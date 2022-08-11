@@ -7,6 +7,7 @@ import re
 import pandas as pd
 import numpy as np
 import networkx as nx
+import pytest
 
 from network_analysis.coword_detection import parse_preprocessed_data
 from network_analysis.graph_reconstruction import reconstruct_graph
@@ -47,7 +48,12 @@ def test_graph():
     G = load_graph(graph_file)
 
     # \Lib\site-packages\networkx\classes\graph.py
-    print(G.nodes)
-    print(G.edges)
+    # print(G.nodes)
+    print(G.nodes['nft']['word_count:2021_07'])
+    # print(G.edges)
+    # print(G.edges.data())
+    print(G.get_edge_data('blockchain', 'cryptocurrency'))
+    print(G['blockchain']['cryptocurrency']['cooccurrence:2021_07'])
+
 
     assert G is not None
