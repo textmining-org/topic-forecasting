@@ -7,19 +7,12 @@ import re
 import pandas as pd
 import numpy as np
 import networkx as nx
+import pytest
 
-import network_analysis.coword_detection as coword_detection
-import network_analysis.graph_reconstruction as graph_reconstruction
+from network_analysis.coword_detection import parse_preprocessed_data
+from network_analysis.graph_reconstruction import reconstruct_graph
+from network_analysis.graph_reconstruction import load_graph
 # import graph_analysis
-
-# Parsing preprocessed data
-def parse_preprocessed_data(**kwargs):
-    return coword_detection.parse_preprocessed_data(**kwargs)
-
-
-# making network x graph object
-def reconstruct_graph(**kwargs):
-    return graph_reconstruction.reconstruct_graph(**kwargs)
 
 def test_make_graph():
     input_f = os.path.abspath('../_datasets/pre_patents_doc.pkl')
@@ -49,3 +42,18 @@ def test_make_graph():
     edge_annotation_file = os.path.join(output_dir, 'edge_attributes.txt')
     print(f'Master graph reconstruction has been finished :\n{_coword_chunk_file_}')
 
+def test_graph():
+    output_dir = os.path.abspath('./')
+    graph_file = os.path.join(output_dir, 'combined_graph.pkl')
+    G = load_graph(graph_file)
+
+    # \Lib\site-packages\networkx\classes\graph.py
+    # print(G.nodes)
+    print(G.nodes['nft']['word_count:2021_07'])
+    # print(G.edges)
+    # print(G.edges.data())
+    print(G.get_edge_data('blockchain', 'cryptocurrency'))
+    print(G['blockchain']['cryptocurrency']['cooccurrence:2021_07'])
+
+
+    assert G is not None
