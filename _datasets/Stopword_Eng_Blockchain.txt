@@ -172,14 +172,12 @@ your
 yours
 yourself
 yourselves
-blockchain
 data
 technology
 system
 US
 information
 company
-Blockchain
 year
 companies
 time
@@ -192,7 +190,6 @@ systems
 value
 years
 technologies
-chain
 model
 users
 development
@@ -200,7 +197,6 @@ way
 method
 use
 process
-block
 number
 Mr
 Word
@@ -231,7 +227,6 @@ day
 months
 month
 Things
-blockchains
 processing
 computing
 set
@@ -240,3 +235,6 @@ Data
 patent
 eg
 Methods
+/
+*
+-
