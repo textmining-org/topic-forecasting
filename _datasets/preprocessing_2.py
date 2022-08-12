@@ -1,3 +1,5 @@
+#treform 사용 
+
 import pandas as pd
 import treform as ptm
 from sklearn.feature_extraction.text import CountVectorizer
