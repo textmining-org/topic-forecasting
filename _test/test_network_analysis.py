@@ -29,7 +29,7 @@ def test_make_graph():
     print(f'Data parsing has been finished :\n{_coword_chunk_file_}')
 
     print(f'Reconstructing master graph... \n{_coword_chunk_file_}')
-    reconstruct_graph(
+    G, node_annotations, edge_annotations = reconstruct_graph(
         coword_file=_coword_chunk_file_,
         word_count_annotation_prefix='word_count',  # annotation prefix for node
         whole_word_count_annotation='word_count:whole_time',  # annotation of node for whole time
@@ -37,6 +37,7 @@ def test_make_graph():
         whole_coword_annotation='cooccurrence:whole_time',  # annotation of edge for whole time
         output_dir=output_dir,
     )
+
     graph_file = os.path.join(output_dir, 'combined_graph.pkl')
     node_annotation_file = os.path.join(output_dir, 'node_attributes.txt')
     edge_annotation_file = os.path.join(output_dir, 'edge_attributes.txt')
@@ -48,12 +49,12 @@ def test_graph():
     G = load_graph(graph_file)
 
     # \Lib\site-packages\networkx\classes\graph.py
-    # print(G.nodes)
-    print(G.nodes['nft']['word_count:2021_07'])
+    print(G.nodes)
+    # print(G.nodes['nft']['word_count:2021_07'])
     # print(G.edges)
     # print(G.edges.data())
-    print(G.get_edge_data('blockchain', 'cryptocurrency'))
-    print(G['blockchain']['cryptocurrency']['cooccurrence:2021_07'])
+    # print(G.get_edge_data('blockchain', 'cryptocurrency'))
+    # print(G['blockchain']['cryptocurrency']['cooccurrence:2021_07'])
 
 
     assert G is not None
