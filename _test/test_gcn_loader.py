@@ -74,6 +74,7 @@ def test_EnglandCovidDatasetLoader():
     # node label    : 60 x (129,)
 
     edge = np.array(dataset_org["edge_mapping"]["edge_index"][str(1)]).T
+    print(len(edge[0]))
     print(edge.shape)
 
     edge_weight = np.array(dataset_org["edge_mapping"]["edge_weight"][str(1)])

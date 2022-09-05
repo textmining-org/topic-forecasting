@@ -50,8 +50,15 @@ def test_graph():
 
     # \Lib\site-packages\networkx\classes\graph.py
     print(G.nodes)
+
+    with open(os.path.join(output_dir, 'node_list.txt'), 'wb') as f:
+        f.write('\n'.join(G.nodes).encode())
+
     # print(G.nodes['nft']['word_count:2021_07'])
-    # print(G.edges)
+    print(G.edges)
+    with open(os.path.join(output_dir, 'edge_list.txt'), 'wb') as f:
+        # f.write('\n'.join('%s %s' % edge for edge in G.edges))
+        f.write('\n'.join('{} {}'.format(edge[0], edge[1]) for edge in G.edges).encode())
     # print(G.edges.data())
     # print(G.get_edge_data('blockchain', 'cryptocurrency'))
     # print(G['blockchain']['cryptocurrency']['cooccurrence:2021_07'])
