@@ -12,6 +12,8 @@ import pytest
 from network_analysis.coword_detection import parse_preprocessed_data
 from network_analysis.graph_reconstruction import reconstruct_graph
 from network_analysis.graph_reconstruction import load_graph
+
+
 # import graph_analysis
 
 def test_make_graph():
@@ -43,25 +45,45 @@ def test_make_graph():
     edge_annotation_file = os.path.join(output_dir, 'edge_attributes.txt')
     print(f'Master graph reconstruction has been finished :\n{_coword_chunk_file_}')
 
+
 def test_graph():
     output_dir = os.path.abspath('./')
     graph_file = os.path.join(output_dir, 'combined_graph.pkl')
+    # # \Lib\site-packages\networkx\classes\graph.py
     G = load_graph(graph_file)
 
-    # \Lib\site-packages\networkx\classes\graph.py
-    print(G.nodes)
-
-    with open(os.path.join(output_dir, 'node_list.txt'), 'wb') as f:
-        f.write('\n'.join(G.nodes).encode())
+    with open(os.path.join(output_dir, 'node_list.txt'), 'r') as f_nname, \
+            open(os.path.join(output_dir, 'node_attributes.txt'), 'r') as f_nattr:
+        node_names = f_nname.readlines()
+        node_attrs = f_nattr.readlines()
+        for node_name in node_names:
+            node_name = node_name.strip()  # 개행문자 제거
+            print(node_name)
+            for node_attr in node_attrs:
+                node_attr = node_attr.strip()
+                print(node_attr)
+                print(G.nodes[node_name][node_attr])
+        f_nname.close()
+        f_nattr.close()
+        # TODO save numpy file (npy)
 
     # print(G.nodes['nft']['word_count:2021_07'])
-    print(G.edges)
-    with open(os.path.join(output_dir, 'edge_list.txt'), 'wb') as f:
-        # f.write('\n'.join('%s %s' % edge for edge in G.edges))
-        f.write('\n'.join('{} {}'.format(edge[0], edge[1]) for edge in G.edges).encode())
     # print(G.edges.data())
     # print(G.get_edge_data('blockchain', 'cryptocurrency'))
     # print(G['blockchain']['cryptocurrency']['cooccurrence:2021_07'])
 
-
     assert G is not None
+
+
+def test_get_node_edge_list():
+    output_dir = os.path.abspath('./')
+    graph_file = os.path.join(output_dir, 'combined_graph.pkl')
+    G = load_graph(graph_file)
+
+    print(G.nodes)
+    with open(os.path.join(output_dir, 'node_list.txt'), 'wb') as f:
+        f.write('\n'.join(G.nodes).encode())
+
+    print(G.edges)
+    with open(os.path.join(output_dir, 'edge_list.txt'), 'wb') as f:
+        f.write('\n'.join('{} {}'.format(edge[0], edge[1]) for edge in G.edges).encode())
