@@ -65,6 +65,15 @@ def test_EnglandCovidDatasetLoader():
 
     dataset_org = loader._dataset
 
+    """
+    영국 코로나 관련 데이터(EnglandCovidDatasetLoader)
+    - 기간 : from 3 March to 12 of May (61일)
+    - 노드 : 129개 (우리: keyword)
+    - 노드 feature : 1개 (우리: centrality...)
+    - 노드 label : 1개 (우리: word count)
+    - 엣지 : 2158개 (시간에따라 바뀜, 우리: co-occurrence 여부)
+    - 엣지 weight : 2158개 (시간에따라 바뀜, 우리: co-occurrence 값)
+    """
     # time_period   : 61 → 60 = 61 - 1(lag)
 
     # parameters
@@ -84,6 +93,9 @@ def test_EnglandCovidDatasetLoader():
     print(len(dataset.features), dataset.features[0].shape)
 
     print(len(dataset.targets), dataset.targets[0].shape)
+    print(dataset.targets)
+
+    # np.save('./targets.npy', dataset.targets)
 
     for features in dataset.features:
         print(features.shape)
