@@ -28,7 +28,7 @@ def preprocess(text, stopfile): #text는 string이 와야함 #stopfile : 경로
     return words, filtered_words, stemmed, pos
 
 #column = ['date'],['text']
-df = pd.read_csv('./patents_new.csv', dtype=str).fillna("") #papers_new.csv / patents_new.csv / news_new.csv
+df = pd.read_csv('./patents_new_100.csv', dtype=str).fillna("") #papers_new.csv / patents_new.csv / news_new.csv
 
 
 row = len(df['text'].to_list())
@@ -36,7 +36,7 @@ row = len(df['text'].to_list())
 for i in range(row):
     #한 문헌에 대해서 pre-process
     #paeprs/patents/news 에 맞게 주석 바꿔달기
-    words, filtered_words, stemmed, pos = preprocess(df['text'].to_list()[i], "../stopwords/Stopword_Eng_Blockchain.txt")
+    words, filtered_words, stemmed, pos = preprocess(df['text'].to_list()[i], "./Stopword_Eng_Blockchain.txt")
 
     #df['title+keywords+abstract'][i] = {"words": words, "filtered_words": filtered_words, "stemmed":stemmed, "pos":pos}
 
