@@ -1,26 +1,11 @@
-# https://pytorch-geometric-temporal.readthedocs.io/en/latest/index.html
+from torch_geometric_temporal.nn.attention import ASTGCN
+from tqdm import tqdm
 import numpy as np
-import torch
-import torch.nn.functional as F
-from torch_geometric_temporal.nn.recurrent import DCRNN
+from preprocessed.utils import get_node_targets, get_edge_indices_and_weights
 from torch_geometric_temporal.signal import DynamicGraphTemporalSignal
 from torch_geometric_temporal.signal import temporal_signal_split
-from tqdm import tqdm
-
-from preprocessed.utils import get_node_targets, get_edge_indices_and_weights
-
-
-class RecurrentGCN(torch.nn.Module):
-    def __init__(self, node_features):
-        super(RecurrentGCN, self).__init__()
-        self.recurrent = DCRNN(node_features, 32, 1)
-        self.linear = torch.nn.Linear(32, 1)
-
-    def forward(self, x, edge_index, edge_weight):
-        h = self.recurrent(x, edge_index, edge_weight)
-        h = F.relu(h)
-        h = self.linear(h)
-        return h
+import torch
+import torch.nn.functional as F
 
 
 #########################
@@ -60,37 +45,31 @@ with open('./preprocessed/edge_attributes.txt', 'r') as f_eattr:
 
     dataset = DynamicGraphTemporalSignal(edge_indices, edge_weights, node_features, node_targets)
 
-# loader = ChickenpoxDatasetLoader()
-# dataset = loader.get_dataset()
-
-
 #########################
 # 2. Model training
 #########################
+model = ASTGCN(nb_block=2,
+               in_channels=1,
+               K=3,
+               nb_chev_filter=64,
+               nb_time_filter=64,
+               time_strides=1,
+               num_for_predict=1,
+               len_input=18,
+               num_of_vertices=600)
+
 train_dataset, test_dataset = temporal_signal_split(dataset, train_ratio=0.2)
-model = RecurrentGCN(node_features=num_of_node_features)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
+
+# FIXME input type and shape
 model.train()
 for epoch in tqdm(range(200)):
     cost = 0
     for time, snapshot in enumerate(train_dataset):
-        # print(snapshot.x.shape)
         y_hat = model(snapshot.x, snapshot.edge_index, snapshot.edge_attr)
         cost = cost + torch.mean((y_hat - snapshot.y) ** 2)
     cost = cost / (time + 1)
     cost.backward()
     optimizer.step()
     optimizer.zero_grad()
-
-#########################
-# 3. Model testing
-#########################
-model.eval()
-cost = 0
-for time, snapshot in enumerate(test_dataset):
-    y_hat = model(snapshot.x, snapshot.edge_index, snapshot.edge_attr)
-    cost = cost + torch.mean((y_hat - snapshot.y) ** 2)
-cost = cost / (time + 1)
-cost = cost.item()
-print("MSE: {:.4f}".format(cost))
