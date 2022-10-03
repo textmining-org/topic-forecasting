@@ -33,7 +33,7 @@ def calc_coehrence_perplexity(target_name, method_name, num_topics_range):
     perplexities = []
     coherences = []
     for num_topics in num_topics_list:
-        model_save_path = os.path.join('./opt_num_topics', target_name + '_' + method_name + '_' + num_topics + '.bin')
+        model_save_path = os.path.join('./opt_num_topics', target_name + '_' + method_name + '_' + str(num_topics) + '.bin')
         model = tp.LDAModel.load(model_save_path)
         coherence = tp.coherence.Coherence(model, coherence=coherence_metric)
         print(
@@ -71,6 +71,8 @@ if __name__ == '__main__':
 
     num_topics_range = range(2, 101, 2)
 
-    make_model(datasets_path, 'patents', 'lda', num_topics_range)
+    # make_model(datasets_path, 'patents', 'lda', num_topics_range)
     make_model(datasets_path, 'papers', 'lda', num_topics_range)
     make_model(datasets_path, 'news', 'lda', num_topics_range)
+
+    # calc_coehrence_perplexity('patents', 'lda', num_topics_range)

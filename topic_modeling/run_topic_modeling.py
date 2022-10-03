@@ -39,5 +39,8 @@ if __name__ == '__main__':
     datasets_path = os.path.abspath('../_datasets')
     print(datasets_path)
 
-    # DMR num_topics : papers=10, patents=12, news=18
-    exec_topic_modeling(datasets_path, 'news', 'dmr', 18)
+    # DMR num_topics : patents=12, papers=10, news=18
+    # LDA num_topics : patents=16, papers=  , news=
+    exec_topic_modeling(datasets_path, 'patents', 'lda', 16)
+
+
