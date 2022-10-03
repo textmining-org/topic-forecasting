@@ -166,6 +166,10 @@ def get_edge_indices_and_weights():
 
 if __name__ == "__main__":
 
+    get_node_indices()
+    get_node_targets()
+    get_edge_list()
+
     dict_edge_indices, dict_edge_weights = get_edge_indices_and_weights()
     output_dir = os.path.abspath('./')
     with open(os.path.join(output_dir, 'edge_attributes.txt'), 'r') as f_eattr:
