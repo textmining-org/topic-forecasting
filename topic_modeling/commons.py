@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 # LDA 모델 생성 및 학습
-def lda_model(documents, topic_number, min_cf=3, rm_top=5, iter=1500):
+def exec_lda_modeling(documents, topic_number, min_cf=3, rm_top=5, iter=1500):
     model = tp.LDAModel(tw=tp.TermWeight.ONE, min_cf=min_cf, rm_top=rm_top, k=topic_number)
     for document in documents:
         model.add_doc(document)
@@ -22,8 +22,7 @@ def lda_model(documents, topic_number, min_cf=3, rm_top=5, iter=1500):
 
     return model
 
-def dmr_model(documents, timestamps, topic_number, min_cf=3, rm_top=5, iter=1500):
-
+def exec_dmr_modeling(documents, timestamps, topic_number, min_cf=3, rm_top=5, iter=1500):
     model = tp.DMRModel(tw=tp.TermWeight.ONE, min_cf=min_cf, rm_top=rm_top, k=topic_number)
     for timestamp, document in zip(timestamps, documents):
         model.add_doc(document, metadata=timestamp)

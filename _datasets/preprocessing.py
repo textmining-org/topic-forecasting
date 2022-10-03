@@ -38,41 +38,41 @@ def _preprocess_text(txt, stopword_file):
 
 
 def preprocessing(datasets_path, target_name):
-    path_preprocessed = os.path.join(datasets_path, target_name + '.pkl')
+    preprocessed_path = os.path.join(datasets_path, target_name + '.pkl')
     # 기전처리된 파일 사용 시
-    if os.path.isfile(path_preprocessed):
-        with open(path_preprocessed, 'rb') as fin:
+    if os.path.isfile(preprocessed_path):
+        with open(preprocessed_path, 'rb') as fin:
             df_target = pickle.load(fin)
         fin.close()
         return df_target
 
-    path_target = os.path.join(datasets_path, target_name + '.csv')
-    path_stopwords = os.path.join(datasets_path, 'Stopword_Eng_Blockchain.txt')
+    target_path = os.path.join(datasets_path, target_name + '.csv')
+    stopwords_path = os.path.join(datasets_path, 'Stopword_Eng_Blockchain.txt')
 
     # 데이터 로드
-    df_target = pd.read_csv(path_target)
+    df_target = pd.read_csv(target_path)
     df_target['date'] = pd.to_datetime(df_target['date'], format='%Y-%m-%d')
     text = df_target['text'].astype(str).values.tolist()
 
     # 전처리
     documents = []
     for document in text:
-        words = _preprocess_text(document, path_stopwords)
+        words = _preprocess_text(document, stopwords_path)
         if len(words) > 0:
             documents.append(words)
     df_target['text'] = documents
 
     # 전처리된 결과 저장
-    with open(path_preprocessed, 'wb') as fout:
+    with open(preprocessed_path, 'wb') as fout:
         pickle.dump(df_target, fout)
     fout.close()
 
     return df_target
 
 
-path_datasets = os.path.abspath('./')
-print(path_datasets)
+if __name__ == '__main__':
+    datasets_path = os.path.abspath('./')
+    print(datasets_path)
 
-df_target = preprocessing(path_datasets, 'news')
-print(df_target)
-
+    df_target = preprocessing(datasets_path, 'news')
+    print(df_target)
