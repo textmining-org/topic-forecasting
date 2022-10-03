@@ -49,7 +49,7 @@ def calc_coehrence_perplexity(target_name, method_name, num_topics_range):
                      columns=columns), ignore_index=True)
     print(df_result)
 
-    result_file = f'./results/{target_name}_{method_name}_perplexity_coherence.csv'
+    result_file = f'./opt_num_topics/{target_name}_{method_name}_perplexity_coherence.csv'
     df_result.to_csv(result_file, index=False, encoding='utf-8-sig')
 
     # plot perplexity/coherence
