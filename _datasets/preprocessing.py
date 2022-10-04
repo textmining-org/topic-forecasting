@@ -46,16 +46,22 @@ def preprocessing(datasets_path, target_name):
         fin.close()
         return df_target
 
-    target_path = os.path.join(datasets_path, target_name + '.csv')
-    stopwords_path = os.path.join(datasets_path, 'Stopword_Eng_Blockchain.txt')
-
     # 데이터 로드
-    df_target = pd.read_csv(target_path)
+    if target_name == 'news':
+        # FIXME csv로 read할 경우 to_datetime에서 parsing 오류 발생 (message : time data 2008. ")
+        target_path = os.path.join(datasets_path, target_name + '.xlsx')
+        df_target = pd.read_excel(target_path)
+    else:
+        target_path = os.path.join(datasets_path, target_name + '.csv')
+        df_target = pd.read_csv(target_path)
+
+
     df_target['date'] = pd.to_datetime(df_target['date'], format='%Y-%m-%d')
     text = df_target['text'].astype(str).values.tolist()
 
     # 전처리
     documents = []
+    stopwords_path = os.path.join(datasets_path, 'Stopword_Eng_Blockchain.txt')
     for document in text:
         words = _preprocess_text(document, stopwords_path)
         if len(words) > 0:
