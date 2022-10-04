@@ -1,11 +1,9 @@
 ﻿,topic number,label,keywords
-0,0,cryptocurrencies bitcoin cryptocurrency bitcoins coins,bitcoin cryptocurrency transactions transaction cryptocurrencies payment mining currency miners market
-1,1,certificate certificates registration identity documents,identity authentication protection education records verification application certificate certificates problems
-2,2,protocol communication complexity byzantine blocks message,consensus protocol nodes scheme algorithm performance transaction signature transactions attacks
-3,3,smart contract access control ethereum smart contract solidity,contracts contract access storage control ethereum scheme smart encryption verification
-4,4,sensors devices sensors devices healthcare iot,iot things devices health healthcare internet applications secure architecture access
-5,5,designmethodologyapproach limitationsimplications research limitationsimplications implications findings,industry review applications literature economy adoption innovation sector application governance
-6,6,service architecture providers hyperledger software,service trust architecture applications services design platform framework performance software
-7,7,energy trading electricity energy energy storage energy resources,energy power trading vehicles market vehicle transaction electricity resources resource
-8,8,food supply supply chains food supply supply traceability,supply traceability food industry logistics chains products construction production quality
-9,9,proceedings papers conference papers conference proceedings papers conference proceedings,detection machine networks conference proceedings topics learning papers image prediction
+0,0,revocation encryption signature decryption scheme,scheme storage access authentication control identity secure encryption protection signature
+1,1,proceedings papers conference papers conference proceedings papers conference proceedings,detection networks machine vehicles conference proceedings topics communication papers learning
+2,2,ethereum cryptocurrencies dollars cryptocurrency money,contracts contract transactions ethereum cryptocurrency bitcoin transaction payment cryptocurrencies smart
+3,3,devices iot healthcare sensors things,iot things devices health applications architecture internet healthcare services service
+4,4,energy trading prosumers energy resources demand response electricity,energy power trading market transaction electricity consumption grid demand resources
+5,5,designmethodologyapproach limitationsimplications research limitationsimplications implications findings,industry applications review literature application economy adoption innovation education governance
+6,6,consensus protocol pow proofofwork consensus byzantine,consensus nodes protocol performance transactions transaction mining algorithm attack scalability
+7,7,food supply supply chains food supply products,supply traceability food industry logistics chains products quality construction transparency

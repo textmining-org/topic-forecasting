@@ -1,17 +1,21 @@
 ﻿,topic number,label,keywords
-0,0,assets ownership asset transfer exchange,asset item resource exchange transfer assets items order platform resources
-1,1,key signature encryption keys key signature,key signature hash encryption keys message party pair secure proof
-2,2,service service service target service device service condition service,service target client result provider server response apparatus execution identifier
-3,3,identity authentication identity authentication device authentication authentication server,identity authentication verification certificate server access response identification credentials identifier
-4,4,applications functions software security services,application devices security software management embodiments environment module platform invention
-5,5,contract smart smart contract event contracts,contract event code contracts transactions operation events execution instruction response
-6,6,circuit wireless communication wireless radio antenna,communication circuit processor wireless communications memory module channel battery signal
-7,7,vehicle vehicles vehicles vehicle telematics vehicle collision,vehicle devices sensor traffic vehicles control transport sensors air space
-8,8,record access ledger records validation,access record entity ledger database records validation management authorization entities
-9,9,risk score assessment fraud detection metrics,action entity risk trust score graph profile machine actions activity
-10,10,storage computer storage programs computer programs programs computer,storage computer hash document blocks media values programs structure apparatus
-11,11,power delivery behindthemeter power distribution behindthemeter power energy,unit power source control energy property units work task elements
-12,12,account merchant cryptocurrency payment account transfer amount merchant,account payment amount transactions currency cryptocurrency customer wallet card credit
-13,13,image image video video images video clip,image content file media feature video display images reality objects
-14,14,consensus node view change nodes byzantine fault tolerance,node nodes message consensus messages group member transactions peer list
-15,15,location interface location target area distance location distance,location interface input memory processor page controller output test structure
+0,0,service request service service provider service service client device service,service provider server services session template response type result client
+1,1,score intelligence health risk sensors,sensor risk machine score activity environment health interaction interactions profile
+2,2,application program application interface functions applications,application interface module platform software applications function action program execution
+3,3,transfer ownership platform implementations ownership asset asset exchange asset,asset assets exchange transfer game name domain instance ownership platform
+4,4,currency payment account merchant funds amount currency,payment account amount currency cryptocurrency transactions customer address wallet transfer
+5,5,vehicle vehicles vehicles vehicle destination location uav,vehicle location display vehicles property area transport package delivery map
+6,6,hash blocks hash tree blocks hash values,hash blocks structure values reference proof function transactions root nodes
+7,7,consensus node consensus nodes nodes consensus consensus,node nodes consensus group transactions operation peer result member list
+8,8,content file author copyright item,target content item file media items metadata source identifier stream
+9,9,storage kp pools computer storage computer,storage computer resource programs apparatus media resources program devices requests
+10,10,contract specification contract contract code memory address contract contract,contract code software execution contracts component instruction container environment memory
+11,11,event entity event entity events entity action,entity event configuration entities events trust operation action profile status
+12,12,identity identity authentication authentication verify identity biometric,identity authentication verification access response identification management consent id entity
+13,13,message message key key backup transaction key message,message key encryption messages keys video master pair processor secure
+14,14,security devices security privacy embodiments applications,security devices management embodiments control transactions invention policy privacy secure
+15,15,image feature images recognition image target,image feature images target input recognition identification sample detection vector
+16,16,signature key signature key piece content signature message,signature certificate key verification party parameter parameters output input computation
+17,17,record access database authorization identifier identifier,access record database client ledger server records authorization identifier secure
+18,18,document andor metadata seal document document seal documents,document graph documents page field air compliance computer fields elements
+19,19,power energy radio circuit wireless,communication unit power devices control wireless circuit energy controller communications
