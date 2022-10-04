@@ -71,8 +71,20 @@ if __name__ == '__main__':
 
     num_topics_range = range(2, 101, 2)
 
-    # make_model(datasets_path, 'patents', 'lda', num_topics_range)
+    make_model(datasets_path, 'patents', 'lda', num_topics_range)
     make_model(datasets_path, 'papers', 'lda', num_topics_range)
     make_model(datasets_path, 'news', 'lda', num_topics_range)
 
-    # calc_coehrence_perplexity('patents', 'lda', num_topics_range)
+    calc_coehrence_perplexity('patents', 'lda', num_topics_range)
+    calc_coehrence_perplexity('papers', 'lda', num_topics_range)
+    calc_coehrence_perplexity('news', 'lda', num_topics_range)
+
+    make_model(datasets_path, 'patents', 'dmr', num_topics_range)
+    make_model(datasets_path, 'papers', 'dmr', num_topics_range)
+    make_model(datasets_path, 'news', 'dmr', num_topics_range)
+
+    calc_coehrence_perplexity('patents', 'dmr', num_topics_range)
+    calc_coehrence_perplexity('papers', 'dmr', num_topics_range)
+    calc_coehrence_perplexity('news', 'dmr', num_topics_range)
+
+

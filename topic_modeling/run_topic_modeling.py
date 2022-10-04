@@ -40,7 +40,5 @@ if __name__ == '__main__':
     print(datasets_path)
 
     # DMR num_topics : patents=12, papers=10, news=18
-    # LDA num_topics : patents=16, papers=  , news=
-    exec_topic_modeling(datasets_path, 'patents', 'lda', 16)
-
-
+    # LDA num_topics : patents=16, papers=8, news=
+    exec_topic_modeling(datasets_path, 'papers', 'lda', 8)
