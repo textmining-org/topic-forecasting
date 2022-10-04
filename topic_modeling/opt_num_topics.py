@@ -6,7 +6,7 @@ import tomotopy as tp
 from plotly.subplots import make_subplots
 
 from commons import exec_lda_modeling, exec_dmr_modeling
-
+import argparse
 
 def make_model(datasets_path, target_name, method_name, num_topics_range):
     preprocessed_path = os.path.join(datasets_path, target_name + '.pkl')
@@ -34,7 +34,10 @@ def calc_coehrence_perplexity(target_name, method_name, num_topics_range):
     coherences = []
     for num_topics in num_topics_list:
         model_save_path = os.path.join('./opt_num_topics', target_name + '_' + method_name + '_' + str(num_topics) + '.bin')
-        model = tp.LDAModel.load(model_save_path)
+        if method_name == 'lda':
+            model = tp.LDAModel.load(model_save_path)
+        elif method_name == 'dmr':
+            model = tp.DMRModel.load(model_save_path)
         coherence = tp.coherence.Coherence(model, coherence=coherence_metric)
         print(
             'num topics: {}\tperplexity: {}\tcoherence: {}'.format(num_topics, model.perplexity, coherence.get_score()))
@@ -65,14 +68,17 @@ def calc_coehrence_perplexity(target_name, method_name, num_topics_range):
     fig.write_html(os.path.splitext(result_file)[0] + '.html')
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--target_name', default='papers')
+parser.add_argument('--method_name', default='dmr')
+args = parser.parse_args()
+
+
 if __name__ == '__main__':
     datasets_path = os.path.abspath('../_datasets')
     print(datasets_path)
 
     num_topics_range = range(2, 101, 2)
 
-    # make_model(datasets_path, 'patents', 'lda', num_topics_range)
-    make_model(datasets_path, 'papers', 'lda', num_topics_range)
-    make_model(datasets_path, 'news', 'lda', num_topics_range)
-
-    # calc_coehrence_perplexity('patents', 'lda', num_topics_range)
+    make_model(datasets_path, args.target_name, args.method_name, num_topics_range)
+    calc_coehrence_perplexity(args.target_name, args.method_name, num_topics_range)
