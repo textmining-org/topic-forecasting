@@ -4,6 +4,7 @@ import sys
 parent_path = os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__)))))
 sys.path.append(parent_path)
 
+import networkx as nx
 import numpy as np
 import pandas as pd
 import logging
@@ -163,6 +164,24 @@ def get_edge_indices_and_weights():
             json.dump(dict_edge_weights, f_w)
 
     return dict_edge_indices, dict_edge_indices
+
+def get_node_features():
+    # TODO implements calculate centrality for nodes
+
+    loc_here = pathlib.Path(__file__).resolve().parent
+    loc_graph = os.path.join(loc_here, 'combined_graph.pkl')
+    G = load_graph(loc_graph)
+
+    ev_centrality = nx.eigenvector_centrality_numpy(G)
+
+    # for node, centrality in ev_centrality.items():
+    # bw_centrality = nx.betweenness_centrality(G)
+    # cl_centrality = nx.closeness_centrality(G)
+
+    # print(ev_centrality)
+    # print(bw_centrality)
+    # print(cl_centrality)
+
 
 if __name__ == "__main__":
 
