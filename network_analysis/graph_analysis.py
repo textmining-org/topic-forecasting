@@ -25,6 +25,8 @@ def _centrality_func_glossary_():
 def _get_centrality_(graph_obj,fn,weight:str)->dict:
     if fn.__name__.split('.')[-1] in ['closeness_centrality']:
         return fn(graph_obj,distance=weight)
+    elif fn.__name__.split('.')[-1] in ['degree_centrality']:
+        return fn(graph_obj)
     else:
         return fn(graph_obj,weight=weight)
 
