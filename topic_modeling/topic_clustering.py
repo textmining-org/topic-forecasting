@@ -68,7 +68,7 @@ for i in range(len(sentence1)):
 
 """###Highest similarity"""
 
-# #Highest similarity
+# #Highest similarity 
 # #Find the pairs with the highest cosine similarity scores
 # pairs = []
 # for i in range(len(cosine_scores)-1):
@@ -100,19 +100,6 @@ cluster_assignment = k_means.labels_
 
 cluster_assignment
 
-# # 클러스터 개수 만큼 문장을 담을 리스트 초기화
-# clustered_sentences = [[] for _ in range(num_clusters)]
-
-# # 클러스터링 결과를 돌며 각 클러스터에 맞게 문장 삽입
-# for sentence_id, cluster_id in enumerate(cluster_assignment):
-#     clustered_sentences[cluster_id].append(sentence1[sentence_id])
-#     clustered_sentences[cluster_id].append(sentence2[sentence_id])
-#     # clustered_sentences[cluster_id].append(docs[sentence_id])
-
-# #원래 코드 
-# for i, cluster in enumerate(clustered_sentences):
-#     result = "\n".join(cluster)
-#     print(f"< topic {i+1} >\n {result}\n")
 
 # 클러스터 개수 만큼 문장을 담을 리스트 초기화
 clustered_sentences = [[] for _ in range(num_clusters)]
@@ -148,7 +135,7 @@ with open('/content/drive/MyDrive/Colab Notebooks/blockchain/news_topic_clusteri
     pickle.dump(topic_10, file)
 
 df = pd.read_pickle('/content/drive/MyDrive/Colab Notebooks/blockchain/news_topic_clustering.pkl') #어떻게 생겼나 확인
-print(df)
+#print(df)
 
 
 # dataframe 형태로 저장 
@@ -164,7 +151,7 @@ df1 = {'topic_num' : topic_num, 'keywords' : keywords}
 df2 = pd.DataFrame(df1)
 df2.to_csv('/content/drive/MyDrive/Colab Notebooks/blockchain/news_topic_clustering.csv', index=False)
 
-print(df2)
+#print(df2)
 
 
 
