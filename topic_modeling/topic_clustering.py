@@ -33,8 +33,8 @@ lda = df['lda_news_keywords'][0:12]
 print(lda)
 
 sentence1 = dmr.to_list()
-print(sentence1)
 sentence2 = lda.to_list()
+
 
 !pip install sentence_transformers
 
