@@ -1,0 +1,21 @@
+﻿dmr_topic number,dmr_patents_keywords,lda_topic number,lda_patents_keywords
+dmr_0,identity authentication access entity record verification server authorization identifier trust,lda_0,service provider server services session template response type result client
+dmr_1,hash file blocks ledger media transactions structure configuration party game,lda_1,sensor risk machine score activity environment health interaction interactions profile
+dmr_2,key message signature certificate encryption keys verification hash secure pair,lda_2,application interface module platform software applications function action program execution
+dmr_3,feature input machine parameters reference output sample graph template structure,lda_3,asset assets exchange transfer game name domain instance ownership platform
+dmr_4,communication vehicle location devices wireless traffic controller communications vehicles area,lda_4,payment account amount currency cryptocurrency transactions customer address wallet transfer
+dmr_5,application software unit processor interface control module function circuit container,lda_5,vehicle location display vehicles property area transport package delivery map
+dmr_6,service contract target client resource execution response server provider result,lda_6,hash blocks structure values reference proof function transactions root nodes
+dmr_7,asset payment account amount assets exchange transfer transactions currency cryptocurrency,lda_7,node nodes consensus group transactions operation peer result member list
+dmr_8,node nodes consensus group transactions message peer member operation messages,lda_8,target content item file media items metadata source identifier stream
+dmr_9,image item items display code images object reality work apparatus,lda_9,storage computer resource programs apparatus media resources program devices requests
+dmr_10,database content document source computer video code metadata record documents,lda_10,contract code software execution contracts component instruction container environment memory
+dmr_11,sensor energy risk power devices environment action activity health battery,lda_11,entity event configuration entities events trust operation action profile status
+dmr_12,storage computer event apparatus media programs devices memory program events,lda_12,identity authentication verification access response identification management consent id entity
+dmr_13,devices security access platform management invention embodiments control resource resources,lda_13,message key encryption messages keys video master pair processor secure
+,,lda_14,security devices management embodiments control transactions invention policy privacy secure
+,,lda_15,image feature images target input recognition identification sample detection vector
+,,lda_16,signature certificate key verification party parameter parameters output input computation
+,,lda_17,access record database client ledger server records authorization identifier secure
+,,lda_18,document graph documents page field air compliance computer fields elements
+,,lda_19,communication unit power devices control wireless circuit energy controller communications
