@@ -83,6 +83,18 @@ def main():
                                    default=False,
                                    action='store_true',
                                    help='sentence_normalization')
+    parser_get_coword.add_argument('--low_mem',
+                                   default=False,
+                                   action='store_true',
+                                   help='Low memory mode.')
+    parser_get_coword.add_argument('--word_count_limit',
+                                   default=0,
+                                   type=int,
+                                   help='Limit on word count for word collection')
+    parser_get_coword.add_argument('--without_coword',
+                                   default=False,
+                                   action='store_true',
+                                   help='Without coword mapping, but only with word counting.')
     
     ####### Arguments for graph reconstruction ########
     parser_make_graph = subparsers.add_parser('make_graph', # 2. make_graph
@@ -140,7 +152,7 @@ def main():
         _output = os.path.abspath(args.output)
         os.makedirs(_output,exist_ok=True)
         
-        print(f'Parsing preprocessed data... \n{input_f}')
+        print(f'Parsing preprocessed data... \n{_input}')
         parse_preprocessed_data(
             data_file=_input,
             output_dir=_output,
@@ -150,6 +162,9 @@ def main():
             timeline_normalization=args.timeline_normalization,
             document_normalization=args.document_normalization,
             sentence_normalization=args.sentence_normalization,
+            low_mem_mode=args.low_mem,
+            word_count_limit=args.word_count_limit,
+            without_coword=args.without_coword,
         )
         _coword_chunk_file_ = os.path.join(_output,'coword_results.pkl')
         print(f'Data parsing has been finished :\n{_coword_chunk_file_}')

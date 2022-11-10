@@ -25,6 +25,46 @@ def _make_ratio_(_v,whole_sum):
 ######## Data IO ########
 #########################
 
+def parse_list(file):
+    with open(file,'rb') as f:
+        _ = f.read().decode().split('\n')
+        while '' in _:
+            _.remove('')
+    return _
+
+
+def write_list(data:list,file):
+    with open(file,'wb') as f:
+        f.write(('\n'.join(data)).encode())
+
+        
+def append_list(data:list,file):
+    with open(file,'a') as f:
+        f.write('\n')
+        f.write('\n'.join(data))
+        
+
+def parse_json(file):
+    with open(file,'rb') as f:
+        _ = json.loads(f.read().decode())
+    return _
+    
+    
+def write_json(data,file):
+    with open(file,'wb') as f:
+        f.write(json.dumps(data).encode())
+
+        
+def parse_lowmem_coword_dict(file):
+    with open(file,'rb') as f:
+        _ = json.loads(f.read().decode())
+    return {tuple(_k.split(':')):_v for _k, _v in _.items()}
+        
+def write_lowmem_coword_dict(data,file): # {(WORD1,WORD2):FLOAT}
+    with open(file,'wb') as f:
+        f.write(json.dumps({':'.join(_k):_v for _k, _v in data.items()}).encode())
+    
+
 def parse_coword_chunk(data_pkl_file):
     with open(data_pkl_file,'rb') as f:
         coword_chunk = pickle.load(f)
