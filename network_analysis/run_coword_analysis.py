@@ -13,6 +13,7 @@ import coword_detection
 import graph_reconstruction
 import graph_analysis
 
+from config import get_config
 
 # Parsing preprocessed data
 def parse_preprocessed_data(**kwargs):
@@ -145,9 +146,11 @@ def main():
                                       default='blockchain',
                                       help='Pre-defined node to align keywords for node indexing')
     
-    args = parser.parse_args()
-    
+    args = get_config()
+
+    print(args)
     if args.job == 'get_coword':
+        print('get_coword')
         _input = os.path.abspath(args.input)
         _output = os.path.abspath(args.output)
         os.makedirs(_output,exist_ok=True)
@@ -222,7 +225,8 @@ def main():
         )
         
     print('Finished')
-    
+
 if __name__=='__main__':
+
     main()
 
