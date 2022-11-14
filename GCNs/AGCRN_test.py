@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, '/home/bigdyl/topic-forecasting/network_analysis')
+
 import numpy as np
 import torch
 import torch.nn.functional as F
