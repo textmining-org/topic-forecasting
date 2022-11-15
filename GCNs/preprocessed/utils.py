@@ -15,7 +15,7 @@ def get_node_targets(media, topic_num):
     raise Exception(f'There is no node targets! (media: {media}, topic num: {topic_num})')
 
 
-def get_edge_indices(media, topic_num):
+def get_edge_indices(media, topic_num, bidirectional=False):
     loc_here = pathlib.Path(__file__).resolve().parent
 
     loc_edge_indices = os.path.join(loc_here / media / '4.topic' / str(topic_num), 'cooccurrence.edge_indices.json')
@@ -30,25 +30,26 @@ def get_edge_indices(media, topic_num):
                 for edge_attr in edge_attrs:
                     if edge_attr in dict_edge_indices:
                         edge_index = np.array(dict_edge_indices[edge_attr])
-                        if edge_index.size != 0:
+                        if bidirectional == True and edge_index.size != 0:
+                            print(edge_index.shape)
                             src_index = np.split(edge_index[0], 2)[0]
                             dst_index = np.split(edge_index[1], 2)[0]
                             edge_index = np.vstack([src_index, dst_index])
                         edge_indices.append(edge_index)
 
-                print('edge indices: {} * {}'.format(len(edge_indices), edge_indices[0].shape))
+                print(f'edge indices: {len(edge_indices)} * {edge_indices[0].shape}')
 
             return edge_indices
 
     raise Exception(f'There is no edge indices! (media: {media}, topic num: {topic_num})')
 
 
-def get_edge_weights(media, topic_num):
+def get_edge_weights(media, topic_num, bidirectional=False):
     loc_here = pathlib.Path(__file__).resolve().parent
 
-    loc_edge_weights = os.path.join(loc_here / media / '4.topic' / str(topic_num), 'cooccurrence.edge_weigths.json')
+    loc_edge_weights = os.path.join(loc_here / media / '4.topic' / str(topic_num), 'cooccurrence.edge_weights.json')
     if os.path.exists(loc_edge_weights):
-        with open(os.path.join(loc_here / media / '4.topic' / str(topic_num), 'cooccurrence.edge_weigths.json'),
+        with open(os.path.join(loc_here / media / '4.topic' / str(topic_num), 'cooccurrence.edge_weights.json'),
                   'r') as f:
             dict_edge_weights = json.load(f)
             with open(f'./preprocessed/{media}/4.topic/{str(topic_num)}/cooccurrence.edge_attributes.txt',
@@ -58,7 +59,7 @@ def get_edge_weights(media, topic_num):
                 for edge_attr in edge_attrs:
                     if edge_attr in dict_edge_weights:
                         edge_weight = np.array(dict_edge_weights[edge_attr])
-                        if edge_weight.size != 0:
+                        if bidirectional == True and edge_weight.size != 0:
                             edge_weight = np.split(edge_weight, 2)[0]
                         edge_weights.append(edge_weight)
 
@@ -82,3 +83,40 @@ def get_node_features(media, topic_num):
         return node_features
 
     raise Exception(f'There is no node features! (media: {media}, topic num: {topic_num})')
+
+def refine_graph_data(node_targets, node_features, edge_indices, edge_weights):
+    """
+    node targets: (64, 30)
+    node feature: (64, 30, 1)
+    edge indices: 64 * (2, 0)
+    edge weights: 64 * (0,)
+
+    """
+    print(f'node targets: {node_targets.shape}')
+    print(f'node feature: {node_features.shape}')
+    print(f'edge indices: {len(edge_indices)} * {edge_indices[0].shape}')
+    print(f'edge weights: {len(edge_weights)} * {edge_weights[0].shape}')
+
+    refined_node_targets  = []
+    refined_node_features = []
+    refined_edge_indices = []
+    refined_edge_weights = []
+
+    del_indices = []
+    print(node_targets.shape)
+    time_seq_len = node_targets.shape[0]
+    for i in range(time_seq_len):
+        if edge_indices[i].any() == True:
+            refined_node_targets.append(node_targets[i])
+            refined_node_features.append(node_features[i])
+            refined_edge_indices.append(edge_indices[i])
+            refined_edge_weights.append(edge_weights[i])
+
+    refined_node_targets = np.array(refined_node_targets)
+    refined_node_features = np.array(refined_node_features)
+    print(f'refined node targets: {refined_node_targets.shape}')
+    print(f'refined node feature: {refined_node_features.shape}')
+    print(f'refined edge indices: {len(refined_edge_indices)} * {refined_edge_indices[0].shape}')
+    print(f'refined edge weights: {len(refined_edge_weights)} * {refined_edge_weights[0].shape}')
+
+    return refined_node_targets, refined_node_features, refined_edge_indices, refined_edge_weights
