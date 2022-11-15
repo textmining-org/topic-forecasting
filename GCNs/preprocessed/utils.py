@@ -5,17 +5,22 @@ import pathlib
 import numpy as np
 
 
-def get_node_targets(media, topic_num):
+def get_node_targets(media, topic_num, discard_index=None):
     loc_here = pathlib.Path(__file__).resolve().parent
 
     loc_node_targets = os.path.join(loc_here / media / '4.topic' / str(topic_num), 'word_count.node_targets.npy')
     if os.path.exists(loc_node_targets):
-        return np.load(loc_node_targets)
+        node_targets = np.load(loc_node_targets)
+        if discard_index is not None:
+            node_targets = node_targets[discard_index:]
+
+        print('node targets: {}'.format(node_targets.shape))
+        return node_targets
 
     raise Exception(f'There is no node targets! (media: {media}, topic num: {topic_num})')
 
 
-def get_edge_indices(media, topic_num, bidirectional=False):
+def get_edge_indices(media, topic_num, bidirectional=False, discard_index=None):
     loc_here = pathlib.Path(__file__).resolve().parent
 
     loc_edge_indices = os.path.join(loc_here / media / '4.topic' / str(topic_num), 'cooccurrence.edge_indices.json')
@@ -37,14 +42,16 @@ def get_edge_indices(media, topic_num, bidirectional=False):
                             edge_index = np.vstack([src_index, dst_index])
                         edge_indices.append(edge_index)
 
-                print(f'edge indices: {len(edge_indices)} * {edge_indices[0].shape}')
+            if discard_index is not None:
+                edge_indices = edge_indices[discard_index:]
 
+            print(f'edge indices: {len(edge_indices)} * {edge_indices[0].shape}')
             return edge_indices
 
     raise Exception(f'There is no edge indices! (media: {media}, topic num: {topic_num})')
 
 
-def get_edge_weights(media, topic_num, bidirectional=False):
+def get_edge_weights(media, topic_num, bidirectional=False, discard_index=None):
     loc_here = pathlib.Path(__file__).resolve().parent
 
     loc_edge_weights = os.path.join(loc_here / media / '4.topic' / str(topic_num), 'cooccurrence.edge_weights.json')
@@ -63,14 +70,16 @@ def get_edge_weights(media, topic_num, bidirectional=False):
                             edge_weight = np.split(edge_weight, 2)[0]
                         edge_weights.append(edge_weight)
 
-                print('edge weights: {} * {}'.format(len(edge_weights), edge_weights[0].shape))
+            if discard_index is not None:
+                edge_weights = edge_weights[discard_index:]
 
+            print('edge weights: {} * {}'.format(len(edge_weights), edge_weights[0].shape))
             return edge_weights
 
     raise Exception(f'There is no edge weights! (media: {media}, topic num: {topic_num})')
 
 
-def get_node_features(media, topic_num):
+def get_node_features(media, topic_num, discard_index=None):
     loc_here = pathlib.Path(__file__).resolve().parent
 
     loc_node_features = os.path.join(loc_here / media / '4.topic' / str(topic_num),
@@ -80,6 +89,11 @@ def get_node_features(media, topic_num):
         node_features = np.expand_dims(node_features, axis=2)
         # FIXME
         node_features = np.nan_to_num(node_features)
+
+        if discard_index is not None:
+            node_features = node_features[discard_index:]
+
+        print('node feature: {}'.format(node_features.shape))
         return node_features
 
     raise Exception(f'There is no node features! (media: {media}, topic num: {topic_num})')
@@ -120,3 +134,24 @@ def refine_graph_data(node_targets, node_features, edge_indices, edge_weights):
     print(f'refined edge weights: {len(refined_edge_weights)} * {refined_edge_weights[0].shape}')
 
     return refined_node_targets, refined_node_features, refined_edge_indices, refined_edge_weights
+
+def normalizer(data):
+    """
+    Execute min-max normalization to data
+
+    Args:
+        data: target data
+
+    Returns:
+        norm_data: normalized data
+
+    """
+    # norm_data = (data - min) / (max + min + 1e-7)
+    min_val = np.min(data, 0)
+    max_val = np.max(data, 0)
+
+    numerator = data - min_val
+    denominator = max_val - min_val
+    norm_data = numerator / (denominator + 1e-7)
+
+    return norm_data, min_val, max_val
