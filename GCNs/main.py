@@ -1,7 +1,7 @@
 import torch.backends.cudnn as cudnn
 import random
 import torch
-from models import DCRNNet, TGCNet, AGCRNet
+from models import DCRNNet, TGCNet, AGCRNet, A3TGCNet
 import numpy as np
 from config import get_config
 from preprocessed.utils import get_node_targets, get_node_features, get_edge_indices, get_edge_weights, \
@@ -21,6 +21,8 @@ def get_model(model_name):
         return TGCNet
     elif model_name == 'agcrn':
         return AGCRNet
+    elif model_name == 'a3tgcn':
+        return A3TGCNet
 
 
 def get_dataset(media, topic_num, discard_index, refine_data=False):
@@ -100,7 +102,11 @@ if __name__ == "__main__":
                       out_size=args.out_size)
         e = torch.empty(num_nodes, args.embedd_dim)
         torch.nn.init.xavier_uniform_(e)
-
+    elif args.model == 'a3tgcn':
+        model = model(node_features=num_features,
+                      out_channels=args.out_channels,
+                      periods=args.periods,
+                      out_size=args.out_size)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     model.train()
@@ -108,7 +114,7 @@ if __name__ == "__main__":
         cost = 0
         h = None
         for time, snapshot in enumerate(train_dataset):
-            if args.model == 'dcrnn' or args.model == 'tgcn':
+            if args.model == 'dcrnn' or args.model == 'tgcn' or args.model == 'a3tgcn':
                 y_hat = model(snapshot.x, snapshot.edge_index, snapshot.edge_attr)
             elif args.model == 'agcrn':
                 x = snapshot.x.view(1, num_nodes, num_features)  # (?, num of nodes, num of node features)

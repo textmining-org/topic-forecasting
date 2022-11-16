@@ -18,6 +18,8 @@ parser.add_argument('--out_size', type=int, default=1)
 parser.add_argument('--K', type=int, default=2)
 # node embedding dimension AGCRN
 parser.add_argument('--embedd_dim', type=int, default=4)
+# A3TGCN
+parser.add_argument('--periods', type=int, default=1)
 
 
 def get_config():
