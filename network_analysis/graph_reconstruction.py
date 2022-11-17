@@ -183,6 +183,7 @@ def reconstruct_graph(coword_file:str=None,
     # In case that coword file is given
     if coword_file:
         print(f"Parsing file...\t{coword_file}")
+        print(net_utils.parse_coword_chunk(coword_file))
         word_list, whole_word_count, by_month_word_count, whole_coword_map, by_month_coword_map = net_utils.parse_coword_chunk(coword_file)
         
     o_d = os.path.abspath(output_dir)
