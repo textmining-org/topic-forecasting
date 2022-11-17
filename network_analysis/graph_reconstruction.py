@@ -473,3 +473,40 @@ def extract_topic(input_package_dir:str,
             # edge_attributes.txt - connectivity
             with open(os.path.join(o_d,f'{conn_method}.{cooc_method}.edge_attributes.txt'),'wb') as f:
                 f.write('\n'.join([conn_method+':'+_t_k for _t_k in time_key_list]).encode())
+
+                
+# Batch function for multiple topics
+def extract_topic_batch(**kwargs,
+                       ):
+    output_dir = kwargs['output_dir']
+    keyword_list_file = kwargs['keyword_list_file']
+    keyword_list = kwargs['keyword_list']
+    
+    if keyword_list:
+        extract_topic(**kwargs)
+        
+    else:
+        if keyword_list_file.endswith('csv'):
+            kwrd_df = pd.read_csv(keyword_list_file,sep=',')
+            keyword_d = {kwrd_df.loc[idx,:].iloc[0]:kwrd_df.loc[idx,:].iloc[1].split(' ') for idx in kwrd_df.index}
+        elif keyword_list_file.endswith('tsv'):
+            kwrd_df = pd.read_csv(keyword_list_file,sep='\t')
+            keyword_d = {kwrd_df.loc[idx,:].iloc[0]:kwrd_df.loc[idx,:].iloc[1].split(' ') for idx in kwrd_df.index}
+        elif keyword_list_file.endswith('pkl'):
+            with open(keyword_list_file, 'rb') as f:
+                kwrd_d = pickle.load(f)
+            keyword_d = {_k:_v.split(' ') for _k, _v in kwrd_d.items()}
+        elif keyword_list_file.endswith('txt'):
+            with open(keyword_list_file,'rb') as f:
+                reading = f.read().decode()
+            keyword_list = reading.split()
+            keyword_d = {keyword_list_file:keyword_list}
+
+        for topic, keyword_list in keyword_d.items():
+            curr_kwargs = kwargs.copy()
+            curr_kwargs['output_dir'] = os.path.join(kwargs['output_dir'],str(topic))
+            os.makedirs(curr_kwargs['output_dir'],exist_ok=True)
+            curr_kwargs['keyword_list_file'] = None
+            curr_kwargs['keyword_list'] = keyword_list
+            extract_topic(**curr_kwargs)
+            

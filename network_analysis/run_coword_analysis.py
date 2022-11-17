@@ -26,6 +26,10 @@ def reconstruct_graph(**kwargs):
     
 def extract_topic(**kwargs):
     return graph_reconstruction.extract_topic(**kwargs)
+
+
+def extract_topic_batch(**kwargs):
+    return graph_reconstruction.extract_topic_batch(**kwargs)
     
     
 def main():
@@ -131,9 +135,9 @@ def main():
     parser_extract_topic.add_argument('-i','--input',
                                       required=True,help='Input directory for graphs')
     parser_extract_topic.add_argument('-k','--keyword_file',
-                                      required=True,help='File for keywords - tsv or txt formatted == node list')
+                                      required=True,help='File for keywords - csv, pkl, tsv or txt formatted. First column is Topic ID and Second column is for keywords with delimited with space (This keywords are list of node)')
     parser_extract_topic.add_argument('-t','--time_line_file',
-                                      required=True,help='File for timeline - tsv or txt formatted == node list')
+                                      required=True,help='File for timeline - tsv or txt formatted.')
     parser_extract_topic.add_argument('-o','--output',
                                       required=True,help='Output directory')
     parser_extract_topic.add_argument('--align_node_order',
@@ -144,6 +148,26 @@ def main():
                                       type=str,
                                       default='blockchain',
                                       help='Pre-defined node to align keywords for node indexing')
+    parser_extract_topic.add_argument('-ct','--centrality',
+                                      type=str,
+                                      action='append',
+                                      default=['betweenness_centrality'],
+                                      choices=list(
+                                          graph_analysis._centrality_func_glossary_().keys()),
+                                      help='Method for centrality')
+    parser_extract_topic.add_argument('-cn','--connectivity',
+                                      type=str,
+                                      action='append',
+                                      default=['all_pairs_dijkstra'],
+                                      choices=list(
+                                          graph_analysis._connectivity_func_glossary_().keys()),
+                                      help='Method for connectivity')
+    parser_extract_topic.add_argument('-co','--cooccurrence',
+                                      type=str,
+                                      action='append',
+                                      default=['inv_cooccurrence'],
+                                      choices=['cooccurrence','inv_cooccurrence'],
+                                      help='Type of cooccurrence feature for calculation of centrality and connectivity.')
     
     args = parser.parse_args()
     
@@ -194,32 +218,52 @@ def main():
         
     elif args.job == 'extract_topic':
         input_package_dir = os.path.abspath(args.input)
-        keyword_file = os.path.abspath(args.keyword_file)
+        keyword_list_file = os.path.abspath(args.keyword_file)
         
         output_dir = os.path.abspath(args.output)
         os.makedirs(output_dir,exist_ok=True)
         
-        with open(args.keyword_file,'rb') as f:
-            keyword_list=f.read().decode().split()
-            while '' in keyword_list:
-                keyword_list.remove('')
+        if keyword_list_file.endswith('txt'):
+            with open(keyword_list_file,'rb') as f:
+                keyword_list=f.read().decode().split()
+                while '' in keyword_list:
+                    keyword_list.remove('')
+            keyword_list_file = None
+        else:
+            keyword_list = None
         with open(args.time_line_file,'rb') as f:
             time_key_list=f.read().decode().split()
             while '' in time_key_list:
                 time_key_list.remove('')
         
-        result = extract_topic(
-            input_package_dir=input_package_dir,
-            output_dir=output_dir,
-            time_key_list=time_key_list,
-            keyword_list=keyword_list,
-            cent_methods=['betweenness_centrality','closeness_centrality'],
-            conn_methods=['all_pairs_dijkstra'],
-            cooc_methods=['inv_cooccurrence'],
-            central_node=args.central_node,
-            align_node_order=bool(args.align_node_order),
-            
-        )
+        if keyword_list:
+            print("Extracting topic features for %s"%'\t'.join(keyword_list))
+            result = extract_topic(
+                input_package_dir=input_package_dir,
+                output_dir=output_dir,
+                time_key_list=time_key_list,
+                keyword_list_file=keyword_list_file,
+                keyword_list=keyword_list,
+                cent_methods=args.centrality,
+                conn_methods=args.connectivity,
+                cooc_methods=args.cooccurrence,
+                central_node=args.central_node,
+                align_node_order=bool(args.align_node_order),   
+            )
+        else:
+            print("Extracting topic features for %s"%keyword_list_file)
+            result = extract_topic_batch(
+                input_package_dir=input_package_dir,
+                output_dir=output_dir,
+                time_key_list=time_key_list,
+                keyword_list_file=keyword_list_file,
+                keyword_list=keyword_list,
+                cent_methods=args.centrality,
+                conn_methods=args.connectivity,
+                cooc_methods=args.cooccurrence,
+                central_node=args.central_node,
+                align_node_order=bool(args.align_node_order),   
+            )
         
     print('Finished')
     
