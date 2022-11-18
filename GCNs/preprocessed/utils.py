@@ -149,9 +149,14 @@ def normalizer(data):
     # norm_data = (data - min) / (max + min + 1e-7)
     min_val = np.min(data, 0)
     max_val = np.max(data, 0)
+    eps = 1e-7
 
     numerator = data - min_val
     denominator = max_val - min_val
-    norm_data = numerator / (denominator + 1e-7)
+    norm_data = numerator / (denominator + eps)
 
-    return norm_data, min_val, max_val
+    return norm_data, min_val, max_val, eps
+
+def denormalizer(data, min_val, max_val, eps):
+    denorm_data = data * (max_val - min_val + eps) + min_val
+    return denorm_data
