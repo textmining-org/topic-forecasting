@@ -3,13 +3,13 @@ import argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--device', type=str, default='0')
-parser.add_argument('--model', type=str, default='agcrn')
+parser.add_argument('--model', type=str, default='a3tgcn')  # dcrnn tgcn agcrn a3tgcn
 parser.add_argument('--epochs', type=int, default=200)
 parser.add_argument('--seed', type=int, default=0)
 parser.add_argument('--lr', type=float, default=1e-3)
-parser.add_argument('--media', type=str, default='patents')
+parser.add_argument('--media', type=str, default='papers') # patents papers
 parser.add_argument('--topic_num', type=int, default=1)
-parser.add_argument('--discard_index', type=int, default=12)
+parser.add_argument('--discard_index', type=int, default=0)
 
 # model
 parser.add_argument('--out_channels', type=int, default=32)

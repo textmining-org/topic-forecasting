@@ -12,7 +12,7 @@ from tqdm import tqdm
 import os
 import pandas as pd
 from datetime import datetime
-
+from torch.utils.tensorboard import SummaryWriter
 
 def get_model(model_name):
     if model_name == 'dcrnn':
@@ -82,6 +82,8 @@ if __name__ == "__main__":
     args = get_config()
     print(args)
 
+    tb_train_loss = SummaryWriter(log_dir=f'../_tensorboard/{args.media}/{args.topic_num}/{args.model}/loss')
+
     # fix randomness
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed(args.seed)
@@ -142,6 +144,9 @@ if __name__ == "__main__":
         optimizer.step()
         optimizer.zero_grad()
 
+        tb_train_loss.add_scalar(f"{args.media} / {args.topic_num} / {args.model} / Loss: mse",
+                                   cost.item(), epoch)
+
     model.eval()
     # y_hats, ys = torch.Tensor(), torch.Tensor()
     y_hats, ys = [], []
@@ -178,3 +183,6 @@ if __name__ == "__main__":
 
     np.save(f"./results/{args.media}_{args.topic_num}_{args.model}_pred.npy", y_hat)
     np.save(f"./results/{args.media}_{args.topic_num}_{args.model}_true.npy", ys)
+
+    tb_train_loss.flush()
+    tb_train_loss.close()
