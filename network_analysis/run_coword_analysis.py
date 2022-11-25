@@ -105,9 +105,9 @@ def main():
     parser_make_graph = subparsers.add_parser('make_graph', # 2. make_graph
                                               help='Analysis and making graph for coword map')
     parser_make_graph.add_argument('-i','--input',
-                                   required=True,help='Input coword result file or directory : result file of \'get_coword\' task')
+                                   required=True,type=str,help='Input coword result file or directory : result file of \'get_coword\' task')
     parser_make_graph.add_argument('-o','--output',
-                                   required=True,help='Output directory')
+                                   required=True,type=str,help='Output directory')
     parser_make_graph.add_argument('-ct','--centrality',
                                    type=str,
                                    action='append',
@@ -170,7 +170,8 @@ def main():
                                       choices=['cooccurrence','inv_cooccurrence'],
                                       help='Type of cooccurrence feature for calculation of centrality and connectivity.')
     
-    args = get_config()
+#     args = get_config()
+    args = parser.parse_args()
 
     print(args)
     if args.job == 'get_coword':
