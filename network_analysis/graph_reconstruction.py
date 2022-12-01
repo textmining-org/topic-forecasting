@@ -131,9 +131,10 @@ def reconstruct_time_graphs(by_month_word_count:dict=None,
         word_list, whole_word_count, by_month_word_count, whole_coword_map, by_month_coword_map = net_utils.parse_coword_chunk(coword_file)
     sub_Gs = {}
     if output_dir:
-        output_dir = os.path.abspath(outupt_dir)
-        os.makedirs(output_dir,exit_ok=True)
-    for inv_bool_flt, cooc_inv_name in enumerate(['cooccurrence','inv_cooccurrence']):
+        output_dir = os.path.abspath(output_dir)
+        os.makedirs(output_dir,exist_ok=True)
+#     for inv_bool_flt, cooc_inv_name in enumerate(['cooccurrence','inv_cooccurrence']):
+    for inv_bool_flt, cooc_inv_name in enumerate(['inv_cooccurrence']):
         sub_Gs[cooc_inv_name] = {}
         for time_key in by_month_word_count.keys():
             G = _recon_time_graph_(
@@ -148,7 +149,7 @@ def reconstruct_time_graphs(by_month_word_count:dict=None,
             if output_dir:
                 net_utils.save_graph(
                     graph_obj=G,
-                    output_file=os.path.join(output_dir,f"graph.{cooc_inv_name}.{time_key}.pkl"),
+                    output_file=os.path.join(output_dir,f"{time_key}.{cooc_inv_name}.graph.pkl"),
                 )
     return sub_Gs
 
@@ -183,7 +184,7 @@ def reconstruct_graph(coword_file:str=None,
     # In case that coword file is given
     if coword_file:
         print(f"Parsing file...\t{coword_file}")
-        print(net_utils.parse_coword_chunk(coword_file))
+        # print(net_utils.parse_coword_chunk(coword_file))
         word_list, whole_word_count, by_month_word_count, whole_coword_map, by_month_coword_map = net_utils.parse_coword_chunk(coword_file)
         
     o_d = os.path.abspath(output_dir)
@@ -220,60 +221,16 @@ def reconstruct_graph(coword_file:str=None,
     with open(os.path.join(o_d,'edge_attributes.txt'),'wb') as f:
         f.write('\n'.join(edge_annotations).encode())
         
-    ## whole_time G analysis
-#     # Graph analysis - whole time cooccurrence and inv_cooccurrence
-#     print('Analyzing whole-time graph network...')
-#         # Cooccurrence
-#     cooc_G = _recon_time_graph_(
-#         by_month_word_count={'whole_time':whole_word_count},
-#         by_month_coword_map={'whole_time':whole_coword_map},
-#         time_key='whole_time',
-#         word_attrb_name='word_count',
-#         cooccr_attrb_name='cooccurrence',
-#         inverse_cooccurrence_value=False,
-#     )
-    
-#     cooc_analyzed = graph_analysis.analyze_graph(
-#         graph_obj=cooc_G,
-#         centrality_function_names=centrality_function_names,
-#         connectivity_function_names=connectivity_function_names,
-#         edge_weight_keys=['cooccurrence'],
-#     )
-#     net_utils.save_graph(graph_obj=cooc_G,output_file=os.path.join(o_d,'whole_time.cooccurrence.graph.pkl'))
-#     with open(os.path.join(o_d,f'whole_time.cooccurrence.centrality.json'),'wb') as f:
-#         f.write(json.dumps(cooc_analyzed['centrality']).encode())
-#     with open(os.path.join(o_d,f'whole_time.cooccurrence.connectivity.json'),'wb') as f:
-#         f.write(json.dumps(cooc_analyzed['connectivity']).encode())
-        
-#         # Inversed cooccurrence
-#     inv_cooc_G = _recon_time_graph_(
-#         by_month_word_count={'whole_time':whole_word_count},
-#         by_month_coword_map={'whole_time':whole_coword_map},
-#         time_key='whole_time',
-#         word_attrb_name='word_count',
-#         cooccr_attrb_name='inv_cooccurrence',
-#         inverse_cooccurrence_value=True,
-#     )
-#     inv_cooc_analyzed = graph_analysis.analyze_graph(
-#         graph_obj=inv_cooc_G,
-#         centrality_function_names=centrality_function_names,
-#         connectivity_function_names=connectivity_function_names,
-#         edge_weight_keys=['inv_cooccurrence'],
-#     )
-#     net_utils.save_graph(graph_obj=inv_cooc_G,output_file=os.path.join(o_d,'whole_time.inv_cooccurrence.graph.pkl'))
-#     with open(os.path.join(o_d,f'whole_time.inv_cooccurrence.centrality.json'),'wb') as f:
-#         f.write(json.dumps(inv_cooc_analyzed['centrality']).encode())
-#     with open(os.path.join(o_d,f'whole_time.inv_cooccurrence.connectivity.json'),'wb') as f:
-#         f.write(json.dumps(inv_cooc_analyzed['connectivity']).encode())
-        
     # Subgraphs - timeline-specific
     sub_g_o_d = os.path.join(o_d,'time_speicific_graphs')
+    sub_g_tmp_d = os.path.join(o_d,'tmp_graph_dir')
     print(f"Output directory for sub graphs and analysis results: {sub_g_o_d}")
     os.makedirs(sub_g_o_d,exist_ok=True)
+    os.makedirs(sub_g_tmp_d,exist_ok=True)
     sub_Gs = reconstruct_time_graphs(
         by_month_word_count=by_month_word_count,
         by_month_coword_map=by_month_coword_map,
-        output_dir=False,
+        output_dir=sub_g_tmp_d,
     )
     
     for cooc_key, t_sub_G_d in sub_Gs.items():
@@ -304,13 +261,55 @@ def reconstruct_graph(coword_file:str=None,
     
     
 # realign keyword list based on central_node-cooccurrence
-def _realign_keyword_(whole_coword_map:dict,central_node:str,keyword_list:list):
+def _realign_keyword_by_edge_val_(whole_coword_map:dict,central_node:str,keyword_list:list):
     _sel_foo = lambda x,y,false_val: x if x!=false_val else y
     _sub_cowrd_d_ = {_sel_foo(n1,n2,central_node):val for (n1,n2), val in whole_coword_map.items() if central_node in [n1,n2]}
     _sub_coword_ser = pd.Series(_sub_cowrd_d_,index=keyword_list)
     _sub_coword_ser.fillna(0.0,inplace=True)
     aligned_keyword_list = list(_sub_coword_ser.sort_values(ascending=False).index)
     return aligned_keyword_list
+    
+    
+# realign keyword list based on node annotation
+# node_annotation (dict): {NODE:VAL}
+# VAL could be word count or centrality
+def _realign_keyword_by_node_val_(node_annotation:dict,keyword_list:list):
+    _node_annot_ser = pd.Series(node_annotation,index=keyword_list)
+    _node_annot_ser.fillna(0.0,inplace=True)
+    aligned_keyword_list = list(_node_annot_ser.sort_values(ascending=False).index)
+    return aligned_keyword_list
+    
+    
+    
+def _fit_structure_node_list_(node_list,
+                              guide_node_n:int,
+                              node_name_tmpl:str='place_holder_%s',
+                             ):
+    _n_l = node_list
+    for diff_idx in range(guide_node_n-len(node_list)):
+        _n_l.append(node_name_tmpl%diff_idx)
+    return _n_l
+    
+    
+# make pre-defined structure of graph data (alike zero padding)
+def _fit_structure_word_count_val_(node_val_mat:'numpy.array', # shape = (len(time_key),len(node))
+                                   guide_node_n:int,
+                                   node_imputation:float=0.0):
+    _fit_arr = np.zeros((node_val_mat.shape[0],guide_node_n)) + node_imputation
+    _fit_arr[:node_val_mat.shape[0],:node_val_mat.shape[1]] = node_val_mat
+    return _fit_arr
+    
+    
+# def _fit_structure_edge_val_(edge_dict:dict, # {NODE_IDX1:}
+#                              guide_node_n:int,
+#                              edge_imputation:float=None,
+#                             ):
+#     if edge_imputation:
+#         _e_d = edge_dict.copy()
+        
+#     else:
+#         edge_dict
+    
     
     
 def extract_topic(input_package_dir:str,
@@ -323,7 +322,8 @@ def extract_topic(input_package_dir:str,
                   conn_methods:list=['all_pairs_dijkstra'],
                   cooc_methods:list=['inv_cooccurrence'], # cooccurrence or inv_cooccurrence
                   align_node_order:bool=False,
-                  central_node:str='blockchain', # Master keyword to align nodes in the keyword_list
+                  central_node:str=None, # Master keyword to align nodes in the keyword_list
+                  max_node_n:int=None,
                  ):
     time_specific_dir = os.path.abspath(
         os.path.join(input_package_dir,'time_speicific_graphs'))
@@ -340,11 +340,20 @@ def extract_topic(input_package_dir:str,
     
     # Realign keyword list
     if align_node_order:
-        whole_coword_map = {_edg:wt_G.edges[_edg]['cooccurrence:whole_time'] for _edg in wt_G.edges if 'cooccurrence:whole_time' in wt_G.edges[_edg]}
-        keyword_list = _realign_keyword_(
-            whole_coword_map=whole_coword_map,
-            central_node=central_node,
-            keyword_list=keyword_list)
+        if central_node and central_node in wt_G.nodes:
+            # whole_coword_map : {(NODE1,NODE2):WHOLE_TIME_COOCCURRENCE}
+            whole_coword_map = {_edg:wt_G.edges[_edg]['cooccurrence:whole_time'] for _edg in wt_G.edges if 'cooccurrence:whole_time' in wt_G.edges[_edg]}
+            keyword_list = _realign_keyword_by_edge_val_(
+                whole_coword_map=whole_coword_map,
+                central_node=central_node,
+                keyword_list=keyword_list)
+        else:
+            annot_wght_key = 'word_count:whole_time'
+            node_annotation = {
+                _nd:wt_G.nodes[_nd][annot_wght_key] for _nd in wt_G.nodes if annot_wght_key in wt_G.nodes[_nd]}
+            keyword_list = _realign_keyword_by_node_val_(
+                node_annotation=node_annotation,
+                keyword_list=keyword_list)
     
     # node_indices.tsv
     net_utils._write_node_index_(
@@ -502,12 +511,12 @@ def extract_topic_batch(**kwargs,
                 reading = f.read().decode()
             keyword_list = reading.split()
             keyword_d = {keyword_list_file:keyword_list}
-
+        
         for topic, keyword_list in keyword_d.items():
             curr_kwargs = kwargs.copy()
             curr_kwargs['output_dir'] = os.path.join(kwargs['output_dir'],str(topic))
             os.makedirs(curr_kwargs['output_dir'],exist_ok=True)
             curr_kwargs['keyword_list_file'] = None
-            curr_kwargs['keyword_list'] = keyword_list
+            curr_kwargs['keyword_list'] = list(set(keyword_list))
             extract_topic(**curr_kwargs)
             

@@ -111,7 +111,7 @@ def main():
     parser_make_graph.add_argument('-ct','--centrality',
                                    type=str,
                                    action='append',
-                                   default=['betweenness_centrality'],
+                                   default=[],
                                    choices=list(
                                        graph_analysis._centrality_func_glossary_().keys()),
                                    help='Method for centrality')
@@ -119,7 +119,7 @@ def main():
     parser_make_graph.add_argument('-cn','--connectivity',
                                    type=str,
                                    action='append',
-                                   default=['all_pairs_dijkstra'],
+                                   default=[],
                                    choices=list(
                                        graph_analysis._connectivity_func_glossary_().keys()),
                                    help='Method for connectivity')
@@ -147,26 +147,26 @@ def main():
                                       help='Align node to central node or defined node')
     parser_extract_topic.add_argument('--central_node',
                                       type=str,
-                                      default='blockchain',
+                                      default=None,
                                       help='Pre-defined node to align keywords for node indexing')
     parser_extract_topic.add_argument('-ct','--centrality',
                                       type=str,
                                       action='append',
-                                      default=['betweenness_centrality'],
+                                      default=[],
                                       choices=list(
                                           graph_analysis._centrality_func_glossary_().keys()),
                                       help='Method for centrality')
     parser_extract_topic.add_argument('-cn','--connectivity',
                                       type=str,
                                       action='append',
-                                      default=['all_pairs_dijkstra'],
+                                      default=[],
                                       choices=list(
                                           graph_analysis._connectivity_func_glossary_().keys()),
                                       help='Method for connectivity')
     parser_extract_topic.add_argument('-co','--cooccurrence',
                                       type=str,
                                       action='append',
-                                      default=['inv_cooccurrence'],
+                                      default=[],
                                       choices=['cooccurrence','inv_cooccurrence'],
                                       help='Type of cooccurrence feature for calculation of centrality and connectivity.')
     
