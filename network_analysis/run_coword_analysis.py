@@ -12,8 +12,9 @@ import networkx as nx
 import coword_detection
 import graph_reconstruction
 import graph_analysis
+import _graph_random_walk_ as random_walk
 
-from config import get_config
+# from config import get_config
 
 # Parsing preprocessed data
 def parse_preprocessed_data(**kwargs):
@@ -33,6 +34,10 @@ def extract_topic_batch(**kwargs):
     return graph_reconstruction.extract_topic_batch(**kwargs)
     
     
+def random_cluster(**kwargs):
+    return random_walk.random_cluster(**kwargs)
+    
+    
 def main():
     print('Initiated')
     parser = argparse.ArgumentParser(description='Process for coword map and graph generation for preprocessed data.')
@@ -45,12 +50,14 @@ def main():
     
     subparsers = parser.add_subparsers(
         title='Jobs to do',
-        description='get_coword/make_graph / select_feature',
+        description='get_coword/make_graph/extract_topic/random_cluster',
         dest='job',
         help='''
     1. get_coword : Getting coword map chunk using preprocessed documents
     2. make_grpah : Analysis and making graph for coword map. This job takes preprocessed data as an input file, and generates anlyzed Network x graph object.
-    3. extract_topic : Selection of node features as related edge features to make data loader. This job takes Network X graph object and make data for GNN training''')
+    3. extract_topic : Selection of node features as related edge features to make data loader. This job takes Network X graph object and make data for GNN training
+    4. random_cluster : Make random clusters (sub graphs)
+    ''')
     
     ##########################################################
     ######## Parer: Graph reconstruction ana analysis ########
@@ -169,6 +176,34 @@ def main():
                                       default=[],
                                       choices=['cooccurrence','inv_cooccurrence'],
                                       help='Type of cooccurrence feature for calculation of centrality and connectivity.')
+    parser_extract_topic.add_argument('--max_keyword_n',
+                                      type=int,
+                                      default=None,
+                                      help='Maximal keyword number. Recommend 50')
+    
+    ####### Arguments for random_clusters ########
+    parser_random_cluster = subparsers.add_parser('random_cluster', # 4. random_cluster
+                                              help='Make random clusters (subgraphs)')
+    parser_random_cluster.add_argument('-i','--input',
+                                       required=True,help='Whole time graph file.')
+    parser_random_cluster.add_argument('-s','--seed_node_file',
+                                       default=None,type=str,
+                                       help='File for seed nodes - tsv or txt formatted.')
+    parser_random_cluster.add_argument('-o','--output',
+                                       default='./random_cluster.json',
+                                       help='Output file. Recommend to end with \"json\"')
+    parser_random_cluster.add_argument('-n','--cluster_n',
+                                       default=1000,
+                                       type=int,
+                                       help='Number of cluster to make')
+    parser_random_cluster.add_argument('--max_node_n',
+                                       default=50,
+                                       type=int,
+                                       help='Maximal number of nodes for a cluster')
+    parser_random_cluster.add_argument('--min_node_n',
+                                       default=10,
+                                       type=int,
+                                       help='Minimal number of nodes for a cluster')
     
 #     args = get_config()
     args = parser.parse_args()
@@ -266,8 +301,19 @@ def main():
                 conn_methods=args.connectivity,
                 cooc_methods=args.cooccurrence,
                 central_node=args.central_node,
-                align_node_order=bool(args.align_node_order),   
+                align_node_order=bool(args.align_node_order),
+                max_keyword_n=args.max_keyword_n,
             )
+    elif args.job == 'random_cluster':
+        print("Generating clusters for %s"%args.input)
+        random_cluster(
+            whole_time_graph_file=args.input,
+            output_f=args.output,
+            seed_node_file=args.seed_node_file,
+            cluster=args.cluster_n,
+            min_node_n=args.min_node_n,
+            max_node_n=args.max_node_n,
+        )
         
     print('Finished')
 
