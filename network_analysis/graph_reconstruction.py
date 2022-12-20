@@ -278,40 +278,9 @@ def _realign_keyword_by_node_val_(node_annotation:dict,keyword_list:list):
     _node_annot_ser.fillna(0.0,inplace=True)
     aligned_keyword_list = list(_node_annot_ser.sort_values(ascending=False).index)
     return aligned_keyword_list
-    
-    
-    
-def _fit_structure_node_list_(node_list,
-                              guide_node_n:int,
-                              node_name_tmpl:str='place_holder_%s',
-                             ):
-    _n_l = node_list
-    for diff_idx in range(guide_node_n-len(node_list)):
-        _n_l.append(node_name_tmpl%diff_idx)
-    return _n_l
-    
-    
-# make pre-defined structure of graph data (alike zero padding)
-def _fit_structure_word_count_val_(node_val_mat:'numpy.array', # shape = (len(time_key),len(node))
-                                   guide_node_n:int,
-                                   node_imputation:float=0.0):
-    _fit_arr = np.zeros((node_val_mat.shape[0],guide_node_n)) + node_imputation
-    _fit_arr[:node_val_mat.shape[0],:node_val_mat.shape[1]] = node_val_mat
-    return _fit_arr
-    
-    
-# def _fit_structure_edge_val_(edge_dict:dict, # {NODE_IDX1:}
-#                              guide_node_n:int,
-#                              edge_imputation:float=None,
-#                             ):
-#     if edge_imputation:
-#         _e_d = edge_dict.copy()
-        
-#     else:
-#         edge_dict
-    
-    
-    
+
+
+#    
 def extract_topic(input_package_dir:str,
                   output_dir:str,
                   time_key_list:list, # [TIME1,TIME2] <- must be ordered
@@ -323,7 +292,6 @@ def extract_topic(input_package_dir:str,
                   cooc_methods:list=['inv_cooccurrence'], # cooccurrence or inv_cooccurrence
                   align_node_order:bool=False,
                   central_node:str=None, # Master keyword to align nodes in the keyword_list
-                  max_node_n:int=None,
                  ):
     time_specific_dir = os.path.abspath(
         os.path.join(input_package_dir,'time_speicific_graphs'))
@@ -337,7 +305,7 @@ def extract_topic(input_package_dir:str,
     if not keyword_list:
         with open(keyword_list_file,'rb') as f:
             keyword_list = f.read().decode().split()
-    
+    keyword_list = list(set(keyword_list))
     # Realign keyword list
     if align_node_order:
         if central_node and central_node in wt_G.nodes:
@@ -358,7 +326,7 @@ def extract_topic(input_package_dir:str,
     # node_indices.tsv
     net_utils._write_node_index_(
         node_ser=pd.Series(keyword_list,index=list(range(len(keyword_list)))),
-        output=os.path.join(o_d,'node_indicies.tsv'))
+        output=os.path.join(o_d,'node_indices.tsv'))
     # edge_list.tsv
     net_utils._write_edge_index_(
         node_list=keyword_list,
@@ -486,15 +454,25 @@ def extract_topic(input_package_dir:str,
 
                 
 # Batch function for multiple topics
-def extract_topic_batch(**kwargs,
+def extract_topic_batch(max_keyword_n:int=None,
+                        **kwargs,
                        ):
     output_dir = kwargs['output_dir']
     keyword_list_file = kwargs['keyword_list_file']
     keyword_list = kwargs['keyword_list']
     
+    if max_keyword_n:
+        structured_od = output_dir+'.max_structured'
+        os.makedirs(structured_od,exist_ok=True)
+    
     if keyword_list:
         extract_topic(**kwargs)
-        
+        if max_keyword_n:
+            fit_features_to_structure(
+                topic_dir=output_dir,
+                output_dir=structured_od,
+                max_node_n=max_keyword_n,
+            )
     else:
         if keyword_list_file.endswith('csv'):
             kwrd_df = pd.read_csv(keyword_list_file,sep=',')
@@ -506,11 +484,18 @@ def extract_topic_batch(**kwargs,
             with open(keyword_list_file, 'rb') as f:
                 kwrd_d = pickle.load(f)
             keyword_d = {_k:_v.split(' ') for _k, _v in kwrd_d.items()}
-        elif keyword_list_file.endswith('txt'):
+        elif keyword_list_file.endswith('txt'): # considering that the file consists of list of words
             with open(keyword_list_file,'rb') as f:
                 reading = f.read().decode()
             keyword_list = reading.split()
             keyword_d = {keyword_list_file:keyword_list}
+        elif keyword_list_file.endswith('json'):
+            with open(keyword_list_file,'rb') as f:
+                reading = json.loads(f.read().decode())
+            if type(list(reading.values())[0]) == str:
+                keyword_d = {_k:_v.split(' ') for _k, _v in reading.items()}
+            else:
+                keyword_d = reading
         
         for topic, keyword_list in keyword_d.items():
             curr_kwargs = kwargs.copy()
@@ -519,4 +504,76 @@ def extract_topic_batch(**kwargs,
             curr_kwargs['keyword_list_file'] = None
             curr_kwargs['keyword_list'] = list(set(keyword_list))
             extract_topic(**curr_kwargs)
-            
+            if max_keyword_n:
+                fit_features_to_structure(
+                    topic_dir=os.path.join(kwargs['output_dir'],str(topic)),
+                    output_dir=os.path.join(structured_od,str(topic)),
+                    max_node_n=max_keyword_n,
+                )
+    
+def _fit_structure_node_list_(node_list,
+                              guide_node_n:int,
+#                               node_name_tmpl:str='place_holder_%s',
+                             ):
+    _n_l = node_list.copy()
+    for diff_idx in range(guide_node_n-len(node_list)):
+        _n_l.append(f"place_holder_{diff_idx:02d}")
+    return _n_l
+    
+    
+# make pre-defined structure of graph data (alike zero padding)
+def _fit_structure_word_count_val_(node_val_mat:'numpy.array', # shape = (len(time_key),len(node))
+                                   guide_node_n:int,
+                                   node_imputation:float=0.0):
+    _fit_arr = np.zeros((node_val_mat.shape[0],guide_node_n)) + node_imputation
+    _fit_arr[:node_val_mat.shape[0],:node_val_mat.shape[1]] = node_val_mat
+    return _fit_arr
+    
+# Fit topic dataset to structured set
+def fit_features_to_structure(topic_dir:str,
+                              output_dir:str,
+                              max_node_n:int=50,
+                             ):
+    i_d = os.path.abspath(topic_dir)
+    o_d = os.path.abspath(output_dir)
+    os.makedirs(o_d,exist_ok=True)
+    
+    _fs = [os.path.join(i_d, _f) for _f in os.listdir(i_d)]
+    
+    # Node list
+    kw_list = net_utils._read_node_index_(os.path.join(i_d,'node_indices.tsv')) # pd.Series
+    kw_list = list(kw_list.values)
+    assert max_node_n >= len(kw_list) # Check if the number of max node is greater than the number of current keywords
+    n_kw_list = _fit_structure_node_list_(
+        node_list=kw_list,guide_node_n=max_node_n)
+    assert len(n_kw_list) == max_node_n
+    net_utils._write_node_index_(
+        node_ser=pd.Series(n_kw_list,index=list(range(len(n_kw_list)))),
+        output=os.path.join(o_d,'node_indices.tsv'))
+    # edge_list.tsv
+    net_utils._write_edge_index_(
+        node_list=n_kw_list,
+        output=os.path.join(o_d,'edge_list.tsv'))
+    
+    for _f in _fs:
+        _f_n = os.path.split(_f)[1]
+    # node features - word count and centrality
+        if _f_n.endswith('node_targets.npy'):
+            wc_arr = net_utils._read_node_features_(
+                file=_f,
+                gcn_io_format=True) # shape: (time,node)
+            assert wc_arr.shape[1] == len(kw_list)
+            _zr_ = np.zeros((wc_arr.shape[0],max_node_n-len(kw_list)))
+            n_wc_arr = np.concatenate([wc_arr,_zr_],axis=1)
+            assert n_wc_arr.shape[1] == max_node_n
+            net_utils._write_node_features_(
+                node_features=n_wc_arr,
+                file=os.path.join(o_d,_f_n),
+                gcn_io_format=True)
+    
+    # node attributes or edge features - cooccurrence weight/ index/ attribute
+        elif _f_n.endswith('edge_indices.json') or _f_n.endswith('edge_weigths.json') or _f_n.endswith('edge_attributes.txt') or _f_n.endswith('node_attributes.txt'):
+            os.system('cp %s %s'%(
+                _f,
+                os.path.join(o_d,_f_n),
+            ))
