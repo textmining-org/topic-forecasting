@@ -5,7 +5,7 @@ from torch_geometric_temporal.signal import DynamicGraphTemporalSignal
 from torch_geometric_temporal.signal import temporal_signal_split
 from tqdm import tqdm
 
-from preprocessed.utils import get_node_targets, get_node_features, get_edge_indices, get_edge_weights
+from preprocessed.preprocessor import get_node_targets, get_node_features, get_edge_indices, get_edge_weights
 
 #########################
 # 1. Data preprocessing
