@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from torch_geometric_temporal.nn.attention import ASTGCN
-from torch_geometric_temporal.signal import DynamicGraphTemporalSignal
+from torch_geometric_temporal.signal import DynamicGraphTemporalSignal, DynamicGraphTemporalSignalBatch
 from torch_geometric_temporal.signal import temporal_signal_split
 from tqdm import tqdm
 
