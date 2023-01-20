@@ -1,4 +1,10 @@
 import os
+import sys
+
+PLF_DIR = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
+DEPS = [os.path.join(PLF_DIR,i) for i in os.listdir(PLF_DIR)]
+sys.path.extend(DEPS)
+print(DEPS)
 
 import torch
 from torch.utils.tensorboard import SummaryWriter
