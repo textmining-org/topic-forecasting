@@ -1,0 +1,9 @@
+﻿dmr_topic number,dmr_papers_keywords,lda_topic number,lda_papers_keywords
+dmr_0,scheme storage access authentication control identity secure encryption protection signature,lda_0,things iot devices networks internet communication applications architecture service edge
+dmr_1,detection networks machine vehicles conference proceedings topics communication papers learning,lda_1,energy power trading market transaction electricity grid consumption demand distribution
+dmr_2,contracts contract transactions ethereum cryptocurrency bitcoin transaction payment cryptocurrencies smart,lda_2,detection machine conference proceedings topics papers learning prediction image networks
+dmr_3,iot things devices health applications architecture internet healthcare services service,lda_3,industry applications review literature economy cryptocurrency application adoption innovation market
+dmr_4,energy power trading market transaction electricity consumption grid demand resources,lda_4,consensus transaction transactions bitcoin nodes protocol performance mining algorithm payment
+dmr_5,industry applications review literature application economy adoption innovation education governance,lda_5,health healthcare records patients education care record insurance covid19 access
+dmr_6,consensus nodes protocol performance transactions transaction mining algorithm attack scalability,lda_6,contracts supply contract traceability food ethereum platform smart application software
+dmr_7,supply traceability food industry logistics chains products quality construction transparency,lda_7,access scheme storage control authentication identity secure encryption protection signature

@@ -1,0 +1,17 @@
+﻿dmr_topic number,dmr_news_keywords,lda_topic number,lda_news_keywords
+dmr_0,security sanctions department government money hackers law court states case,lda_0,capital startups startup venture investment fund funding ventures fintech firm
+dmr_1,cryptocurrencies crypto currency price money exchange currencies assets trading exchanges,lda_1,government china trade countries economy policy country president states percent
+dmr_2,services startups capital startup tech venture investment software platform firm,lda_2,law security court money department hackers enforcement case transactions fraud
+dmr_3,nfts art work game media money something york thats things,lda_3,health supply group products logistics food industry sales customers vehicles
+dmr_4,energy food power industry mining supply oil gas electricity carbon,lda_4,crypto assets securities exchange asset trading regulators cryptocurrencies industry exchanges
+dmr_5,facebook law regulators tax government policy rules libra mr president,lda_5,university students school event research program director education science city
+dmr_6,application transaction network images tables charts states office abstract device,lda_6,stock stocks shares growth cent investment markets price quarter index
+dmr_7,securities platform investment exchange tokens group media statements news services,lda_7,cryptocurrencies price currency crypto money currencies exchange bitcoins transactions gold
+dmr_8,government trade countries china economy growth sector industry country innovation,lda_8,nfts art game auction artists tokens games sale metaverse nft
+dmr_9,university health research students school education work program city science,lda_9,insider trends industry reports media book coverage report intelligence insiders
+dmr_10,banks payments payment services banking currency money transactions credit customers,lda_10,mr things work money something thats lot media dont york
+dmr_11,stock stocks cent shares investment markets growth price funds fund,lda_11,energy power mining food oil industry gas electricity carbon miners
+,,lda_12,application transaction network images charts tables states abstract office device
+,,lda_13,banks payments currency payment money banking services credit facebook transactions
+,,lda_14,platform services security software industry solutions cloud management media applications
+,,lda_15,growth innovation services industry sector investment cent intelligence india opportunities
