@@ -12,8 +12,9 @@ import networkx as nx
 import coword_detection
 import graph_reconstruction
 import graph_analysis
+import _graph_random_walk_ as random_walk
 
-from config import get_config
+# from config import get_config
 
 # Parsing preprocessed data
 def parse_preprocessed_data(**kwargs):
@@ -27,6 +28,14 @@ def reconstruct_graph(**kwargs):
     
 def extract_topic(**kwargs):
     return graph_reconstruction.extract_topic(**kwargs)
+
+
+def extract_topic_batch(**kwargs):
+    return graph_reconstruction.extract_topic_batch(**kwargs)
+    
+    
+def random_cluster(**kwargs):
+    return random_walk.random_cluster(**kwargs)
     
     
 def main():
@@ -41,12 +50,14 @@ def main():
     
     subparsers = parser.add_subparsers(
         title='Jobs to do',
-        description='get_coword/make_graph / select_feature',
+        description='get_coword/make_graph/extract_topic/random_cluster',
         dest='job',
         help='''
     1. get_coword : Getting coword map chunk using preprocessed documents
     2. make_grpah : Analysis and making graph for coword map. This job takes preprocessed data as an input file, and generates anlyzed Network x graph object.
-    3. extract_topic : Selection of node features as related edge features to make data loader. This job takes Network X graph object and make data for GNN training''')
+    3. extract_topic : Selection of node features as related edge features to make data loader. This job takes Network X graph object and make data for GNN training
+    4. random_cluster : Make random clusters (sub graphs)
+    ''')
     
     ##########################################################
     ######## Parer: Graph reconstruction ana analysis ########
@@ -101,13 +112,13 @@ def main():
     parser_make_graph = subparsers.add_parser('make_graph', # 2. make_graph
                                               help='Analysis and making graph for coword map')
     parser_make_graph.add_argument('-i','--input',
-                                   required=True,help='Input coword result file or directory : result file of \'get_coword\' task')
+                                   required=True,type=str,help='Input coword result file or directory : result file of \'get_coword\' task')
     parser_make_graph.add_argument('-o','--output',
-                                   required=True,help='Output directory')
+                                   required=True,type=str,help='Output directory')
     parser_make_graph.add_argument('-ct','--centrality',
                                    type=str,
                                    action='append',
-                                   default=['betweenness_centrality'],
+                                   default=[],
                                    choices=list(
                                        graph_analysis._centrality_func_glossary_().keys()),
                                    help='Method for centrality')
@@ -115,7 +126,7 @@ def main():
     parser_make_graph.add_argument('-cn','--connectivity',
                                    type=str,
                                    action='append',
-                                   default=['all_pairs_dijkstra'],
+                                   default=[],
                                    choices=list(
                                        graph_analysis._connectivity_func_glossary_().keys()),
                                    help='Method for connectivity')
@@ -132,9 +143,9 @@ def main():
     parser_extract_topic.add_argument('-i','--input',
                                       required=True,help='Input directory for graphs')
     parser_extract_topic.add_argument('-k','--keyword_file',
-                                      required=True,help='File for keywords - tsv or txt formatted == node list')
+                                      required=True,help='File for keywords - csv, pkl, tsv or txt formatted. First column is Topic ID and Second column is for keywords with delimited with space (This keywords are list of node)')
     parser_extract_topic.add_argument('-t','--time_line_file',
-                                      required=True,help='File for timeline - tsv or txt formatted == node list')
+                                      required=True,help='File for timeline - tsv or txt formatted.')
     parser_extract_topic.add_argument('-o','--output',
                                       required=True,help='Output directory')
     parser_extract_topic.add_argument('--align_node_order',
@@ -143,10 +154,59 @@ def main():
                                       help='Align node to central node or defined node')
     parser_extract_topic.add_argument('--central_node',
                                       type=str,
-                                      default='blockchain',
+                                      default=None,
                                       help='Pre-defined node to align keywords for node indexing')
+    parser_extract_topic.add_argument('-ct','--centrality',
+                                      type=str,
+                                      action='append',
+                                      default=[],
+                                      choices=list(
+                                          graph_analysis._centrality_func_glossary_().keys()),
+                                      help='Method for centrality')
+    parser_extract_topic.add_argument('-cn','--connectivity',
+                                      type=str,
+                                      action='append',
+                                      default=[],
+                                      choices=list(
+                                          graph_analysis._connectivity_func_glossary_().keys()),
+                                      help='Method for connectivity')
+    parser_extract_topic.add_argument('-co','--cooccurrence',
+                                      type=str,
+                                      action='append',
+                                      default=[],
+                                      choices=['cooccurrence','inv_cooccurrence'],
+                                      help='Type of cooccurrence feature for calculation of centrality and connectivity.')
+    parser_extract_topic.add_argument('--max_keyword_n',
+                                      type=int,
+                                      default=None,
+                                      help='Maximal keyword number. Recommend 50')
     
-    args = get_config()
+    ####### Arguments for random_clusters ########
+    parser_random_cluster = subparsers.add_parser('random_cluster', # 4. random_cluster
+                                              help='Make random clusters (subgraphs)')
+    parser_random_cluster.add_argument('-i','--input',
+                                       required=True,help='Whole time graph file.')
+    parser_random_cluster.add_argument('-s','--seed_node_file',
+                                       default=None,type=str,
+                                       help='File for seed nodes - tsv or txt formatted.')
+    parser_random_cluster.add_argument('-o','--output',
+                                       default='./random_cluster.json',
+                                       help='Output file. Recommend to end with \"json\"')
+    parser_random_cluster.add_argument('-n','--cluster_n',
+                                       default=1000,
+                                       type=int,
+                                       help='Number of cluster to make')
+    parser_random_cluster.add_argument('--max_node_n',
+                                       default=50,
+                                       type=int,
+                                       help='Maximal number of nodes for a cluster')
+    parser_random_cluster.add_argument('--min_node_n',
+                                       default=10,
+                                       type=int,
+                                       help='Minimal number of nodes for a cluster')
+    
+#     args = get_config()
+    args = parser.parse_args()
 
     print(args)
     if args.job == 'get_coword':
@@ -197,31 +257,62 @@ def main():
         
     elif args.job == 'extract_topic':
         input_package_dir = os.path.abspath(args.input)
-        keyword_file = os.path.abspath(args.keyword_file)
+        keyword_list_file = os.path.abspath(args.keyword_file)
         
         output_dir = os.path.abspath(args.output)
         os.makedirs(output_dir,exist_ok=True)
         
-        with open(args.keyword_file,'rb') as f:
-            keyword_list=f.read().decode().split()
-            while '' in keyword_list:
-                keyword_list.remove('')
+        if keyword_list_file.endswith('txt'):
+            with open(keyword_list_file,'rb') as f:
+                keyword_list=f.read().decode().split()
+                while '' in keyword_list:
+                    keyword_list.remove('')
+            keyword_list_file = None
+        else:
+            keyword_list = None
         with open(args.time_line_file,'rb') as f:
             time_key_list=f.read().decode().split()
             while '' in time_key_list:
                 time_key_list.remove('')
         
-        result = extract_topic(
-            input_package_dir=input_package_dir,
-            output_dir=output_dir,
-            time_key_list=time_key_list,
-            keyword_list=keyword_list,
-            cent_methods=['betweenness_centrality','closeness_centrality'],
-            conn_methods=['all_pairs_dijkstra'],
-            cooc_methods=['inv_cooccurrence'],
-            central_node=args.central_node,
-            align_node_order=bool(args.align_node_order),
-            
+        if keyword_list:
+            print("Extracting topic features for %s"%'\t'.join(keyword_list))
+            result = extract_topic(
+                input_package_dir=input_package_dir,
+                output_dir=output_dir,
+                time_key_list=time_key_list,
+                keyword_list_file=keyword_list_file,
+                keyword_list=keyword_list,
+                cent_methods=args.centrality,
+                conn_methods=args.connectivity,
+                cooc_methods=args.cooccurrence,
+                central_node=args.central_node,
+                align_node_order=bool(args.align_node_order),   
+            )
+        else:
+            print("Extracting topic features for %s"%keyword_list_file)
+            result = extract_topic_batch(
+                input_package_dir=input_package_dir,
+                output_dir=output_dir,
+                time_key_list=time_key_list,
+                keyword_list_file=keyword_list_file,
+                keyword_list=keyword_list,
+                cent_methods=args.centrality,
+                conn_methods=args.connectivity,
+                cooc_methods=args.cooccurrence,
+                central_node=args.central_node,
+                align_node_order=bool(args.align_node_order),
+                max_keyword_n=args.max_keyword_n,
+            )
+    elif args.job == 'random_cluster':
+        print("Generating clusters for %s"%args.input)
+        random_cluster(
+            whole_time_graph_file=args.input,
+            output_f=args.output,
+            seed_node_file=args.seed_node_file,
+            cluster=args.cluster_n,
+            min_node_n=args.min_node_n,
+            max_node_n=args.max_node_n,
         )
         
     print('Finished')

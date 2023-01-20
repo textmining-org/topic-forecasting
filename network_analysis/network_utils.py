@@ -188,6 +188,16 @@ def _write_edge_features_(edge_features:dict,output_prefix,gcn_io_format=True):
             f.write(json.dumps(edge_features).encode())
     
     
+def _save_graph_position_(pos, file):
+    with open(file,'wb') as f:
+        f.write(json.dumps({_k:list(_v) for _k, _v in pos.items()}).encode())
+    
+def _load_graph_position_(file):
+    with open(file,'rb') as f:
+        _pos = json.loads(f.read().decode())
+    return {_k:np.array(_v) for _k, _v in _pos.items()}
+    
+    
 #########################
 ###### Conversion #######
 #########################

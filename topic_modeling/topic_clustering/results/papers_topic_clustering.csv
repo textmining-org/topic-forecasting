@@ -1,9 +1,10 @@
 topic_num,keywords
-4,access scheme storage control authentication identity secure encryption protection signature scheme storage access authentication control identity secure encryption protection signature
-2,detection networks machine vehicles conference proceedings topics communication papers learning detection machine conference proceedings topics papers learning prediction image networks
-1,industry applications review literature economy cryptocurrency application adoption innovation market contracts supply contract traceability food ethereum platform smart application software consensus transaction transactions bitcoin nodes protocol performance mining algorithm payment consensus nodes protocol performance transactions transaction mining algorithm attack scalability contracts contract transactions ethereum cryptocurrency bitcoin transaction payment cryptocurrencies smart
+1,contracts contract transactions ethereum cryptocurrency bitcoin transaction payment cryptocurrencies smart contracts supply contract traceability food ethereum platform smart application software
+2,industry applications review literature application economy adoption innovation education governance industry applications review literature economy cryptocurrency application adoption innovation market
 3,things iot devices networks internet communication applications architecture service edge iot things devices health applications architecture internet healthcare services service
-5,energy power trading market transaction electricity grid consumption demand distribution energy power trading market transaction electricity consumption grid demand resources
-6,industry applications review literature application economy adoption innovation education governance
-7,supply traceability food industry logistics chains products quality construction transparency
-8,health healthcare records patients education care record insurance covid19 access
+4,detection networks machine vehicles conference proceedings topics communication papers learning detection machine conference proceedings topics papers learning prediction image networks
+5,health healthcare records patients education care record insurance covid19 access
+6,access scheme storage control authentication identity secure encryption protection signature scheme storage access authentication control identity secure encryption protection signature
+7,consensus transaction transactions bitcoin nodes protocol performance mining algorithm payment consensus nodes protocol performance transactions transaction mining algorithm attack scalability
+8,supply traceability food industry logistics chains products quality construction transparency
+9,energy power trading market transaction electricity grid consumption demand distribution energy power trading market transaction electricity consumption grid demand resources

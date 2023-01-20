@@ -15,7 +15,6 @@ def _centrality_func_glossary_():
         nx.betweenness_centrality,
         nx.closeness_centrality,
         nx.eigenvector_centrality,
-        nx.edge_betweenness_centrality,
     ]
     return {fn.__name__.split('.')[-1]:fn for fn in nx_cent_fns}
 
@@ -37,6 +36,7 @@ def _connectivity_func_glossary_():
         nx.all_pairs_node_connectivity, # w.o. weight; takes too long
         nx.all_pairs_dijkstra, # wegith 
         nx.all_pairs_bellman_ford_path_length, # weight
+        nx.edge_betweenness_centrality,
         #nx.node_connectivity,
         #nx.resistance_distance,
     ]
@@ -52,7 +52,7 @@ def _get_connectivity_(graph_obj,fn,weight:str)->dict:
     fn_name = fn.__name__.split('.')[-1]
     if fn_name == 'all_pairs_node_connectivity':
         return fn(graph_obj)
-    if fn_name in ['all_pairs_dijkstra','all_pairs_bellman_ford_path_length']:
+    elif fn_name in ['all_pairs_dijkstra','all_pairs_bellman_ford_path_length','edge_betweenness_centrality']:
         gen = fn(graph_obj,weight=weight)
     # without weight
     else:
@@ -63,7 +63,12 @@ def _get_connectivity_(graph_obj,fn,weight:str)->dict:
         if fn_name in ['all_pairs_dijkstra']:
             for node2, pathlen in path_val[0].items():
                 conn[node1][node2] = pathlen
-        elif fn_name in ['all_pairs_bellman_ford_path_length']:
+#         elif fn_name in ['all_pairs_bellman_ford_path_length']:
+        elif fn_name == 'edge_betweenness_centrality':
+            node2 = path_val
+            pathlen = gen[(node1,node2)]
+            conn[node1][node2] = pathlen
+        else:
             for node2, pathlen in path_val.items():
                 conn[node1][node2] = pathlen
     return conn # {NODE:{NODE:VALUE}}
