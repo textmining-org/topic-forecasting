@@ -70,3 +70,26 @@ class A3TGCNet(torch.nn.Module):
         h = F.relu(h)
         h = self.linear(h)
         return h
+
+def get_model(args, num_nodes, num_features):
+    if args.model == 'dcrnn':
+        return DCRNNet(in_channels=num_features,
+                       out_channels=args.out_channels,
+                       K=args.K,
+                       out_size=args.out_size)
+    elif args.model == 'tgcn':
+        return TGCNet(in_channels=num_features,
+                      out_channels=args.out_channels,
+                      out_size=args.out_size)
+    elif args.model == 'agcrn':
+        return AGCRNet(number_of_nodes=num_nodes,
+                       in_channels=num_features,
+                       out_channels=args.out_channels,
+                       K=args.K,
+                       embedding_dimensions=args.embedd_dim,
+                       out_size=args.out_size)
+    elif args.model == 'a3tgcn':
+        return A3TGCNet(node_features=num_features,
+                        out_channels=args.out_channels,
+                        periods=args.periods,
+                        out_size=args.out_size)
