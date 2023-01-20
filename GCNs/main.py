@@ -55,9 +55,6 @@ if __name__ == "__main__":
         = get_dataset(args.media, args.topic_num, args.discard_index, refine_data)
     train_dataset, test_dataset = temporal_signal_split(dataset, train_ratio=0.7)
 
-    # train_loader = DataLoader(train_dataset, batch_size=args.batch_size)
-    # test_loader = DataLoader(test_dataset, batch_size=args.batch_size)
-
     # create GCN model
     model = get_model(args, num_nodes, num_features)
     if args.model == 'agcrn':
