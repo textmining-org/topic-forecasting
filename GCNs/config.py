@@ -21,6 +21,8 @@ parser.add_argument('--embedd_dim', type=int, default=4)
 # A3TGCN
 parser.add_argument('--periods', type=int, default=1)
 
+# etc
+parser.add_argument('--results_path', type=str, default='./results')
 
 def get_config():
     return parser.parse_args()

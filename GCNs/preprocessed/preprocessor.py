@@ -3,6 +3,7 @@ import os
 import pathlib
 
 import numpy as np
+from torch_geometric_temporal.signal import DynamicGraphTemporalSignal
 
 
 def get_node_targets(media, topic_num, discard_index=None):
@@ -98,6 +99,7 @@ def get_node_features(media, topic_num, discard_index=None):
 
     raise Exception(f'There is no node features! (media: {media}, topic num: {topic_num})')
 
+
 def refine_graph_data(node_targets, node_features, edge_indices, edge_weights):
     """
     node targets: (64, 30)
@@ -111,7 +113,7 @@ def refine_graph_data(node_targets, node_features, edge_indices, edge_weights):
     print(f'edge indices: {len(edge_indices)} * {edge_indices[0].shape}')
     print(f'edge weights: {len(edge_weights)} * {edge_weights[0].shape}')
 
-    refined_node_targets  = []
+    refined_node_targets = []
     refined_node_features = []
     refined_edge_indices = []
     refined_edge_weights = []
@@ -135,6 +137,7 @@ def refine_graph_data(node_targets, node_features, edge_indices, edge_weights):
 
     return refined_node_targets, refined_node_features, refined_edge_indices, refined_edge_weights
 
+
 def normalizer(data):
     """
     Execute min-max normalization to data
@@ -157,6 +160,30 @@ def normalizer(data):
 
     return norm_data, min_val, max_val, eps
 
+
 def denormalizer(data, min_val, max_val, eps):
     denorm_data = data * (max_val - min_val + eps) + min_val
     return denorm_data
+
+
+def get_dataset(media, topic_num, discard_index, refine_data=False):
+    # node targets(label)
+    node_targets = get_node_targets(media=media, topic_num=topic_num, discard_index=discard_index)
+    node_targets, min_val_tar, max_val_tar, eps = normalizer(node_targets)
+    num_nodes = node_targets[0].shape[0]
+
+    # node features
+    node_features = get_node_features(media=media, topic_num=topic_num, discard_index=discard_index)
+    node_features, min_val_fea, max_val_fea, eps = normalizer(node_features)
+    num_features = node_features[0].shape[1]
+
+    # edge indices and weights
+    edge_indices = get_edge_indices(media=media, topic_num=topic_num, discard_index=discard_index)
+    edge_weights = get_edge_weights(media=media, topic_num=topic_num, discard_index=discard_index)
+
+    if refine_data == True:
+        node_targets, node_features, edge_indices, edge_weights = refine_graph_data(node_targets, node_features,
+                                                                                    edge_indices, edge_weights)
+    dataset = DynamicGraphTemporalSignal(edge_indices, edge_weights, node_features, node_targets)
+
+    return dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps
