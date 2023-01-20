@@ -2,9 +2,9 @@ import os
 import sys
 
 PLF_DIR = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
+sys.path.append(PLF_DIR)
 DEPS = [os.path.join(PLF_DIR,i) for i in os.listdir(PLF_DIR)]
 sys.path.extend(DEPS)
-print(DEPS)
 
 import torch
 from torch.utils.tensorboard import SummaryWriter
@@ -72,22 +72,6 @@ if __name__ == "__main__":
     for epoch in tqdm(range(args.epochs)):
         y_hat, y, mse = training(args.model,model, train_dataset, optimizer, criterion)
         print(f'{epoch}-th epochs, train mse: {mse}')
-        # cost = 0
-        # h = None
-        #
-        # # for time, snapshot in enumerate(train_loader):
-        # for time, snapshot in enumerate(train_dataset):
-        #     if args.model == 'dcrnn' or args.model == 'tgcn' or args.model == 'a3tgcn':
-        #         y_hat = model(snapshot.x, snapshot.edge_index, snapshot.edge_attr)
-        #     elif args.model == 'agcrn':
-        #         x = snapshot.x.view(1, num_nodes, num_features)  # (?, num of nodes, num of node features)
-        #         y_hat, h = model(x, e, h)
-        #
-        #     cost = cost + torch.mean((y_hat - snapshot.y) ** 2)
-        # cost = cost / (time + 1)
-        # cost.backward()
-        # optimizer.step()
-        # optimizer.zero_grad()
 
         tb_train_loss.add_scalar(f"{args.media} / {args.topic_num} / {args.model} / Loss: mse",
                                  mse, epoch)
