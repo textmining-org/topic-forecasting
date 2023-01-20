@@ -3,7 +3,7 @@ import os
 import pathlib
 
 import numpy as np
-from torch_geometric_temporal.signal import DynamicGraphTemporalSignal
+from torch_geometric_temporal.signal import DynamicGraphTemporalSignal, DynamicGraphTemporalSignalBatch
 
 
 def get_node_targets(media, topic_num, discard_index=None):
