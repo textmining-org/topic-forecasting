@@ -45,6 +45,7 @@ class AGCRNet(torch.nn.Module):
         y = self.linear(y)
         return y, h_0
 
+
 class CustomA3TGCN(A3TGCN):
     def _setup_layers(self):
         self._base_tgcn = TGCN(
@@ -59,6 +60,7 @@ class CustomA3TGCN(A3TGCN):
         self._attention = torch.nn.Parameter(torch.empty(self.periods))
         torch.nn.init.uniform_(self._attention)
 
+
 class A3TGCNet(torch.nn.Module):
     def __init__(self, node_features, out_channels, periods, out_size):
         super(A3TGCNet, self).__init__()
@@ -70,6 +72,7 @@ class A3TGCNet(torch.nn.Module):
         h = F.relu(h)
         h = self.linear(h)
         return h
+
 
 def get_model(args, num_nodes, num_features):
     if args.model == 'dcrnn':

@@ -6,10 +6,8 @@ import numpy as np
 from torch_geometric_temporal.signal import DynamicGraphTemporalSignal, DynamicGraphTemporalSignalBatch
 
 
-def get_node_targets(media, topic_num, discard_index=None):
-    loc_here = pathlib.Path(__file__).resolve().parent
-
-    loc_node_targets = os.path.join(loc_here / media / '4.topic' / str(topic_num), 'word_count.node_targets.npy')
+def get_node_targets(data_path, discard_index=None):
+    loc_node_targets = os.path.join(data_path, 'word_count.node_targets.npy')
     if os.path.exists(loc_node_targets):
         node_targets = np.load(loc_node_targets)
         if discard_index is not None:
@@ -18,19 +16,15 @@ def get_node_targets(media, topic_num, discard_index=None):
         print('node targets: {}'.format(node_targets.shape))
         return node_targets
 
-    raise Exception(f'There is no node targets! (media: {media}, topic num: {topic_num})')
+    raise Exception(f'There is no node targets! (data_path: {data_path})')
 
 
-def get_edge_indices(media, topic_num, bidirectional=False, discard_index=None):
-    loc_here = pathlib.Path(__file__).resolve().parent
-
-    loc_edge_indices = os.path.join(loc_here / media / '4.topic' / str(topic_num), 'cooccurrence.edge_indices.json')
+def get_edge_indices(data_path, bidirectional=False, discard_index=None):
+    loc_edge_indices = os.path.join(data_path, 'cooccurrence.edge_indices.json')
     if os.path.exists(loc_edge_indices):
-        with open(os.path.join(loc_here / media / '4.topic' / str(topic_num), 'cooccurrence.edge_indices.json'),
-                  'r') as f:
+        with open(os.path.join(data_path, 'cooccurrence.edge_indices.json'), 'r') as f:
             dict_edge_indices = json.load(f)
-            with open(f'./preprocessed/{media}/4.topic/{str(topic_num)}/cooccurrence.edge_attributes.txt',
-                      'r') as f_eattr:
+            with open(os.path.join(data_path, 'cooccurrence.edge_attributes.txt'), 'r') as f_eattr:
                 edge_attrs = f_eattr.read().splitlines()
                 edge_indices = []
                 for edge_attr in edge_attrs:
@@ -49,19 +43,15 @@ def get_edge_indices(media, topic_num, bidirectional=False, discard_index=None):
             print(f'edge indices: {len(edge_indices)} * {edge_indices[0].shape}')
             return edge_indices
 
-    raise Exception(f'There is no edge indices! (media: {media}, topic num: {topic_num})')
+    raise Exception(f'There is no edge indices! (data_path: {data_path})')
 
 
-def get_edge_weights(media, topic_num, bidirectional=False, discard_index=None):
-    loc_here = pathlib.Path(__file__).resolve().parent
-
-    loc_edge_weights = os.path.join(loc_here / media / '4.topic' / str(topic_num), 'cooccurrence.edge_weights.json')
+def get_edge_weights(data_path, bidirectional=False, discard_index=None):
+    loc_edge_weights = os.path.join(data_path, 'cooccurrence.edge_weigths.json')
     if os.path.exists(loc_edge_weights):
-        with open(os.path.join(loc_here / media / '4.topic' / str(topic_num), 'cooccurrence.edge_weights.json'),
-                  'r') as f:
+        with open(os.path.join(data_path, 'cooccurrence.edge_weigths.json'), 'r') as f:
             dict_edge_weights = json.load(f)
-            with open(f'./preprocessed/{media}/4.topic/{str(topic_num)}/cooccurrence.edge_attributes.txt',
-                      'r') as f_eattr:
+            with open(os.path.join(data_path, 'cooccurrence.edge_attributes.txt'), 'r') as f_eattr:
                 edge_attrs = f_eattr.read().splitlines()
                 edge_weights = []
                 for edge_attr in edge_attrs:
@@ -77,27 +67,29 @@ def get_edge_weights(media, topic_num, bidirectional=False, discard_index=None):
             print('edge weights: {} * {}'.format(len(edge_weights), edge_weights[0].shape))
             return edge_weights
 
-    raise Exception(f'There is no edge weights! (media: {media}, topic num: {topic_num})')
+    raise Exception(f'There is no edge weights! (data_path: {data_path})')
 
 
-def get_node_features(media, topic_num, discard_index=None):
-    loc_here = pathlib.Path(__file__).resolve().parent
+def get_node_features(data_path, feature_type=['betweenness'], discard_index=None):
+    node_features = None
+    for type in feature_type:
+        loc_node_feature = os.path.join(data_path, f'{type}_centrality.inv_cooccurrence.node_targets.npy')
+        if os.path.exists(loc_node_feature):
+            node_feature = np.load(loc_node_feature)
+            node_feature = np.expand_dims(node_feature, axis=2)
+            # FIXME
+            node_feature = np.nan_to_num(node_feature)
 
-    loc_node_features = os.path.join(loc_here / media / '4.topic' / str(topic_num),
-                                     'betweenness_centrality.inv_cooccurrence.node_targets.npy')
-    if os.path.exists(loc_node_features):
-        node_features = np.load(loc_node_features)
-        node_features = np.expand_dims(node_features, axis=2)
-        # FIXME
-        node_features = np.nan_to_num(node_features)
+            if discard_index is not None:
+                node_feature = node_feature[discard_index:]
 
-        if discard_index is not None:
-            node_features = node_features[discard_index:]
+            if node_features is None:
+                node_features = node_feature
+            else:
+                node_features = np.concatenate([node_features, node_feature], axis=2)
 
-        print('node feature: {}'.format(node_features.shape))
-        return node_features
-
-    raise Exception(f'There is no node features! (media: {media}, topic num: {topic_num})')
+    print('node features: {}'.format(node_features.shape))
+    return node_features
 
 
 def refine_graph_data(node_targets, node_features, edge_indices, edge_weights):
@@ -166,20 +158,20 @@ def denormalizer(data, min_val, max_val, eps):
     return denorm_data
 
 
-def get_dataset(media, topic_num, discard_index, refine_data=False):
+def get_dataset(data_path, node_feature_type='betweenness', discard_index=None, refine_data=False):
     # node targets(label)
-    node_targets = get_node_targets(media=media, topic_num=topic_num, discard_index=discard_index)
+    node_targets = get_node_targets(data_path, discard_index=discard_index)
     node_targets, min_val_tar, max_val_tar, eps = normalizer(node_targets)
     num_nodes = node_targets[0].shape[0]
 
     # node features
-    node_features = get_node_features(media=media, topic_num=topic_num, discard_index=discard_index)
+    node_features = get_node_features(data_path, node_feature_type, discard_index=discard_index)
     node_features, min_val_fea, max_val_fea, eps = normalizer(node_features)
     num_features = node_features[0].shape[1]
 
     # edge indices and weights
-    edge_indices = get_edge_indices(media=media, topic_num=topic_num, discard_index=discard_index)
-    edge_weights = get_edge_weights(media=media, topic_num=topic_num, discard_index=discard_index)
+    edge_indices = get_edge_indices(data_path, discard_index=discard_index)
+    edge_weights = get_edge_weights(data_path, discard_index=discard_index)
 
     if refine_data == True:
         node_targets, node_features, edge_indices, edge_weights = refine_graph_data(node_targets, node_features,
@@ -187,3 +179,4 @@ def get_dataset(media, topic_num, discard_index, refine_data=False):
     dataset = DynamicGraphTemporalSignal(edge_indices, edge_weights, node_features, node_targets)
 
     return dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps
+

@@ -1,1 +1,1 @@
-Topic predictino based on GCN 
+Topic forecasting based on GCN 

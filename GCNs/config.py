@@ -4,14 +4,14 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('--device', type=str, default='0')
 parser.add_argument('--model', type=str, default='dcrnn')  # dcrnn tgcn agcrn a3tgcn
-parser.add_argument('--epochs', type=int, default=200)
+parser.add_argument('--epochs', type=int, default=1)
 parser.add_argument('--batch_size', type=int, default=8)
 parser.add_argument('--seed', type=int, default=0)
 parser.add_argument('--lr', type=float, default=1e-3)
-parser.add_argument('--media', type=str, default='patents') # patents papers
+parser.add_argument('--node_feature_type', type=str, default=[], action="append")
 parser.add_argument('--topic_num', type=int, default=1)
 parser.add_argument('--discard_index', type=int, default=0)
-
+parser.add_argument('--data_dir', type=str, default='/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured')
 
 # model
 parser.add_argument('--out_channels', type=int, default=32)
