@@ -96,3 +96,61 @@ def get_model(args, num_nodes, num_features):
                         out_channels=args.out_channels,
                         periods=args.periods,
                         out_size=args.out_size)
+
+
+def training(model, dataset, optimizer, criterion, num_features, num_nodes=None, embedd_dim=None):
+    device = next(model.parameters()).device
+
+    if model.__class__ == AGCRNet:
+        h = None
+        e = torch.empty(num_nodes, embedd_dim).to(device)
+        torch.nn.init.xavier_uniform_(e)
+
+    ys, y_hats = torch.Tensor().to(device), torch.Tensor().to(device)
+    for time, snapshot in enumerate(dataset):
+        optimizer.zero_grad()
+        snapshot = snapshot.to(device)
+        if model.__class__ in [DCRNNet, TGCNet, A3TGCNet]:
+            y_hat = model(snapshot.x, snapshot.edge_index, snapshot.edge_attr)
+        elif model.__class__ in [AGCRNet]:
+            e = torch.empty(num_nodes, embedd_dim).to(device)
+            torch.nn.init.xavier_uniform_(e)
+            x = snapshot.x.view(1, num_nodes, num_features)  # (?, num of nodes, num of node features)
+            y_hat, h = model(x, e, h)
+            h = h.detach()  # FIXME RuntimeError: Trying to backward through the graph a second time
+
+        y_hat = y_hat.squeeze()
+
+        loss = criterion(y_hat, snapshot.y)
+        loss.backward()
+        optimizer.step()
+
+        ys = torch.concat([ys, snapshot.y[None, :]], axis=0)
+        y_hats = torch.concat([y_hats, y_hat[None, :]], axis=0)
+
+    return y_hats, ys
+
+
+def evaluating(model, dataset, num_features, num_nodes=None, embedd_dim=None):
+    device = next(model.parameters()).device
+
+    if model.__class__ == AGCRNet:
+        h = None
+        e = torch.empty(num_nodes, embedd_dim).to(device)
+        torch.nn.init.xavier_uniform_(e)
+
+    with torch.no_grad():
+        ys, y_hats = torch.Tensor().to(device), torch.Tensor().to(device)
+        for time, snapshot in enumerate(dataset):
+            snapshot = snapshot.to(device)
+            if model.__class__ in [DCRNNet, TGCNet, A3TGCNet]:
+                y_hat = model(snapshot.x, snapshot.edge_index, snapshot.edge_attr)
+            elif model.__class__ in [AGCRNet]:
+                x = snapshot.x.view(1, num_nodes, num_features)
+                y_hat, h = model(x, e, h)
+            y_hat = y_hat.squeeze()
+
+            ys = torch.concat([ys, snapshot.y[None, :]], axis=0)
+            y_hats = torch.concat([y_hats, y_hat[None, :]], axis=0)
+
+        return y_hats, ys
