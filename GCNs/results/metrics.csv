@@ -1,4 +1,6 @@
 timestamp,data_dir,node_feature_type,model,epochs,lr,mse,mae
+2023-01-26 02:02:38,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured,['closeness'],agcrn,200,0.001,0.030216586,0.08827098
+2023-01-25 20:47:01,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured,"['betweenness', 'closeness']",agcrn,200,0.001,0.032040674,0.096190855
 2023-01-21 06:35:20,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured,['closeness'],dcrnn,200,0.001,0.033862222,0.08935553
 2023-01-21 09:30:55,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured,['closeness'],tgcn,200,0.001,0.0339994,0.077872165
 2023-01-21 12:34:14,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured,['closeness'],a3tgcn,200,0.001,0.034036677,0.079357654
@@ -7,4 +9,7 @@ timestamp,data_dir,node_feature_type,model,epochs,lr,mse,mae
 2023-01-21 14:41:11,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured,['degree'],dcrnn,200,0.001,0.035369776,0.08985576
 2023-01-21 04:29:40,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured,['betweenness'],a3tgcn,200,0.001,0.048920974,0.09957883
 2023-01-21 01:27:10,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured,['betweenness'],tgcn,200,0.001,0.049046624,0.099665776
+2023-01-26 03:46:40,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured,['degree'],agcrn,200,0.001,0.052362666,0.12029137
 2023-01-20 22:33:57,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured,['betweenness'],dcrnn,200,0.001,0.052948833,0.123011
+2023-01-25 22:30:29,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured,"['betweenness', 'degree']",agcrn,200,0.001,0.055308044,0.11447098
+2023-01-26 00:19:05,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured,['betweenness'],agcrn,200,0.001,0.063145936,0.13120176

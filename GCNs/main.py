@@ -7,59 +7,14 @@ DEPS = [os.path.join(PLF_DIR, i) for i in os.listdir(PLF_DIR)]
 sys.path.extend(DEPS)
 
 import torch
+from torch.nn import DataParallel
 from torch.utils.tensorboard import SummaryWriter
 from torch_geometric_temporal.signal import temporal_signal_split
 from tqdm import tqdm
-# from _commons.loss import MSE, MAE
 from _commons.utils import save_metrics, fix_randomness
 from config import get_config
-from model import get_model
+from models import get_model, training, evaluating
 from preprocessed.preprocessor import get_dataset
-
-
-def training(model_name, model, dataset, optimizer, criterion):
-    device = next(model.parameters()).device
-    h = None
-
-    ys, y_hats = torch.Tensor().to(device), torch.Tensor().to(device)
-    for time, snapshot in enumerate(dataset):
-        optimizer.zero_grad()
-        snapshot = snapshot.to(device)
-        if model_name in ['dcrnn', 'tgcn', 'a3tgcn']:
-            y_hat = model(snapshot.x, snapshot.edge_index, snapshot.edge_attr)
-        elif model_name in ['agcrn']:
-            x = snapshot.x.view(1, num_nodes, num_features)  # (?, num of nodes, num of node features)
-            y_hat, h = model(x, e, h)
-        y_hat = y_hat.squeeze()
-
-        loss = criterion(y_hat, snapshot.y)
-        loss.backward()
-        optimizer.step()
-
-        ys = torch.concat([ys, snapshot.y[None, :]], axis=0)
-        y_hats = torch.concat([y_hats, y_hat[None, :]], axis=0)
-
-    return y_hats, ys
-
-
-def evaluating(model_name, model, dataset):
-    device = next(model.parameters()).device
-    with torch.no_grad():
-        ys, y_hats = torch.Tensor().to(device), torch.Tensor().to(device)
-        for time, snapshot in enumerate(dataset):
-            snapshot = snapshot.to(device)
-            if model_name in ['dcrnn', 'tgcn', 'a3tgcn']:
-                y_hat = model(snapshot.x, snapshot.edge_index, snapshot.edge_attr)
-            elif model_name in ['agcrn']:
-                x = snapshot.x.view(1, num_nodes, num_features)
-                y_hat, h = model(x, e, h)
-            y_hat = y_hat.squeeze()
-
-            ys = torch.concat([ys, snapshot.y[None, :]], axis=0)
-            y_hats = torch.concat([y_hats, y_hat[None, :]], axis=0)
-
-        return y_hats, ys
-
 
 if __name__ == "__main__":
     # set configuration
@@ -71,9 +26,6 @@ if __name__ == "__main__":
     # fix randomness
     fix_randomness(args.seed)
 
-    gpu = 'cuda:' + args.device
-    device = torch.device(gpu)
-
     # load data
     refine_data = True if args.model == 'dcrnn' else False
 
@@ -83,16 +35,20 @@ if __name__ == "__main__":
     for _c_dir in cluster_dirs:
         dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps \
             = get_dataset(_c_dir, args.node_feature_type, args.discard_index, refine_data)
+        # FIXME dataloader, validation dataset
         train_dataset, test_dataset = temporal_signal_split(dataset, train_ratio=0.7)
         dataset_packages.append([train_dataset, test_dataset,
                                  num_nodes, num_features, min_val_tar, max_val_tar, eps])
 
+    # FIXME data parallel : multi-gpu
     # create GCN model
     model = get_model(args, num_nodes, num_features)
+    # device_ids = args.device_ids
+    # gpu = 'cuda:' + str(args.device_ids[0])
+    # model = DataParallel(model, device_ids=device_ids)
+    gpu = 'cuda:' + args.device
+    device = torch.device(gpu)
     model.to(device)
-    if args.model == 'agcrn':
-        e = torch.empty(num_nodes, args.embedd_dim)
-        torch.nn.init.xavier_uniform_(e)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     criterion = torch.nn.MSELoss(reduction='mean')
@@ -103,16 +59,19 @@ if __name__ == "__main__":
         train_y_hats, train_ys, test_y_hats, test_ys = torch.Tensor().to(device), torch.Tensor().to(
             device), torch.Tensor().to(device), torch.Tensor().to(device)
         for _ds_idx, _curr_dataset_pack in enumerate(dataset_packages):
+            # training
             model.train()
             train_dataset = _curr_dataset_pack[0]
-            train_y_hat, train_y = training(args.model, model, train_dataset, optimizer, criterion)
+            train_y_hat, train_y = training(model, train_dataset, optimizer, criterion, num_features, num_nodes,
+                                            args.embedd_dim)
 
             train_y_hats = torch.concat([train_y_hats, train_y_hat])
             train_ys = torch.concat([train_ys, train_y])
 
+            # evaluating
             model.eval()
             test_dataset = _curr_dataset_pack[1]
-            test_y_hat, test_y = evaluating(args.model, model, test_dataset)
+            test_y_hat, test_y = evaluating(model, test_dataset, num_features, num_nodes, args.embedd_dim)
 
             test_y_hats = torch.concat([test_y_hats, test_y_hat])
             test_ys = torch.concat([test_ys, test_y])
@@ -123,7 +82,6 @@ if __name__ == "__main__":
         train_mse, train_mae = MSE(train_y_hats, train_ys), MAE(train_y_hats, train_ys)
         test_mse, test_mae = MSE(test_y_hats, test_ys), MAE(test_y_hats, test_ys)
 
-        print(train_mse)
         mse_log[epoch] = train_mse
 
     test_y_hats = test_y_hats.detach().cpu()
