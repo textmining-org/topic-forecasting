@@ -158,7 +158,7 @@ def denormalizer(data, min_val, max_val, eps):
     return denorm_data
 
 
-def get_dataset(data_path, node_feature_type='betweenness', discard_index=None, refine_data=False):
+def get_dataset(data_path, node_feature_type=['betweenness'], discard_index=None, refine_data=False):
     # node targets(label)
     node_targets = get_node_targets(data_path, discard_index=discard_index)
     node_targets, min_val_tar, max_val_tar, eps = normalizer(node_targets)
