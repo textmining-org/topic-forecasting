@@ -3,7 +3,8 @@ import argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--device', type=str, default='0')
-parser.add_argument('--model', type=str, default='dcrnn')  # dcrnn tgcn agcrn a3tgcn
+parser.add_argument('--device_ids', type=int, default=[0, 1, 2, 3], action="append")
+parser.add_argument('--model', type=str, default='agcrn')  # dcrnn tgcn agcrn a3tgcn
 parser.add_argument('--epochs', type=int, default=1)
 parser.add_argument('--batch_size', type=int, default=8)
 parser.add_argument('--seed', type=int, default=0)
