@@ -12,7 +12,8 @@ parser.add_argument('--lr', type=float, default=1e-3)
 parser.add_argument('--node_feature_type', type=str, default=[], action="append")
 parser.add_argument('--topic_num', type=int, default=1)
 parser.add_argument('--discard_index', type=int, default=0)
-parser.add_argument('--data_dir', type=str, default='/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured')
+parser.add_argument('--cluster_dir', type=str, default='/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured')
+parser.add_argument('--topic_dir', type=str, default='/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured')
 
 # model
 parser.add_argument('--out_channels', type=int, default=32)
