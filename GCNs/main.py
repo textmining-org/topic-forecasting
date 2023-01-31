@@ -11,7 +11,7 @@ from torch.nn import DataParallel
 from torch.utils.tensorboard import SummaryWriter
 from torch_geometric_temporal.signal import temporal_signal_split
 from tqdm import tqdm
-from _commons.utils import save_metrics, fix_randomness, exists_metrics
+from _commons.utils import save_metrics, fix_randomness
 from config import get_config
 from models import get_model, training, evaluating
 from preprocessed.preprocessor import get_dataset
@@ -24,11 +24,7 @@ if __name__ == "__main__":
 
     results_path = os.path.abspath(args.results_path)
     model_save_path = os.path.join(results_path, 'models')
-
-    arg_names = ['model', 'node_feature_type', 'epochs', 'lr', 'cluster_dir', 'topic_dir']
-    # if exists_metrics(results_path, 'metrics.csv', args, arg_names):
-    #     print(f'There exist experiments results! - {args}')
-    #     sys.exit()
+    model_filename = args.model + '_' + '_'.join(args.node_feature_type) + '.pt'
 
     tb_train_loss = SummaryWriter(log_dir=f'../_tensorboard/{args.node_feature_type}/{args.model}/loss')
 
@@ -59,7 +55,6 @@ if __name__ == "__main__":
     gpu = 'cuda:' + args.device
     device = torch.device(gpu)
     model.to(device)
-    print(model)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     criterion = torch.nn.MSELoss(reduction='mean')
@@ -75,12 +70,6 @@ if __name__ == "__main__":
             # training
             model.train()
             train_dataset = _curr_dataset_pack[0]
-            # from torch_geometric.loader import DataLoader
-            # from torch_geometric.datasets import TUDataset
-            # train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-            # for batch in train_loader:
-            #     print(batch)
-
             train_y_hat, train_y = training(model, train_dataset, optimizer, criterion, num_features, num_nodes,
                                             args.embedd_dim)
 
@@ -120,17 +109,16 @@ if __name__ == "__main__":
             print("- Best (MAE) update!! Train: {:.8f} | Valid : {:.8f} | Test : {:.8f} at Epoch {:3}".format(
                 best_train_mae, best_valid_mae, best_test_mae, best_epoch))
             # save best model
-            torch.save(model.state_dict(), os.path.join(model_save_path, f'{args.model}_{args.node_feature_type}.pt'))
+
+            torch.save(model.state_dict(), os.path.join(model_save_path, model_filename))
 
     print("[Final (BEST MSE)] Train: {:.8f} | Valid : {:.8f} | Test : {:.8f} at Epoch {:3}".format(
         best_train_mse, best_valid_mse, best_test_mse, best_epoch))
-
     print("[Final (BEST MAE)] Train: {:.8f} | Valid : {:.8f} | Test : {:.8f} at Epoch {:3}".format(
         best_train_mae, best_valid_mae, best_test_mae, best_epoch, best_epoch))
 
-
     # topic evaluation
-    model.load_state_dict(torch.load(os.path.join(model_save_path, f'{args.model}_{args.node_feature_type}.pt')))
+    model.load_state_dict(torch.load(os.path.join(model_save_path, model_filename)))
     model.eval()
 
     topic_dirs = [os.path.join(args.topic_dir, i) for i in os.listdir(args.topic_dir)]
@@ -154,6 +142,7 @@ if __name__ == "__main__":
     topic_mse, topic_mae = MSE(topic_y_hats, topic_ys).item(), MAE(topic_y_hats, topic_ys).item()
 
     # save cluster metrics
+    arg_names = ['model', 'node_feature_type', 'epochs', 'lr', 'cluster_dir', 'topic_dir']
     metric_names = ['mse', 'mae', 'topic_mse', 'topic_mae']
     metrics = [best_test_mse, best_test_mae, topic_mse, topic_mae]
     save_metrics(results_path, 'metrics.csv', args, arg_names, metrics, metric_names)
