@@ -64,11 +64,15 @@ class CustomA3TGCN(A3TGCN):
 class A3TGCNet(torch.nn.Module):
     def __init__(self, node_features, out_channels, periods, out_size):
         super(A3TGCNet, self).__init__()
+        self.node_features = node_features
         self.recurrent = CustomA3TGCN(node_features, out_channels, periods)
         self.linear = torch.nn.Linear(out_channels, out_size)
 
     def forward(self, x, edge_index, edge_weight):
-        h = self.recurrent(x.view(x.shape[0], 1, x.shape[1]), edge_index, edge_weight)
+        # feature 수 증가 시 RuntimeError 관련 shape 수정 : mat1 and mat2 shapes cannot be multiplied (50x1 and 2x32)
+        # x = x.view(x.shape[0], 1, x.shape[1])
+        x = x.view(x.shape[0], x.shape[1], 1)
+        h = self.recurrent(x, edge_index, edge_weight)
         h = F.relu(h)
         h = self.linear(h)
         return h

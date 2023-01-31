@@ -13,7 +13,7 @@ def get_node_targets(data_path, discard_index=None):
         if discard_index is not None:
             node_targets = node_targets[discard_index:]
 
-        print('node targets: {}'.format(node_targets.shape))
+        # print('node targets: {}'.format(node_targets.shape))
         return node_targets
 
     raise Exception(f'There is no node targets! (data_path: {data_path})')
@@ -40,7 +40,7 @@ def get_edge_indices(data_path, bidirectional=False, discard_index=None):
             if discard_index is not None:
                 edge_indices = edge_indices[discard_index:]
 
-            print(f'edge indices: {len(edge_indices)} * {edge_indices[0].shape}')
+            # print(f'edge indices: {len(edge_indices)} * {edge_indices[0].shape}')
             return edge_indices
 
     raise Exception(f'There is no edge indices! (data_path: {data_path})')
@@ -64,7 +64,7 @@ def get_edge_weights(data_path, bidirectional=False, discard_index=None):
             if discard_index is not None:
                 edge_weights = edge_weights[discard_index:]
 
-            print('edge weights: {} * {}'.format(len(edge_weights), edge_weights[0].shape))
+            # print('edge weights: {} * {}'.format(len(edge_weights), edge_weights[0].shape))
             return edge_weights
 
     raise Exception(f'There is no edge weights! (data_path: {data_path})')
@@ -88,7 +88,7 @@ def get_node_features(data_path, feature_type=['betweenness'], discard_index=Non
             else:
                 node_features = np.concatenate([node_features, node_feature], axis=2)
 
-    print('node features: {}'.format(node_features.shape))
+    # print('node features: {}'.format(node_features.shape))
     return node_features
 
 
@@ -110,8 +110,6 @@ def refine_graph_data(node_targets, node_features, edge_indices, edge_weights):
     refined_edge_indices = []
     refined_edge_weights = []
 
-    del_indices = []
-    print(node_targets.shape)
     time_seq_len = node_targets.shape[0]
     for i in range(time_seq_len):
         if edge_indices[i].any() == True:
