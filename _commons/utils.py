@@ -29,7 +29,7 @@ def save_metrics(save_path, file_name, args, arg_names, metrics, metric_names):
     for arg_name in arg_names:
         arg_value = vars(args).get(arg_name)
         columns.append(arg_name)
-        values.append(arg_value)
+        values.append(str(arg_value))
 
     save_path = os.path.join(save_path, file_name)
     if os.path.exists(save_path):
@@ -46,11 +46,11 @@ def save_metrics(save_path, file_name, args, arg_names, metrics, metric_names):
     df_results.to_csv(save_path, index=False)
 
 
-def exists_metrics(save_path, args, arg_names):
-    if not os.path.exists(save_path):
+def exists_metrics(save_path, file_name, args, arg_names):
+    if not os.path.exists(os.path.join(save_path, file_name)):
         return False
 
-    df_results = pd.read_csv(os.path.join(save_path, 'metrics.csv'))
+    df_results = pd.read_csv(os.path.join(save_path, file_name))
 
     for index, result in df_results.iterrows():
         existence_flag = True
