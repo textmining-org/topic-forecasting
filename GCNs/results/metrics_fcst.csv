@@ -1,0 +1,34 @@
+timestamp,mse,mae,model,node_feature_type,topic_dir
+2023-02-06 15:52:11,0.0144060999155044,0.0452192053198814,a3tgcn,['degree'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-06 15:53:15,0.0144060999155044,0.0452192053198814,a3tgcn,['degree'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-06 16:31:18,0.014406099915504456,0.04521920531988144,a3tgcn,['degree'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 20:27,0.0144061,0.045219205,a3tgcn,['degree'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 20:02,0.01444899,0.045561522,tgcn,['degree'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 2:24,0.014591671,0.04712883,a3tgcn,"['betweenness', 'closeness']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 8:34,0.014673795,0.047586862,a3tgcn,"['closeness', 'degree']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 10:50,0.014709678,0.049075324,tgcn,"['betweenness', 'closeness', 'degree']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 2:14,0.015018705,0.048139814,tgcn,"['betweenness', 'closeness']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 8:00,0.015079702,0.04722302,tgcn,"['closeness', 'degree']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 11:37,0.015137836,0.05077618,a3tgcn,"['betweenness', 'closeness', 'degree']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 23:29,0.015420954,0.047618374,a3tgcn,['closeness'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 5:31,0.015432149,0.047281429,a3tgcn,"['betweenness', 'degree']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 5:08,0.015433431,0.047094878,tgcn,"['betweenness', 'degree']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 22:53,0.015505459,0.047315069,tgcn,['closeness'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 17:22,0.015641838,0.04963981,a3tgcn,['betweenness'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-06 15:50:52,0.015641838312149,0.0496398098766803,a3tgcn,['betweenness'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 18:19,0.015644398,0.05547728,dcrnn,['degree'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 17:09,0.015703207,0.049781319,tgcn,['betweenness'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 7:29,0.016031627,0.054788161,dcrnn,"['betweenness', 'closeness', 'degree']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 3:25,0.016124191,0.055422656,dcrnn,"['betweenness', 'degree']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 5:29,0.016276527,0.057498064,dcrnn,"['closeness', 'degree']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 16:17,0.017287847,0.069629863,dcrnn,['betweenness'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 20:21,0.017422445,0.059540063,dcrnn,['closeness'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 4:29,0.017500497,0.070033789,agcrn,"['closeness', 'degree']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 6:11,0.017989438,0.067331225,agcrn,"['betweenness', 'closeness', 'degree']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 1:21,0.018161155,0.060540341,dcrnn,"['betweenness', 'closeness']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 1:03,0.020661702,0.079605393,agcrn,"['betweenness', 'closeness']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-06 15:50:22,0.026206612586975,0.0704640671610832,a3tgcn,['betweenness'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 19:23,0.028573468,0.088244863,agcrn,['closeness'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 2:46,0.030209303,0.13297829,agcrn,"['betweenness', 'degree']",/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 15:58,0.034237131,0.119471811,agcrn,['betweenness'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured
+2023-02-05 17:41,0.052367125,0.168451592,agcrn,['degree'],/Data2/yejin/blockchain_data/patents_co10/4.topic_all_set.max_structured

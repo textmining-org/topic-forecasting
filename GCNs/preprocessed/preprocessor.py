@@ -31,7 +31,6 @@ def get_edge_indices(data_path, bidirectional=False, discard_index=None):
                     if edge_attr in dict_edge_indices:
                         edge_index = np.array(dict_edge_indices[edge_attr])
                         if bidirectional == True and edge_index.size != 0:
-                            print(edge_index.shape)
                             src_index = np.split(edge_index[0], 2)[0]
                             dst_index = np.split(edge_index[1], 2)[0]
                             edge_index = np.vstack([src_index, dst_index])
