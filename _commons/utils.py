@@ -37,8 +37,6 @@ def save_metrics(save_path, file_name, args, arg_names, metrics, metric_names):
     else:
         df_results = pd.DataFrame(columns=columns)
 
-    print(columns)
-    print(values)
     df_results.loc[len(df_results)] = values
 
     df_results.sort_values(by="mse", ascending=True, inplace=True)
