@@ -40,7 +40,7 @@ def save_metrics(save_path, file_name, args, arg_names, metrics, metric_names):
     df_results.loc[len(df_results)] = values
 
     df_results.sort_values(by="mse", ascending=True, inplace=True)
-    print(df_results)
+    # print(df_results)
     df_results.to_csv(save_path, index=False)
 
 
@@ -63,10 +63,16 @@ def exists_metrics(save_path, file_name, args, arg_names):
     return existence_flag
 
 
-def save_pred_y(save_path, media, topic_num, model_name, true_y, pred_y):
+def save_fsct_y(save_path, media, model_name, node_feature_type, true_y, fcst_y):
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
-    np.save(os.path.join(save_path, f"{media}_{topic_num}_{model_name}_pred.npy"), pred_y)
-    np.save(os.path.join(save_path, f"{media}_{topic_num}_{model_name}_true.npy"), true_y)
+    np.save(os.path.join(save_path, f"{media}_{model_name}_{node_feature_type}_true.npy"), true_y)
+    np.save(os.path.join(save_path, f"{media}_{model_name}_{node_feature_type}_fcst.npy"), fcst_y)
 
+
+def load_fcst_y(save_path, media, model_name, node_feature_type):
+    true_y = np.load(os.path.join(save_path, f"{media}_{model_name}_{node_feature_type}_true.npy"))
+    fcst_y = np.load(os.path.join(save_path, f"{media}_{model_name}_{node_feature_type}_fcst.npy"))
+
+    return true_y, fcst_y
