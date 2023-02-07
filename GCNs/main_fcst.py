@@ -1,4 +1,10 @@
 import os
+import sys
+
+PLF_DIR = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
+sys.path.append(PLF_DIR)
+DEPS = [os.path.join(PLF_DIR, i) for i in os.listdir(PLF_DIR)]
+sys.path.extend(DEPS)
 
 import numpy as np
 import torch
@@ -19,7 +25,15 @@ if __name__ == "__main__":
     model_filename = args.model + '_' + '_'.join(args.node_feature_type) + '.pt'
 
     # load data
-    refine_data = True if args.model == 'dcrnn' else False
+
+    # FIXME error : DCRNN에서 refine 수행 시 shape 불일치 오류 발생 (yhat-(55, 50), y-(57, 50)), 임시로 False 처리
+    #
+    # Traceback (most recent call last):
+    #   File "main_fcst.py", line 50, in <module>
+    #     y_hats = torch.concat([y_hats, y_hat[None, :, :]])
+    # RuntimeError: Sizes of tensors must match except in dimension 0. Expected size 55 but got size 57 for tensor number 1 in the list.
+    # refine_data = True if args.model == 'dcrnn' else False
+    refine_data = False
     topic_dirs = [os.path.join(args.topic_dir, i) for i in os.listdir(args.topic_dir)]
     topic_dataset_packages = []
     for _t_dir in topic_dirs:
@@ -34,12 +48,13 @@ if __name__ == "__main__":
     model.to(device)
     model.load_state_dict(torch.load(os.path.join(model_save_path, model_filename)))
     model.eval()
+    print(model)
 
     y_hats, ys = torch.Tensor().to(device), torch.Tensor().to(device)
+
     for _ds_idx, _curr_dataset_pack in enumerate(topic_dataset_packages):
         dataset = _curr_dataset_pack[0]
         y_hat, y = evaluating(model, dataset, num_features, num_nodes, args.embedd_dim)
-
         y_hats = torch.concat([y_hats, y_hat[None, :, :]])
         ys = torch.concat([ys, y[None, :, :]])
 
@@ -48,7 +63,7 @@ if __name__ == "__main__":
     mse, mae = MSE(y_hats, ys).item(), MAE(y_hats, ys).item()
 
     # save forecasting metrics
-    arg_names = ['model', 'node_feature_type', 'topic_dir']
+    arg_names = ['model', 'node_feature_type', 'num_training_clusters', 'topic_dir']
     metric_names = ['mse', 'mae']
     metrics = [mse, mae]
     save_metrics(results_path, 'metrics_fcst.csv', args, arg_names, metrics, metric_names)
