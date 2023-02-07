@@ -13,7 +13,7 @@ def get_node_targets(data_path, discard_index=None):
         if discard_index is not None:
             node_targets = node_targets[discard_index:]
 
-        # print('node targets: {}'.format(node_targets.shape))
+        print('node targets: {}'.format(node_targets.shape))
         return node_targets
 
     raise Exception(f'There is no node targets! (data_path: {data_path})')
@@ -87,7 +87,7 @@ def get_node_features(data_path, feature_type=['betweenness'], discard_index=Non
             else:
                 node_features = np.concatenate([node_features, node_feature], axis=2)
 
-    # print('node features: {}'.format(node_features.shape))
+    print('node features: {}'.format(node_features.shape))
     return node_features
 
 

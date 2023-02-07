@@ -1,8 +1,8 @@
 
 seed=0
 # "betweenness closeness" "betweenness degree" "closeness degree" "betweenness closeness degree" "betweenness" "degree" "closeness"
-for node_feature_type in "betweenness" "degree" "closeness"; do #  betweenness closeness degree
-  for model in a3tgcn; do                # 'dcrnn' 'tgcn' 'agcrn' 'a3tgcn'
+for node_feature_type in "betweenness closeness degree"; do
+  for model in dcrnn; do                # 'dcrnn' 'tgcn' 'agcrn' 'a3tgcn'
     for epochs in 200; do
       for device in 3; do
         for lr in 1e-3; do

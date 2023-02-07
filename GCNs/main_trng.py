@@ -24,21 +24,26 @@ if __name__ == "__main__":
 
     results_path = os.path.abspath(args.results_path)
     # TODO rollback directory : models
-    model_save_path = os.path.join(results_path, 'models_test')
-    model_filename = args.model + '_' + '_'.join(args.node_feature_type) + '.pt'
+    model_save_path = os.path.join(results_path, 'models')
+    node_feature_type = '_'.join(args.node_feature_type)
+    model_filename = args.model + '_' + node_feature_type + '.pt'
 
-    tb_train_loss = SummaryWriter(log_dir=f'../_tensorboard/{args.node_feature_type}/{args.model}/loss')
+    # tensorboard
+    # tensorboard dev upload --logdir _tensorboard
+    tb_train_loss = SummaryWriter(log_dir=f'../_tensorboard/{args.media}/{args.model}/{node_feature_type}/train')
+    tb_valid_loss = SummaryWriter(log_dir=f'../_tensorboard/{args.media}/{args.model}/{node_feature_type}/valid')
+    tb_test_loss = SummaryWriter(log_dir=f'../_tensorboard/{args.media}/{args.model}/{node_feature_type}/test')
 
     # fix randomness
     fix_randomness(args.seed)
 
     # load data
-    refine_data = True if args.model == 'dcrnn' else False
+    # refine_data = True if args.model == 'dcrnn' else False
+    refine_data = False
 
     # TODO WARNING - check the location of cluster dirs
-    # TODO rollback size : 100
-    num_clusters = 10
-    cluster_dirs = [os.path.join(args.cluster_dir, i) for i in os.listdir(args.cluster_dir)][:num_clusters]
+    cluster_dirs = [os.path.join(args.cluster_dir, i) for i in os.listdir(args.cluster_dir)][
+                   :args.num_training_clusters]
     dataset_packages = []
     for _c_dir in cluster_dirs:
         dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps \
@@ -111,12 +116,17 @@ if __name__ == "__main__":
             # save best model
             torch.save(model.state_dict(), os.path.join(model_save_path, model_filename))
 
+        # tensorboard
+        tb_train_loss.add_scalar(f"{args.media} / {args.model} / {node_feature_type} / Loss: mse", train_mse, epoch)
+        tb_valid_loss.add_scalar(f"{args.media} / {args.model} / {node_feature_type} / Loss: mse", valid_mse, epoch)
+        tb_test_loss.add_scalar(f"{args.media} / {args.model} / {node_feature_type} / Loss: mse", test_mse, epoch)
+
     print("[Final (BEST MSE)] Train: {:.8f} | Valid : {:.8f} | Test : {:.8f} at Epoch {:3}".format(
         best_train_mse, best_valid_mse, best_test_mse, best_epoch))
     print("[Final (BEST MAE)] Train: {:.8f} | Valid : {:.8f} | Test : {:.8f} at Epoch {:3}".format(
         best_train_mae, best_valid_mae, best_test_mae, best_epoch, best_epoch))
 
-    arg_names = ['model', 'node_feature_type', 'epochs', 'lr', 'cluster_dir']
+    arg_names = ['model', 'node_feature_type', 'epochs', 'lr', 'num_training_clusters', 'cluster_dir']
     metric_names = ['mse', 'mae']
     metrics = [best_test_mse, best_test_mae]
     save_metrics(results_path, 'metrics_trng.csv', args, arg_names, metrics, metric_names)
