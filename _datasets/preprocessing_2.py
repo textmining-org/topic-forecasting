@@ -7,7 +7,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 # paper / news / patent 중 선택
 # paper
-# eid	date	title	abstract	keywords    text
+# column : eid	date	title	abstract	keywords    text
 df = pd.read_csv('C:/Users/yejin/PycharmProjects/lec-text-mining-main/team_project/_datasets/preprocess/data/papers_new_2022.csv', encoding="utf8").fillna("")
 df.rename(columns={'cover_date': 'date'}, inplace=True)
 df['keywords'] = df['keywords'].str.replace("|", "", )
