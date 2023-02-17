@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from google.colab import drive
-drive.mount('/content/drive')
-
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 from matplotlib import pyplot as plt
@@ -123,10 +120,10 @@ for i in range(len(sentence2)):
   allones_lda.append(one_hot)
 
 np.array(allones)
-  np.array(allones_dmr)
-  np.array(allones_lda)
+np.array(allones_dmr)
+np.array(allones_lda)
 
-!pip install transformers
+#!pip install transformers
 
 import torch
 from transformers import BertTokenizer, BertModel
