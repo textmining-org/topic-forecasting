@@ -1,13 +1,25 @@
-# -*- coding: utf-8 -*-
+# -*- coding: cp949 -*-
 
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 from matplotlib import pyplot as plt
+import torch
+from transformers import BertTokenizer, BertModel
+import numpy as np
+from numpy import unique
+from numpy import where
+from sklearn.cluster import AgglomerativeClustering
+from matplotlib import pyplot
+from sklearn.metrics import silhouette_score
+from sklearn.metrics import calinski_harabasz_score
+from sklearn.metrics import davies_bouldin_score
+from sklearn.cluster import AgglomerativeClustering
 
-df = pd.read_csv("/content/drive/MyDrive/Colab Notebooks/blockchain/papers_keywords.csv", encoding='utf-8') # news_keywords.csv / papers_keywords.csv / patents_keywords.csv
-#data = df['patent_keywords'] #'patent_keywords'
-print(df)
 
+# topic modeling results 
+df1 = pd.read_csv("../results/papers_dmr_topic_keywords.csv", encoding='utf-8') #dmr
+df2 = pd.read_csv("../results/papers_lda_topic_keywords.csv", encoding='utf-8') #lda
+df = pd.concat([df1['dmr_keywords'], df2['lda_keywords']], axis=1)
 
 # dmr = df[['topic number','patent_keywords']].iloc[0:12]
 # print(dmr)
@@ -23,9 +35,9 @@ print(df)
 # print(lda)
 
 # papers
-dmr = df['dmr_papers_keywords'][0:8]
+dmr = df['dmr_keywords']
 print(dmr)
-lda = df['lda_papers_keywords'][0:8]
+lda = df['lda_keywords']
 print(lda)
 
 # # patents
@@ -73,7 +85,6 @@ for v in vocab:
   i+=1
 terms_to_ids
 
-#terms_to_ids['access']
 
 ## corpus_one_hot
 allones = []
@@ -123,15 +134,8 @@ np.array(allones)
 np.array(allones_dmr)
 np.array(allones_lda)
 
-#!pip install transformers
-
-import torch
-from transformers import BertTokenizer, BertModel
-
 tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
 model = BertModel.from_pretrained('bert-base-multilingual-cased')
-
-import numpy as np
 
 embeddingDict = {}
 for i in range(len(vocab)):
@@ -141,10 +145,8 @@ for i in range(len(vocab)):
   embeddings = embeddings.reshape(embeddings.shape[0], -1)
   avg = np.average(embeddings[1:-1], axis=0)
   embeddingDict[vocab[i]] = avg
-#print(embeddingDict.values())
 
-#print(embeddingDict['authentication'])
-print(embeddingDict)
+#print(embeddingDict)
 #print(embeddingDict.items())
 
 embeddingDict = dict(sorted(embeddingDict.items()))
@@ -228,18 +230,15 @@ embeddings2 = embeddings2 /  np.linalg.norm(embeddings2, axis=1, keepdims=True)
 
 print(finvector)
 
-!pip install sentence_transformers
+#!pip install sentence_transformers
 
 # https://stackoverflow.com/questions/55619176/how-to-cluster-similar-sentences-using-bert #참고 링크
 
 """
 This is a simple application for sentence embeddings: clustering
-
 Sentences are mapped to sentence embeddings and then agglomerative clustering with a threshold is applied.
 """
 #from sentence_transformers import SentenceTransformer
-from sklearn.cluster import AgglomerativeClustering
-import numpy as np
 
 # Normalize the embeddings to unit length
 embeddings = list(finvector.values()) 
@@ -249,7 +248,7 @@ print(embeddings)
 # Perform clustering
 # n_clusters 랑 distance_threshold 둘 중 하나만 쓸 수 있음 
 # n_clusters = 11
-clustering_model = AgglomerativeClustering(n_clusters= None, affinity='cosine', linkage='average', distance_threshold=0.07) # distance_threshold=0.4, distance_threshold=1.5 등 #news: distance_threshold=0.07 #papers:distance_threshold=0.07 #papents:distance_threshold=0.07
+clustering_model = AgglomerativeClustering(n_clusters= None, affinity='cosine', linkage='average', distance_threshold=0.06) # distance_threshold=0.4, distance_threshold=1.5 등 #news: distance_threshold=0.07 #papers:distance_threshold=0.07 #papents:distance_threshold=0.07
 clustering_model.fit(embeddings)
 cluster_assignment = clustering_model.labels_
 
@@ -267,14 +266,6 @@ for i, cluster in clustered_sentences.items():
     print("")
 
 # Agglomerative clustering
-from numpy import unique
-from numpy import where
-from sklearn.cluster import AgglomerativeClustering
-from matplotlib import pyplot
-from sklearn.metrics import silhouette_score
-from sklearn.metrics import calinski_harabasz_score
-from sklearn.metrics import davies_bouldin_score
-
 # define the model
 #model = AgglomerativeClustering(n_clusters=4)
 # fit model and predict clusters
@@ -331,18 +322,18 @@ keywords = clustering
 df1 = {'topic_num' : topic_num, 'keywords' : keywords}
 df2 = pd.DataFrame(df1)
 print(df2)
-df2.to_csv('/content/drive/MyDrive/Colab Notebooks/blockchain/papers_topic_clustering.csv', index=False)
+df2.to_csv('./results/papers_topic_clustering.csv', index=False)
 
 
 # picKle 형태로 저장 
 import pickle
-with open('/content/drive/MyDrive/Colab Notebooks/blockchain/papers_topic_clustering.pkl', "wb") as file:
+with open('./results/papers_topic_clustering.pkl', "wb") as file:
     pickle.dump(topic_keywords, file)
 
-df = pd.read_pickle('/content/drive/MyDrive/Colab Notebooks/blockchain/papers_topic_clustering.pkl') #어떻게 생겼나 확인
+df = pd.read_pickle('./results/papers_topic_clustering.pkl') #어떻게 생겼나 확인
 print(df)
 
-# df = pd.read_pickle('/content/drive/MyDrive/Colab Notebooks/blockchain/results/news_topic_clustering.pkl') #어떻게 생겼나 확인
+# df = pd.read_pickle('./results/papers_topic_clustering.pkl') #어떻게 생겼나 확인
 # print(df)
 
 # dendrogram 그리기 
@@ -376,47 +367,6 @@ def plot_dendrogram(model, **kwargs):
 
 # plot dendrogram to visualize clusters
 plot_dendrogram(trained_model)
-
-# !pip install sentence_transformers
-
-# from sentence_transformers import SentenceTransformer, util
-# # model = SentenceTransformer('all-MiniLM-L6-v2')
-# # Two lists of sentences
-# # sentences1 = ['The cat sits outside']
-# # sentences2 = ['The dog plays in the garden']
-# #Compute embedding for both lists
-# # embeddings1 = model.encode(sentences1, convert_to_tensor=True)
-# # embeddings2 = model.encode(sentences2, convert_to_tensor=True)
-# #Compute cosine-similarities
-# cosine_scores = util.cos_sim(embeddings1, embeddings2)
-# #Output the pairs with their score
-
-# # for i in range(len(sentence1)):
-# #   for j in range(len(sentence2)):
-# #     # if cosine_scores[i][j] > 0.91:
-# #     print("{} \t\t {} \t\t  {:.4f}".format(sentence1[i], sentence2[j], cosine_scores[i][j]))
-
-
-# for j in range(len(sentence2)):
-#   for i in range(len(sentence1)):
-#     if cosine_scores[i][j] > 0.9:
-#       print("{} \t\t {} \t\t  {:.4f}".format(sentence2[j], sentence1[i], cosine_scores[i][j]))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+plt.savefig('./results/paper.png')
 
 
