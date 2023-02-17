@@ -14,7 +14,9 @@ from sklearn.metrics import silhouette_score
 from sklearn.metrics import calinski_harabasz_score
 from sklearn.metrics import davies_bouldin_score
 from sklearn.cluster import AgglomerativeClustering
+import json
 
+# papers, patent, news 바꿔야할 라인 : 21, 22, 282, 331, 336, 339, 376
 
 # topic modeling results 
 df1 = pd.read_csv("../results/papers_dmr_topic_keywords.csv", encoding='utf-8') #dmr
@@ -248,7 +250,7 @@ print(embeddings)
 # Perform clustering
 # n_clusters 랑 distance_threshold 둘 중 하나만 쓸 수 있음 
 # n_clusters = 11
-clustering_model = AgglomerativeClustering(n_clusters= None, affinity='cosine', linkage='average', distance_threshold=0.06) # distance_threshold=0.4, distance_threshold=1.5 등 #news: distance_threshold=0.07 #papers:distance_threshold=0.07 #papents:distance_threshold=0.07
+clustering_model = AgglomerativeClustering(n_clusters= None, affinity='cosine', linkage='average', distance_threshold=0.06) # distance_threshold=0.04, distance_threshold=1.5 등 
 clustering_model.fit(embeddings)
 cluster_assignment = clustering_model.labels_
 
@@ -277,6 +279,11 @@ clusters = unique(yhat)
 score_AGclustering_s = silhouette_score(embeddings, yhat.labels_, metric='cosine')
 score_AGclustering_c = calinski_harabasz_score(embeddings, yhat.labels_)
 score_AGclustering_d = davies_bouldin_score(embeddings, yhat_2)
+
+with open('./results/paper_score.json', 'w') as f:
+    #json.dump({'Silhouette Score': score_AGclustering_s, 'Calinski Harabasz Score': score_AGclustering_c, 'Davies Bouldin Score': score_AGclustering_d}, f)
+    json.dump({'Silhouette Score': format(score_AGclustering_s, ".4f"), 'Calinski Harabasz Score': format(score_AGclustering_c, ".4f"), 'Davies Bouldin Score': format(score_AGclustering_d, ".4f")}, f)
+    
 print('Silhouette Score: %.4f' % score_AGclustering_s)
 print('Calinski Harabasz Score: %.4f' % score_AGclustering_c)
 print('Davies Bouldin Score: %.4f' % score_AGclustering_d)
