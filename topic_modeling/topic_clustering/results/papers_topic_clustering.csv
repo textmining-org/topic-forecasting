@@ -1,10 +1,12 @@
 topic_num,keywords
-1,contracts contract transactions ethereum cryptocurrency bitcoin transaction payment cryptocurrencies smart contracts supply contract traceability food ethereum platform smart application software
-2,industry applications review literature application economy adoption innovation education governance industry applications review literature economy cryptocurrency application adoption innovation market
-3,things iot devices networks internet communication applications architecture service edge iot things devices health applications architecture internet healthcare services service
-4,detection networks machine vehicles conference proceedings topics communication papers learning detection machine conference proceedings topics papers learning prediction image networks
-5,health healthcare records patients education care record insurance covid19 access
-6,access scheme storage control authentication identity secure encryption protection signature scheme storage access authentication control identity secure encryption protection signature
-7,consensus transaction transactions bitcoin nodes protocol performance mining algorithm payment consensus nodes protocol performance transactions transaction mining algorithm attack scalability
-8,supply traceability food industry logistics chains products quality construction transparency
-9,energy power trading market transaction electricity grid consumption demand distribution energy power trading market transaction electricity consumption grid demand resources
+8,supply traceability food industry logistics chains products quality manufacturing production supply traceability food industry logistics chains quality products production manufacturing
+2,scheme privacy access authentication encryption control storage vehicles secure signature privacy scheme access storage control authentication identity encryption protection secure
+3,iot internet things devices networks edge communication privacy architecture applications iot internet things devices healthcare health privacy applications architecture edge
+7,bitcoin cryptocurrency transactions transaction cryptocurrencies payment market currency money price bitcoin cryptocurrency transactions transaction payment cryptocurrencies market currency money price
+9,consensus nodes block protocol algorithm transaction performance transactions mining blockchains consensus block nodes protocol algorithm transaction mining transactions performance blockchains
+1,contracts contract ethereum software applications voting blockchains smart execution framework contracts contract ethereum platform service applications framework software architecture smart
+11,research industry review applications literature adoption application economy innovation intelligence research industry review literature applications adoption application economy innovation intelligence
+4,energy power trading market grid electricity transaction consumption demand resources energy power trading market grid transaction electricity resource resources consumption
+6,health healthcare records education patients privacy record care patient insurance
+5,learning detection machine networks conference algorithm proceedings topics papers prediction learning detection machine conference algorithm proceedings topics papers prediction image
+10,service trust identity platform privacy storage services solution records integrity
