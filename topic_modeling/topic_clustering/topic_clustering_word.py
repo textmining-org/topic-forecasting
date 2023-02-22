@@ -16,10 +16,10 @@ from sklearn.metrics import davies_bouldin_score
 from sklearn.cluster import AgglomerativeClustering
 import json
 
-# target_name¿¡ papers, patent, news ÁöÁ¤ 
+# target_nameì— papers, patent, news ì§€ì • 
 target_name = 'patents'
 
-# topic modeling results ÀĞ¾î¿À±â 
+# topic modeling results ì½ì–´ì˜¤ê¸° 
 df1 = pd.read_csv('../results/' + target_name + '_dmr_topic_keywords.csv', encoding='utf-8') #dmr
 df2 = pd.read_csv('../results/' + target_name + '_lda_topic_keywords.csv', encoding='utf-8') #lda
 df = pd.concat([df1['dmr_keywords'], df2['lda_keywords']], axis=1)
@@ -30,7 +30,7 @@ df = pd.concat([df1['dmr_keywords'], df2['lda_keywords']], axis=1)
 # print(bert)
 
 
-# news / papers / patents ¼±ÅÃÇØ¼­ ÁÖ¼®Á¦¿ÜÇÏ°í µ¹¸®¸é µÊ 
+# news / papers / patents ì„ íƒí•´ì„œ ì£¼ì„ì œì™¸í•˜ê³  ëŒë¦¬ë©´ ë¨ 
 # news
 if target_name == 'news':
   dmr = df['dmr_keywords']
@@ -145,7 +145,7 @@ embeddingDict = {}
 for i in range(len(vocab)):
   encoding = tokenizer(vocab[i], return_tensors="pt")
   output = model(**encoding)
-  embeddings = output[0][0].detach().numpy() #embedding value »ÌÈ÷´Â °Í 
+  embeddings = output[0][0].detach().numpy() #embedding value ë½‘íˆëŠ” ê²ƒ 
   embeddings = embeddings.reshape(embeddings.shape[0], -1)
   avg = np.average(embeddings[1:-1], axis=0)
   embeddingDict[vocab[i]] = avg
@@ -236,7 +236,7 @@ print(finvector)
 
 #!pip install sentence_transformers
 
-# https://stackoverflow.com/questions/55619176/how-to-cluster-similar-sentences-using-bert #Âü°í ¸µÅ©
+# https://stackoverflow.com/questions/55619176/how-to-cluster-similar-sentences-using-bert #ì°¸ê³  ë§í¬
 
 """
 This is a simple application for sentence embeddings: clustering
@@ -250,9 +250,9 @@ embeddings = embeddings /  np.linalg.norm(embeddings, axis=1, keepdims=True)
 print(embeddings)
 
 # Perform clustering
-# n_clusters ¶û distance_threshold µÑ Áß ÇÏ³ª¸¸ ¾µ ¼ö ÀÖÀ½ 
+# n_clusters ë‘ distance_threshold ë‘˜ ì¤‘ í•˜ë‚˜ë§Œ ì“¸ ìˆ˜ ìˆìŒ 
 # n_clusters = 11
-clustering_model = AgglomerativeClustering(n_clusters= None, affinity='cosine', linkage='average', distance_threshold=0.05)  #distance_threshold=0.04, distance_threshold=1.5 µî #n_clusters= None #patent: 0.05
+clustering_model = AgglomerativeClustering(n_clusters= None, affinity='cosine', linkage='average', distance_threshold=0.05)  #distance_threshold=0.04, distance_threshold=1.5 ë“± #n_clusters= None #patent: 0.05
 clustering_model.fit(embeddings)
 cluster_assignment = clustering_model.labels_
 
@@ -304,22 +304,22 @@ print('Davies Bouldin Score: %.4f' % score_AGclustering_d)
 
 # #cosine score dimension / mean / standardization plot?
 
-# topic_num, keywords -> dataframe°ú pickleÇüÅÂ·Î ÀúÀåÇÏ±â
+# topic_num, keywords -> dataframeê³¼ pickleí˜•íƒœë¡œ ì €ì¥í•˜ê¸°
 
 topic_cluster={}
 topic_num = []
 clustering = []
-for i, cluster in clustered_sentences.items(): #items()¾²¸é key¿Í value ½ÖÀ» ¾òÀ» ¼ö ÀÖÀ½ 
+for i, cluster in clustered_sentences.items(): #items()ì“°ë©´ keyì™€ value ìŒì„ ì–»ì„ ìˆ˜ ìˆìŒ 
     #print("Cluster ", i+1)
     #print(cluster)
-    _str = " ".join(map(str,set(cluster))) # keywords°£ÀÇ Áßº¹Á¦°Å ÇÏ±â ½ÈÀ¸¸é set ¾ø¾Ö¸é µÊ 
+    _str = " ".join(map(str,set(cluster))) # keywordsê°„ì˜ ì¤‘ë³µì œê±° í•˜ê¸° ì‹«ìœ¼ë©´ set ì—†ì• ë©´ ë¨ 
     #print(str)   
     clustering.append(_str)
     num = i+1 #f"topic {i+1}" 
     topic_num.append(num)
     topic_cluster[num] = _str
 topic_keywords = topic_cluster
-#print(topic_keywords) #key,value ÇüÅÂ # ex) {'topic 1': 'cryptocurrencies crypto  services cryptocurrencies price', 'topic 2': 'government trade countries china economy growth sector industry country innovation nfts art game auction artists tokens games sale metaverse nft', 'topic 3': 'university health research students school education work program city science insider trends industry reports media book coverage report intelligence insiders', 'topic 4': 'security sanctions department government money hackers law court states case capital startups startup venture investment fund funding ventures fintech firm', 'topic 5': 'facebook law regulators tax government policy rules libra mr president university students school event research program director education science city', 'topic 6': 'nfts art work game media money something york thats things health supply group products logistics food industry sales customers vehicles', 'topic 7': 'services startups capital startup tech venture investment software platform firm law security court money department hackers enforcement case transactions fraud', 'topic 8': 'application transaction network images tables charts states office abstract device stock stocks shares growth cent investment markets price quarter index', 'topic 9': 'banks payments payment services banking currency money transactions credit customers mr things work money something thats lot media dont york', 'topic 10': 'energy food power industry mining supply oil gas electricity carbon crypto assets securities exchange asset trading regulators cryptocurrencies industry exchanges'}
+#print(topic_keywords) #key,value í˜•íƒœ # ex) {'topic 1': 'cryptocurrencies crypto  services cryptocurrencies price', 'topic 2': 'government trade countries china economy growth sector industry country innovation nfts art game auction artists tokens games sale metaverse nft', 'topic 3': 'university health research students school education work program city science insider trends industry reports media book coverage report intelligence insiders', 'topic 4': 'security sanctions department government money hackers law court states case capital startups startup venture investment fund funding ventures fintech firm', 'topic 5': 'facebook law regulators tax government policy rules libra mr president university students school event research program director education science city', 'topic 6': 'nfts art work game media money something york thats things health supply group products logistics food industry sales customers vehicles', 'topic 7': 'services startups capital startup tech venture investment software platform firm law security court money department hackers enforcement case transactions fraud', 'topic 8': 'application transaction network images tables charts states office abstract device stock stocks shares growth cent investment markets price quarter index', 'topic 9': 'banks payments payment services banking currency money transactions credit customers mr things work money something thats lot media dont york', 'topic 10': 'energy food power industry mining supply oil gas electricity carbon crypto assets securities exchange asset trading regulators cryptocurrencies industry exchanges'}
 #print(topic_keywords.keys())
 #print(topic_keywords[1])
 topic_num = topic_num
@@ -327,7 +327,7 @@ keywords = clustering
 #print(keywords)
 
 
-# dataframe ÇüÅÂ·Î ÀúÀå 
+# dataframe í˜•íƒœë¡œ ì €ì¥ 
 df1 = {'topic_num' : topic_num, 'keywords' : keywords}
 df2 = pd.DataFrame(df1)
 #df2 = df2.dropna()
@@ -335,18 +335,18 @@ print(df2)
 df2.to_csv('./results/' + target_name + '_topic_clustering.csv', index=False)
 
 
-# picKle ÇüÅÂ·Î ÀúÀå 
+# picKle í˜•íƒœë¡œ ì €ì¥ 
 import pickle
 with open('./results/' + target_name + '_topic_clustering.pkl', "wb") as file:
     pickle.dump(topic_keywords, file)
 
-df = pd.read_pickle('./results/' + target_name + '_topic_clustering.pkl') #¾î¶»°Ô »ı°å³ª È®ÀÎ
+df = pd.read_pickle('./results/' + target_name + '_topic_clustering.pkl') #ì–´ë–»ê²Œ ìƒê²¼ë‚˜ í™•ì¸
 print(df)
 
-# df = pd.read_pickle('./results/papers_topic_clustering.pkl') #¾î¶»°Ô »ı°å³ª È®ÀÎ
+# df = pd.read_pickle('./results/papers_topic_clustering.pkl') #ì–´ë–»ê²Œ ìƒê²¼ë‚˜ í™•ì¸
 # print(df)
 
-# dendrogram ±×¸®±â 
+# dendrogram ê·¸ë¦¬ê¸° 
 # import libraries
 from scipy.cluster.hierarchy import dendrogram
 
