@@ -9,6 +9,7 @@ import pandas as pd
 import networkx as nx
 import graph_analysis
 import network_utils as net_utils
+import _multi
 
 
 #################################
@@ -154,6 +155,28 @@ def reconstruct_time_graphs(by_month_word_count:dict=None,
     return sub_Gs
 
 
+# Component function for graph analysis for multiprocessing
+def _graph_analysis_multiprc_compo_(time_specific_grpah_file:str, #sub_g_o_d,f'{time_key}.{cooc_key}.graph.pkl')
+                                    centrality_function_names,
+                                    connectivity_function_names,
+                                    edge_weight_keys, #[cooc_key]
+                                    centrality_output_f, # os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.centrality.json'
+                                    connectivity_output_f, # os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.connectivity.json'
+                                   ):
+    print(f'Current analysis: %s'%os.path.split(time_specific_grpah_file)[-1])
+    sub_G = net_utils.load_graph(time_specific_grpah_file)
+    # NOTE: EDGE_WEIGHT_KEY is dependent on cooc vs inv_coor
+    _t_analyzed = graph_analysis.analyze_graph(
+        graph_obj=sub_G,
+        centrality_function_names=centrality_function_names,
+        connectivity_function_names=connectivity_function_names,
+        edge_weight_keys=edge_weight_keys,
+    )
+    with open(centrality_output_f,'wb') as f:
+        f.write(json.dumps(_t_analyzed['centrality']).encode())
+    with open(connectivity_output_f,'wb') as f:
+        f.write(json.dumps(_t_analyzed['connectivity']).encode())
+
 
 ######## Master Function ########
 
@@ -180,6 +203,7 @@ def reconstruct_graph(coword_file:str=None,
                       output_dir:str='./output',
                       centrality_function_names:list=['betweenness_centrality','closeness_centrality'],
                       connectivity_function_names:list=['all_pairs_dijkstra'],
+                      multiprocess:int=8,
                      )->('nx.Graph', list, list):
     # In case that coword file is given
     if coword_file:
@@ -233,6 +257,11 @@ def reconstruct_graph(coword_file:str=None,
         output_dir=sub_g_tmp_d,
     )
     
+    
+    fn = _graph_analysis_multiprc_compo_
+    fn_arg_list = []
+    fn_kwarg_list = []
+
     for cooc_key, t_sub_G_d in sub_Gs.items():
         for time_key, sub_G in t_sub_G_d.items():
             print(f'Current analysis: {time_key}.{cooc_key}')
@@ -240,19 +269,56 @@ def reconstruct_graph(coword_file:str=None,
                 graph_obj=sub_G,
                 output_file=os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.graph.pkl'))
             assert os.path.isfile(os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.graph.pkl'))
-            # _t_analyzed = {'centrality':{CENT_FUNC_NAME:{EDGE_WEIGHT_KEY:{NODE:VAL}}},
-            #     'connectivity':{CONN_FUNC_NAME:{EDGE_WEIGHT_KEY:{NODE:{NODE:VAL}}}}}
-            # NOTE: EDGE_WEIGHT_KEY is dependent on cooc vs inv_coor
-            _t_analyzed = graph_analysis.analyze_graph(
-                graph_obj=sub_G,
+            _curr_arg_ = tuple()
+            _curr_kwarg_ = dict(
+                time_specific_grpah_file=os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.graph.pkl'),
                 centrality_function_names=centrality_function_names,
                 connectivity_function_names=connectivity_function_names,
                 edge_weight_keys=[cooc_key],
+                centrality_output_f=os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.centrality.json'),
+                connectivity_output_f=os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.connectivity.json'),
             )
-            with open(os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.centrality.json'),'wb') as f:
-                f.write(json.dumps(_t_analyzed['centrality']).encode())
-            with open(os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.connectivity.json'),'wb') as f:
-                f.write(json.dumps(_t_analyzed['connectivity']).encode())
+            fn_arg_list.append(_curr_arg_)
+            fn_kwarg_list.append(_curr_kwarg_.copy())
+    time_lines = list(list(sub_Gs.values())[0].keys())
+    with open(os.path.join(o_d,'time_lines.txt'),'wb') as f:
+        f.write('\n'.join(time_lines))
+    with open(os.path.join(o_d,'fc_time_lines.txt'),'wb') as f:
+        f.write('\n'.join(time_lines[1:]))
+        
+    del sub_Gs
+            
+    fn_args = _multi.argument_generator(fn_arg_list)
+    fn_kwargs = _multi.keyword_argument_generator(fn_kwarg_list)
+    _multi.multi_function_execution(
+        fn=fn,
+        fn_args=fn_args,
+        fn_kwargs=fn_kwargs,
+        max_processes=multiprocess,
+        collect_result=False,
+    )
+    
+    # Backup
+#     for cooc_key, t_sub_G_d in sub_Gs.items():
+#         for time_key, sub_G in t_sub_G_d.items():
+#             print(f'Current analysis: {time_key}.{cooc_key}')
+#             net_utils.save_graph(
+#                 graph_obj=sub_G,
+#                 output_file=os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.graph.pkl'))
+#             assert os.path.isfile(os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.graph.pkl'))
+#             # _t_analyzed = {'centrality':{CENT_FUNC_NAME:{EDGE_WEIGHT_KEY:{NODE:VAL}}},
+#             #     'connectivity':{CONN_FUNC_NAME:{EDGE_WEIGHT_KEY:{NODE:{NODE:VAL}}}}}
+#             # NOTE: EDGE_WEIGHT_KEY is dependent on cooc vs inv_coor
+#             _t_analyzed = graph_analysis.analyze_graph(
+#                 graph_obj=sub_G,
+#                 centrality_function_names=centrality_function_names,
+#                 connectivity_function_names=connectivity_function_names,
+#                 edge_weight_keys=[cooc_key],
+#             )
+#             with open(os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.centrality.json'),'wb') as f:
+#                 f.write(json.dumps(_t_analyzed['centrality']).encode())
+#             with open(os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.connectivity.json'),'wb') as f:
+#                 f.write(json.dumps(_t_analyzed['connectivity']).encode())
     
     return G, node_annotations, edge_annotations
     
@@ -454,7 +520,8 @@ def extract_topic(input_package_dir:str,
 
                 
 # Batch function for multiple topics
-def extract_topic_batch(max_keyword_n:int=None,
+def extract_topic_batch(max_keyword_n:int=50,
+                        multiprocess:int=8,
                         **kwargs,
                        ):
     output_dir = kwargs['output_dir']
@@ -474,42 +541,58 @@ def extract_topic_batch(max_keyword_n:int=None,
                 max_node_n=max_keyword_n,
             )
     else:
-        if keyword_list_file.endswith('csv'):
-            kwrd_df = pd.read_csv(keyword_list_file,sep=',')
-            keyword_d = {kwrd_df.loc[idx,:].iloc[0]:kwrd_df.loc[idx,:].iloc[1].split(' ') for idx in kwrd_df.index}
-        elif keyword_list_file.endswith('tsv'):
-            kwrd_df = pd.read_csv(keyword_list_file,sep='\t')
-            keyword_d = {kwrd_df.loc[idx,:].iloc[0]:kwrd_df.loc[idx,:].iloc[1].split(' ') for idx in kwrd_df.index}
-        elif keyword_list_file.endswith('pkl'):
-            with open(keyword_list_file, 'rb') as f:
-                kwrd_d = pickle.load(f)
-            keyword_d = {_k:_v.split(' ') for _k, _v in kwrd_d.items()}
-        elif keyword_list_file.endswith('txt'): # considering that the file consists of list of words
-            with open(keyword_list_file,'rb') as f:
-                reading = f.read().decode()
-            keyword_list = reading.split()
-            keyword_d = {keyword_list_file:keyword_list}
-        elif keyword_list_file.endswith('json'):
-            with open(keyword_list_file,'rb') as f:
-                reading = json.loads(f.read().decode())
-            if type(list(reading.values())[0]) == str:
-                keyword_d = {_k:_v.split(' ') for _k, _v in reading.items()}
-            else:
-                keyword_d = reading
-        
+        keyword_d = net_utils.parse_keyword_file(keyword_list_file=keyword_list_file)
+                
+        fn_arg_list= []
+        fn_kwarg_list = []
+        fn_kwarg_fit_ftr_list = []
         for topic, keyword_list in keyword_d.items():
             curr_kwargs = kwargs.copy()
             curr_kwargs['output_dir'] = os.path.join(kwargs['output_dir'],str(topic))
             os.makedirs(curr_kwargs['output_dir'],exist_ok=True)
             curr_kwargs['keyword_list_file'] = None
             curr_kwargs['keyword_list'] = list(set(keyword_list))
-            extract_topic(**curr_kwargs)
+            fn_kwarg_list.append(curr_kwargs.copy())
+            fn_arg_list.append(tuple())
             if max_keyword_n:
-                fit_features_to_structure(
+                fit_ftr_kwargs = dict(
                     topic_dir=os.path.join(kwargs['output_dir'],str(topic)),
                     output_dir=os.path.join(structured_od,str(topic)),
-                    max_node_n=max_keyword_n,
-                )
+                    max_node_n=max_keyword_n,)
+                fn_kwarg_fit_ftr_list.append(fit_ftr_kwargs.copy())
+                
+#         for topic, keyword_list in keyword_d.items():
+#             curr_kwargs = kwargs.copy()
+#             curr_kwargs['output_dir'] = os.path.join(kwargs['output_dir'],str(topic))
+#             os.makedirs(curr_kwargs['output_dir'],exist_ok=True)
+#             curr_kwargs['keyword_list_file'] = None
+#             curr_kwargs['keyword_list'] = list(set(keyword_list))
+#             extract_topic(**curr_kwargs)
+#             if max_keyword_n:
+#                 fit_features_to_structure(
+#                     topic_dir=os.path.join(kwargs['output_dir'],str(topic)),
+#                     output_dir=os.path.join(structured_od,str(topic)),
+#                     max_node_n=max_keyword_n,
+#                 )
+        fn_args = _multi.argument_generator(fn_arg_list)
+        fn_kwargs = _multi.keyword_argument_generator(fn_kwarg_list)
+        _multi.multi_function_execution(
+            fn=extract_topic,
+            fn_args=fn_args,
+            fn_kwargs=fn_kwargs,
+            max_processes=multiprocess,
+            collect_result=False,
+        )
+        if max_keyword_n:
+            fn_args = _multi.argument_generator(fn_arg_list)
+            fn_kwargs = _multi.keyword_argument_generator(fn_kwarg_fit_ftr_list)
+            _multi.multi_function_execution(
+                fn=fit_features_to_structure,
+                fn_args=fn_args,
+                fn_kwargs=fn_kwargs,
+                max_processes=multiprocess,
+                collect_result=False,
+            )
     
 def _fit_structure_node_list_(node_list,
                               guide_node_n:int,
@@ -572,7 +655,7 @@ def fit_features_to_structure(topic_dir:str,
                 gcn_io_format=True)
     
     # node attributes or edge features - cooccurrence weight/ index/ attribute
-        elif _f_n.endswith('edge_indices.json') or _f_n.endswith('edge_weigths.json') or _f_n.endswith('edge_attributes.txt') or _f_n.endswith('node_attributes.txt'):
+        elif _f_n.endswith('edge_indices.json') or _f_n.endswith('edge_weights.json') or _f_n.endswith('edge_attributes.txt') or _f_n.endswith('node_attributes.txt'):
             os.system('cp %s %s'%(
                 _f,
                 os.path.join(o_d,_f_n),
