@@ -11,7 +11,7 @@ from torch.nn import DataParallel
 from torch.utils.tensorboard import SummaryWriter
 from torch_geometric_temporal.signal import temporal_signal_split
 from tqdm import tqdm
-from _commons.utils import save_metrics, fix_randomness
+from _commons.utils import save_metrics, fix_randomness, EarlyStopping
 from config import get_config
 from models import get_model, training, evaluating
 from preprocessed.preprocessor import get_dataset
@@ -26,13 +26,16 @@ if __name__ == "__main__":
     # TODO rollback directory : models
     model_save_path = os.path.join(results_path, 'models')
     node_feature_type = '_'.join(args.node_feature_type)
-    model_filename = args.model + '_' + node_feature_type + '.pt'
+    model_filename = f'{args.model}_{node_feature_type}_{args.num_training_clusters}.pt'
 
     # tensorboard
     # tensorboard dev upload --logdir _tensorboard
-    tb_train_loss = SummaryWriter(log_dir=f'../_tensorboard/{args.media}/{args.model}/{node_feature_type}/train')
-    tb_valid_loss = SummaryWriter(log_dir=f'../_tensorboard/{args.media}/{args.model}/{node_feature_type}/valid')
-    tb_test_loss = SummaryWriter(log_dir=f'../_tensorboard/{args.media}/{args.model}/{node_feature_type}/test')
+    tb_train_loss = SummaryWriter(
+        log_dir=f'../_tensorboard/{args.media}/{args.model}/{node_feature_type}/{args.num_training_clusters}/train')
+    tb_valid_loss = SummaryWriter(
+        log_dir=f'../_tensorboard/{args.media}/{args.model}/{node_feature_type}/{args.num_training_clusters}/valid')
+    tb_test_loss = SummaryWriter(
+        log_dir=f'../_tensorboard/{args.media}/{args.model}/{node_feature_type}/{args.num_training_clusters}/test')
 
     # fix randomness
     fix_randomness(args.seed)
@@ -44,15 +47,33 @@ if __name__ == "__main__":
     # TODO WARNING - check the location of cluster dirs
     cluster_dirs = [os.path.join(args.cluster_dir, i) for i in os.listdir(args.cluster_dir)][
                    :args.num_training_clusters]
-    dataset_packages = []
-    for _c_dir in cluster_dirs:
+
+    # TODO split clusters by ratio(train/valid/test)
+    train_border = int(len(cluster_dirs) * 0.7)
+    valid_border = int(len(cluster_dirs) * 0.85)
+    train_cluster_dirs = cluster_dirs[:train_border]
+    valid_cluster_dirs = cluster_dirs[train_border:valid_border]
+    test_cluster_dirs = cluster_dirs[valid_border:]
+
+    train_dataset_packages = []
+    for _c_dir in train_cluster_dirs:
         dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps \
             = get_dataset(_c_dir, args.node_feature_type, args.discard_index, refine_data)
-        # FIXME dataloader, validation dataset
-        train_dataset, test_dataset = temporal_signal_split(dataset, train_ratio=0.7)
-        valid_dataset, test_dataset = temporal_signal_split(test_dataset, train_ratio=0.5)
-        dataset_packages.append([train_dataset, valid_dataset, test_dataset,
-                                 num_nodes, num_features, min_val_tar, max_val_tar, eps])
+        train_dataset_packages.append([dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps])
+    valid_dataset_packages = []
+    for _c_dir in valid_cluster_dirs:
+        dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps \
+            = get_dataset(_c_dir, args.node_feature_type, args.discard_index, refine_data)
+        valid_dataset_packages.append([dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps])
+    test_dataset_packages = []
+    for _c_dir in test_cluster_dirs:
+        dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps \
+            = get_dataset(_c_dir, args.node_feature_type, args.discard_index, refine_data)
+        test_dataset_packages.append([dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps])
+
+    print(f'train len: {len(train_dataset_packages)}')
+    print(f'valid len: {len(valid_dataset_packages)}')
+    print(f'test len: {len(test_dataset_packages)}')
 
     # FIXME data parallel : multi-gpu
     # create GCN model
@@ -66,6 +87,7 @@ if __name__ == "__main__":
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     criterion = torch.nn.MSELoss(reduction='mean')
+    early_stopping = EarlyStopping(patience=7)
 
     # mse_log = {}
     best_epoch, best_train_mse, best_valid_mse, best_test_mse = 0, math.inf, math.inf, math.inf
@@ -74,7 +96,7 @@ if __name__ == "__main__":
         train_y_hats, train_ys, valid_y_hats, valid_ys, test_y_hats, test_ys \
             = torch.Tensor().to(device), torch.Tensor().to(device), torch.Tensor().to(device), torch.Tensor().to(
             device), torch.Tensor().to(device), torch.Tensor().to(device)
-        for _ds_idx, _curr_dataset_pack in enumerate(dataset_packages):
+        for _ds_idx, _curr_dataset_pack in enumerate(train_dataset_packages):
             # training
             model.train()
             train_dataset = _curr_dataset_pack[0]
@@ -83,14 +105,18 @@ if __name__ == "__main__":
             train_y_hats = torch.concat([train_y_hats, train_y_hat[None, :, :]])
             train_ys = torch.concat([train_ys, train_y[None, :, :]])
 
+        for _ds_idx, _curr_dataset_pack in enumerate(valid_dataset_packages):
             # evaluating
             model.eval()
-            valid_dataset = _curr_dataset_pack[1]
+            valid_dataset = _curr_dataset_pack[0]
             valid_y_hat, valid_y = evaluating(model, valid_dataset, num_features, num_nodes, args.embedd_dim)
             valid_y_hats = torch.concat([valid_y_hats, valid_y_hat[None, :, :]])
             valid_ys = torch.concat([valid_ys, valid_y[None, :, :]])
 
-            test_dataset = _curr_dataset_pack[2]
+        for _ds_idx, _curr_dataset_pack in enumerate(test_dataset_packages):
+            # evaluating
+            model.eval()
+            test_dataset = _curr_dataset_pack[0]
             test_y_hat, test_y = evaluating(model, test_dataset, num_features, num_nodes, args.embedd_dim)
             test_y_hats = torch.concat([test_y_hats, test_y_hat[None, :, :]])
             test_ys = torch.concat([test_ys, test_y[None, :, :]])
@@ -120,6 +146,12 @@ if __name__ == "__main__":
         tb_train_loss.add_scalar(f"{args.media} / {args.model} / {node_feature_type} / Loss: mse", train_mse, epoch)
         tb_valid_loss.add_scalar(f"{args.media} / {args.model} / {node_feature_type} / Loss: mse", valid_mse, epoch)
         tb_test_loss.add_scalar(f"{args.media} / {args.model} / {node_feature_type} / Loss: mse", test_mse, epoch)
+
+        # early stopping
+        early_stopping(valid_mse)
+        if early_stopping.early_stop:
+            print("##### Early stopping ...")
+            break
 
     print("[Final (BEST MSE)] Train: {:.8f} | Valid : {:.8f} | Test : {:.8f} at Epoch {:3}".format(
         best_train_mse, best_valid_mse, best_test_mse, best_epoch))

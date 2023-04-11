@@ -1,6 +1,6 @@
 import json
 from six.moves import urllib
-from torch_geometric_temporal.dataset import EnglandCovidDatasetLoader, ChickenpoxDatasetLoader
+from torch_geometric_temporal.dataset import EnglandCovidDatasetLoader, ChickenpoxDatasetLoader, METRLADatasetLoader
 import networkx as nx
 from torch_geometric_temporal.signal import DynamicGraphTemporalSignal, StaticGraphTemporalSignal
 import pytest

@@ -22,10 +22,10 @@ if __name__ == "__main__":
     results_path = os.path.abspath(args.results_path)
     fcst_val_save_path = os.path.join(results_path, 'fcst_val')
     model_save_path = os.path.join(results_path, 'models')
-    model_filename = args.model + '_' + '_'.join(args.node_feature_type) + '.pt'
+    node_feature_type = '_'.join(args.node_feature_type)
+    model_filename = f'{args.model}_{node_feature_type}_{args.num_training_clusters}.pt'
 
     # load data
-
     # FIXME error : DCRNN에서 refine 수행 시 shape 불일치 오류 발생 (yhat-(55, 50), y-(57, 50)), 임시로 False 처리
     #
     # Traceback (most recent call last):
@@ -51,7 +51,6 @@ if __name__ == "__main__":
     print(model)
 
     y_hats, ys = torch.Tensor().to(device), torch.Tensor().to(device)
-
     for _ds_idx, _curr_dataset_pack in enumerate(topic_dataset_packages):
         dataset = _curr_dataset_pack[0]
         y_hat, y = evaluating(model, dataset, num_features, num_nodes, args.embedd_dim)
@@ -81,4 +80,4 @@ if __name__ == "__main__":
     ys_denorm = np.stack(ys_denorm, axis=0)
 
     # save forecasting values
-    save_fsct_y(fcst_val_save_path, 'patent', args.model, '_'.join(args.node_feature_type), ys_denorm, y_hats_denorm)
+    save_fsct_y(fcst_val_save_path, 'patent', args.model, node_feature_type, args.num_training_clusters, ys_denorm, y_hats_denorm)

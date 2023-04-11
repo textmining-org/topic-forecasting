@@ -63,16 +63,37 @@ def exists_metrics(save_path, file_name, args, arg_names):
     return existence_flag
 
 
-def save_fsct_y(save_path, media, model_name, node_feature_type, true_y, fcst_y):
+def save_fsct_y(save_path, media, model_name, node_feature_type, num_training_clusters, true_y, fcst_y):
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
-    np.save(os.path.join(save_path, f"{media}_{model_name}_{node_feature_type}_true.npy"), true_y)
-    np.save(os.path.join(save_path, f"{media}_{model_name}_{node_feature_type}_fcst.npy"), fcst_y)
+    np.save(os.path.join(save_path, f"{media}_{model_name}_{node_feature_type}_{num_training_clusters}_true.npy"), true_y)
+    np.save(os.path.join(save_path, f"{media}_{model_name}_{node_feature_type}_{num_training_clusters}_fcst.npy"), fcst_y)
 
 
-def load_fcst_y(save_path, media, model_name, node_feature_type):
-    true_y = np.load(os.path.join(save_path, f"{media}_{model_name}_{node_feature_type}_true.npy"))
-    fcst_y = np.load(os.path.join(save_path, f"{media}_{model_name}_{node_feature_type}_fcst.npy"))
+def load_fcst_y(save_path, media, model_name, node_feature_type,  num_training_clusters):
+    true_y = np.load(os.path.join(save_path, f"{media}_{model_name}_{node_feature_type}_{num_training_clusters}_true.npy"))
+    fcst_y = np.load(os.path.join(save_path, f"{media}_{model_name}_{node_feature_type}_{num_training_clusters}_fcst.npy"))
 
     return true_y, fcst_y
+
+class EarlyStopping:
+    def __init__(self, patience=7, delta=0):
+        self.patience = patience
+        self.counter = 0
+        self.best_score = None
+        self.early_stop = False
+        self.delta = delta
+
+    def __call__(self, valid_loss):
+        score = -valid_loss
+        if self.best_score is None:
+            self.best_score = score
+        elif score < self.best_score + self.delta:
+            self.counter += 1
+            print(f'##### EarlyStopping counter: {self.counter} out of {self.patience}')
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.best_score = score
+            self.counter = 0
