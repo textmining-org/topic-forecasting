@@ -1,15 +1,13 @@
-﻿,topic number,label,keywords
-0,0,identity authentication credentials access authorization,identity authentication access entity record verification server authorization identifier trust
-1,1,ledger hash file content metadata blocks,hash file blocks ledger media transactions structure configuration party game
-2,2,key signature key key keys pair,key message signature certificate encryption keys verification hash secure pair
-3,3,prediction input feature machine features,feature input machine parameters reference output sample graph template structure
-4,4,vehicle radio vehicles wireless communication,communication vehicle location devices wireless traffic controller communications vehicles area
-5,5,functions control circuit application unit,application software unit processor interface control module function circuit container
-6,6,service condition service request service contract specification,service contract target client resource execution response server provider result
-7,7,currency transfer currency amount currency currency account transfer amount,asset payment account amount assets exchange transfer transactions currency cryptocurrency
-8,8,node consensus nodes nodes group master node,node nodes consensus group transactions message peer member operation messages
-9,9,image field view images camera capture image,image item items display code images object reality work apparatus
-10,10,document content metadata andor database,database content document source computer video code metadata record documents
-11,11,sensors environment agriculture temperature sensor energy power,sensor energy risk power devices environment action activity health battery
-12,12,storage computer storage computer programs memory location,storage computer event apparatus media programs devices memory program events
-13,13,security services platform embodiments devices,devices security access platform management invention embodiments control resource resources
+﻿,topic number,label,dmr_keywords
+0,0,storage encryption input output key,storage key encryption unit power keys computer input energy memory
+1,1,node consensus consensus consensus nodes network consensus,node nodes target consensus computer storage request apparatus message result
+2,2,risk score machine embodiments intelligence,entity machine profile entities risk security score trust graph privacy
+3,3,drive vehicles vehicle temperature power source vehicle,vehicle sensor control vehicles devices transport sensors battery power location
+4,4,video streams stock item record customer order item identifier,item items platform exchange order consent test activity embodiments tag
+5,5,merchant account cryptocurrency payment payment transfer currency payment service,service account payment request provider amount currency cryptocurrency customer wallet
+6,6,block block block hash blocks hash block,block hash record blocks chain ledger database transactions records validation
+7,7,image images video image video feature,image content media file location feature video target code display
+8,8,identity authentication authority certificate credentials,identity authentication access request verification client server key entity certificate
+9,9,ownership assets asset rights transfer,asset document assets transactions party transfer ledger embodiments invention game
+10,10,contract execution resource resources environment,contract event resource software computer execution management environment resources application
+11,11,communication wireless communications radio devices,communication devices application message module interface communications server security wireless

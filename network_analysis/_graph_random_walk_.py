@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
+import os
 import json
 import numpy as np
 import pandas as pd
 import networkx as nx
 import network_utils as net_utils
+import copy
+import _multi
 
 
 SEED = 123
 np.random.seed(SEED)
+
 
 def _pick_random_node_(graph_obj=None,node_list=None):
     if graph_obj:
@@ -69,15 +73,21 @@ def make_random_node_cluster(graph_obj,
 
 def make_random_clusters(graph_obj,
                          seed_node_list:list=[], # Seed nodes to start clustering
-                         cluster:int=100,
+                         cluster_min:int=0,
+                         cluster_max:int=100,
                          min_node_n:int=10,
                          max_node_n:int=40,
+                         tmp_output_file:str='tmp.random_batch.0.json',
                         ):
     cluster_dict = {} # {CLUSTER_NAME:[KEYWORDS]}
+    if type(graph_obj) == str:
+        graph_obj = net_utils.load_graph(graph_obj)
     _n_l = _get_node_l_(graph_obj)
     _e_d = _get_edge_d_(graph_obj)
-    
-    for clstr_no in range(cluster):
+    print(tmp_output_file+':'+str(cluster_max-cluster_min))
+    c = 0
+    for clstr_no in range(cluster_min,cluster_max):
+        c += 1
         cluster_name = f'random_cluster_{clstr_no:04d}'
         kwrds = make_random_node_cluster(
             graph_obj,
@@ -89,29 +99,91 @@ def make_random_clusters(graph_obj,
             max_node_n=max_node_n,
         )
         cluster_dict[cluster_name] = kwrds
+        if c%20==0:
+            print(tmp_output_file+' processed: '+str(c/(cluster_max-cluster_min)))
+    print("Random clustering finished for batch %s"%tmp_output_file)
+    with open(tmp_output_file,'wb') as f:
+        f.write(json.dumps(cluster_dict).encode())
         
     return cluster_dict
 
 
 def random_cluster(whole_time_graph_file:str,
+                   exclusive_node_file:str=None, # \n delimitted file of keywords
                    output_f='./random_clusters.json',
                    seed_node_file:str=None, # \n delimitted file of keywords
                    cluster:int=100,
                    min_node_n:int=10,
-                   max_node_n:int=40,):
+                   max_node_n:int=50,
+                   multiprocess:int=8,
+                  ):
     graph_obj = net_utils.load_graph(whole_time_graph_file)
+    if exclusive_node_file:
+        excl_n_l = []
+        excl_n_d = net_utils.parse_keyword_file(exclusive_node_file)
+        for _v in excl_n_d.values():
+            excl_n_l.extend(_v)
+        excl_n_l = list(set(excl_n_l))
+        print(f'{len(excl_n_l)} words are found for exclusive words')
+        print(f"Input graph: {len(graph_obj.nodes)} words with {len(graph_obj.edges)}")
+        graph_obj.remove_nodes_from(excl_n_l)
+        print(f"Exclusive node_excluded graph: {len(graph_obj.nodes)} words with {len(graph_obj.edges)}")
+    net_utils.save_graph(graph_obj=graph_obj,output_file=output_f+'.tmp_graph_obj.pkl')
+    del graph_obj
     if seed_node_file:
         with open(seed_node_file,'rb') as f:
             seed_node_list=f.read().decode().split()
     else:
         seed_node_list=None
-    clstr_dict = make_random_clusters(
-        graph_obj=graph_obj,
-        seed_node_list=seed_node_list,
-        cluster=cluster,
-        min_node_n=min_node_n,
-        max_node_n=max_node_n,
+#     clstr_dict = make_random_clusters(
+#         graph_obj=graph_obj,
+#         seed_node_list=seed_node_list,
+#         cluster=cluster,
+#         min_node_n=min_node_n,
+#         max_node_n=max_node_n,
+#     )
+    fn_arg_list = []
+    fn_kwarg_list = []
+    tmp_output_file_list = []
+    if cluster<multiprocess:
+        multiprocess = 1
+    clstr_step = int(cluster/multiprocess)
+    for _batch_n in range(multiprocess):
+        tmp_output_file = output_f+'.random_batch.%s.json'%_batch_n
+        tmp_output_file_list.append(tmp_output_file)
+        _curr_kwargs = dict(
+            graph_obj=output_f+'.tmp_graph_obj.pkl',
+            seed_node_list=seed_node_list,
+            cluster_min=int(clstr_step*_batch_n),
+            cluster_max=int(clstr_step*(_batch_n+1)),
+            min_node_n=min_node_n,
+            max_node_n=max_node_n,
+            tmp_output_file=tmp_output_file,
+        )
+        if _batch_n==multiprocess:
+            _curr_kwargs['max_node_n'] = cluster
+        fn_arg_list.append(tuple())
+        fn_kwarg_list.append(copy.deepcopy(_curr_kwargs))
+#     with open(output_f+'tmp','wb') as f:
+#         f.write(json.dumps(fn_kwarg_list[0]).encode())
+    fn_args = _multi.argument_generator(fn_arg_list)
+    fn_kwargs = _multi.keyword_argument_generator(fn_kwarg_list)
+    
+    result = _multi.multi_function_execution(
+        fn=make_random_clusters,
+        fn_args=fn_args,
+        fn_kwargs=fn_kwargs,
+        max_processes=multiprocess,
+        collect_result=False,
     )
+    
+    clstr_dict = {}
+    for _f in tmp_output_file_list:
+        with open(_f,'rb') as f:
+            _curr_cltr_dict = json.loads(f.read().decode())
+        clstr_dict.update(_curr_cltr_dict.copy())
+        os.system('rm %s'%_f)
+        
     if output_f.endswith('json'):
         with open(output_f,'wb') as f:
             f.write(json.dumps(clstr_dict).encode())

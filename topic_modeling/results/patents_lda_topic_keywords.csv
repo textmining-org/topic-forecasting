@@ -1,21 +1,13 @@
-﻿,topic number,label,keywords
-0,0,service request service service provider service service client device service,service provider server services session template response type result client
-1,1,score intelligence health risk sensors,sensor risk machine score activity environment health interaction interactions profile
-2,2,application program application interface functions applications,application interface module platform software applications function action program execution
-3,3,transfer ownership platform implementations ownership asset asset exchange asset,asset assets exchange transfer game name domain instance ownership platform
-4,4,currency payment account merchant funds amount currency,payment account amount currency cryptocurrency transactions customer address wallet transfer
-5,5,vehicle vehicles vehicles vehicle destination location uav,vehicle location display vehicles property area transport package delivery map
-6,6,hash blocks hash tree blocks hash values,hash blocks structure values reference proof function transactions root nodes
-7,7,consensus node consensus nodes nodes consensus consensus,node nodes consensus group transactions operation peer result member list
-8,8,content file author copyright item,target content item file media items metadata source identifier stream
-9,9,storage kp pools computer storage computer,storage computer resource programs apparatus media resources program devices requests
-10,10,contract specification contract contract code memory address contract contract,contract code software execution contracts component instruction container environment memory
-11,11,event entity event entity events entity action,entity event configuration entities events trust operation action profile status
-12,12,identity identity authentication authentication verify identity biometric,identity authentication verification access response identification management consent id entity
-13,13,message message key key backup transaction key message,message key encryption messages keys video master pair processor secure
-14,14,security devices security privacy embodiments applications,security devices management embodiments control transactions invention policy privacy secure
-15,15,image feature images recognition image target,image feature images target input recognition identification sample detection vector
-16,16,signature key signature key piece content signature message,signature certificate key verification party parameter parameters output input computation
-17,17,record access database authorization identifier identifier,access record database client ledger server records authorization identifier secure
-18,18,document andor metadata seal document document seal documents,document graph documents page field air compliance computer fields elements
-19,19,power energy radio circuit wireless,communication unit power devices control wireless circuit energy controller communications
+﻿,topic number,label,lda_keywords
+0,0,currency funds transfer currency currency account wallet,asset payment account assets transfer amount transactions cryptocurrency currency customer
+1,1,annotation graph score embodiments machine,content document machine risk computer score embodiments graph object documents
+2,2,computer programs computer programs computer computer storage programs computer storage computer programs computer storage,contract storage computer target apparatus request execution code result client
+3,3,wireless communication radio antenna registration module,communication module processor memory interface application wireless communications control container
+4,4,security resources applications platforms services,devices security resource application software management platform environment control access
+5,5,block blocks block block hash block blockchain,block hash ledger record blocks chain transactions database nodes records
+6,6,vehicle vehicles transportation vehicle vehicle proximate,vehicle event file media sensor events vehicles location transport traffic
+7,7,power energy energy storage power supply energy storage device,storage power devices unit energy circuit control battery sensor units
+8,8,item items item record customer order group devices,item items platform exchange order game location server delivery activity
+9,9,key node signature message backup transaction,node key nodes message consensus signature encryption group keys messages
+10,10,image images position feature image target,image location feature video display target images code point identification
+11,11,identity login authentication identity authentication access token,service request identity authentication access server entity client verification response

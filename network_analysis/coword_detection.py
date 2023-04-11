@@ -24,9 +24,11 @@ def load_pickled(file):
     with open(file,'rb') as f:
         parsed = pickle.load(f)
     print(parsed)
-    time_map = parsed.iloc[:,0].to_dict() # 
+#     time_map = parsed.iloc[:,0].to_dict() # 
+#     data = parsed.iloc[:,1].to_dict()
+    time_map = parsed.loc[:,'date'].to_dict() # 
 #     time_map = {k:v.split('-') for k,v in time_map.items()}
-    data = parsed.iloc[:,1].to_dict()
+    data = parsed.loc[:,'text'].to_dict()
     return data, time_map
 
 

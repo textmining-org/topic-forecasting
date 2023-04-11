@@ -1,9 +1,11 @@
-﻿,topic number,label,keywords
-0,0,revocation encryption signature decryption scheme,scheme storage access authentication control identity secure encryption protection signature
-1,1,proceedings papers conference papers conference proceedings papers conference proceedings,detection networks machine vehicles conference proceedings topics communication papers learning
-2,2,ethereum cryptocurrencies dollars cryptocurrency money,contracts contract transactions ethereum cryptocurrency bitcoin transaction payment cryptocurrencies smart
-3,3,devices iot healthcare sensors things,iot things devices health applications architecture internet healthcare services service
-4,4,energy trading prosumers energy resources demand response electricity,energy power trading market transaction electricity consumption grid demand resources
-5,5,designmethodologyapproach limitationsimplications research limitationsimplications implications findings,industry applications review literature application economy adoption innovation education governance
-6,6,consensus protocol pow proofofwork consensus byzantine,consensus nodes protocol performance transactions transaction mining algorithm attack scalability
-7,7,food supply supply chains food supply products,supply traceability food industry logistics chains products quality construction transparency
+﻿,topic number,label,dmr_keywords
+0,0,supply chain food food supply food safety supply chain traceability,supply traceability food industry logistics chains quality products production manufacturing
+1,1,revocation ciphertext decryption encryption keys,privacy scheme access storage control authentication identity encryption protection secure
+2,2,sdn fog things iot iot devices internet things iot,iot internet things devices networks edge communication privacy architecture applications
+3,3,cryptocurrencies investors currencies cryptocurrency cryptocurrency market,bitcoin cryptocurrency transactions transaction payment cryptocurrencies market currency money price
+4,4,pow proof-of-work pow consensus protocol liveness proof-of-work,consensus block nodes protocol algorithm transaction mining transactions performance blockchains
+5,5,contracts execution smart contracts code contract,contracts contract ethereum platform service applications framework software architecture smart
+6,6,design/methodology/approach originality/value limitations/implications research limitations/implications implications,research industry review applications literature adoption application economy innovation intelligence
+7,7,electricity market prosumers energy trading energy resources demand response,energy power trading market grid electricity transaction consumption demand resources
+8,8,patients health patient health care care,health healthcare records education patients privacy record care patient insurance
+9,9,focus conference papers focus conference proceedings papers focus conference proceedings papers focus papers focus,learning detection machine conference algorithm proceedings topics papers prediction image

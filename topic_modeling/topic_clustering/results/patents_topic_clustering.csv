@@ -1,14 +1,16 @@
 topic_num,keywords
-1,asset assets exchange transfer game name domain instance ownership platform feature input machine parameters reference output sample graph template structure hash file blocks ledger media transactions structure configuration party game hash blocks structure values reference proof function transactions root nodes
-2,devices security access platform management invention embodiments control resource resources contract code software execution contracts component instruction container environment memory storage computer event apparatus media programs devices memory program events storage computer resource programs apparatus media resources program devices requests
-3,service provider server services session template response type result client service contract target client resource execution response server provider result
-4,sensor risk machine score activity environment health interaction interactions profile sensor energy risk power devices environment action activity health battery
-5,database content document source computer video code metadata record documents target content item file media items metadata source identifier stream
-6,key message signature certificate encryption keys verification hash secure pair message key encryption messages keys video master pair processor secure
-7,asset payment account amount assets exchange transfer transactions currency cryptocurrency payment account amount currency cryptocurrency transactions customer address wallet transfer
-8,entity event configuration entities events trust operation action profile status
-9,identity authentication access entity record verification server authorization identifier trust identity authentication verification access response identification management consent id entity
-10,vehicle location display vehicles property area transport package delivery map communication vehicle location devices wireless traffic controller communications vehicles area
-11,image item items display code images object reality work apparatus
-12,node nodes consensus group transactions message peer member operation messages node nodes consensus group transactions operation peer result member list
-13,application software unit processor interface control module function circuit container application interface module platform software applications function action program execution
+11,storage key encryption unit power keys computer input energy memory
+3,contract storage computer target apparatus request execution code result client node nodes target consensus computer storage request apparatus message result
+9,entity machine profile entities risk security score trust graph privacy
+5,vehicle sensor control vehicles devices transport sensors battery power location storage power devices unit energy circuit control battery sensor units
+4,item items platform exchange order game location server delivery activity item items platform exchange order consent test activity embodiments tag
+2,service account payment request provider amount currency cryptocurrency customer wallet asset payment account assets transfer amount transactions cryptocurrency currency customer
+8,block hash ledger record blocks chain transactions database nodes records block hash record blocks chain ledger database transactions records validation
+7,image location feature video display target images code point identification image content media file location feature video target code display
+10,service request identity authentication access server entity client verification response identity authentication access request verification client server key entity certificate
+15,asset document assets transactions party transfer ledger embodiments invention game
+1,devices security resource application software management platform environment control access contract event resource software computer execution management environment resources application
+14,communication module processor memory interface application wireless communications control container communication devices application message module interface communications server security wireless
+13,content document machine risk computer score embodiments graph object documents
+12,vehicle event file media sensor events vehicles location transport traffic
+6,node key nodes message consensus signature encryption group keys messages

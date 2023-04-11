@@ -1,16 +1,28 @@
-# -*- coding: utf-8 -*-
-
-from google.colab import drive
-drive.mount('/content/drive')
+# -*- coding: cp949 -*-
 
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 from matplotlib import pyplot as plt
+import torch
+from transformers import BertTokenizer, BertModel
+import numpy as np
+from numpy import unique
+from numpy import where
+from sklearn.cluster import AgglomerativeClustering
+from matplotlib import pyplot
+from sklearn.metrics import silhouette_score
+from sklearn.metrics import calinski_harabasz_score
+from sklearn.metrics import davies_bouldin_score
+from sklearn.cluster import AgglomerativeClustering
+import json
 
-df = pd.read_csv("/content/drive/MyDrive/Colab Notebooks/blockchain/papers_keywords.csv", encoding='utf-8') # news_keywords.csv / papers_keywords.csv / patents_keywords.csv
-#data = df['patent_keywords'] #'patent_keywords'
-print(df)
+# target_name에 papers, patent, news 지정 
+target_name = 'patents'
 
+# topic modeling results 읽어오기 
+df1 = pd.read_csv('../results/' + target_name + '_dmr_topic_keywords.csv', encoding='utf-8') #dmr
+df2 = pd.read_csv('../results/' + target_name + '_lda_topic_keywords.csv', encoding='utf-8') #lda
+df = pd.concat([df1['dmr_keywords'], df2['lda_keywords']], axis=1)
 
 # dmr = df[['topic number','patent_keywords']].iloc[0:12]
 # print(dmr)
@@ -20,22 +32,23 @@ print(df)
 
 # news / papers / patents 선택해서 주석제외하고 돌리면 됨 
 # news
-# dmr = df['dmr_news_keywords'][0:12]
-# print(dmr)
-# lda = df['lda_news_keywords'][0:12]
-# print(lda)
+if target_name == 'news':
+  dmr = df['dmr_keywords']
+  print(dmr)
+  lda = df['lda_keywords']
+  print(lda) 
 
-# papers
-dmr = df['dmr_papers_keywords'][0:8]
-print(dmr)
-lda = df['lda_papers_keywords'][0:8]
-print(lda)
-
-# # patents
-# dmr = df['dmr_patents_keywords'][0:14]
-# #print(dmr)
-# lda = df['lda_patents_keywords'][0:14]
-#print(lda)
+elif target_name == 'papers':
+  dmr = df['dmr_keywords']
+  print(dmr)
+  lda = df['lda_keywords']
+  print(lda)
+  
+elif target_name == 'patents':
+  dmr = df['dmr_keywords']
+  print(dmr)
+  lda = df['lda_keywords']
+  print(lda)
 
 
 sentence1 = dmr.to_list()
@@ -52,7 +65,7 @@ corpus
 cor = []
 i=0
 for i in range(len(corpus)):
-  c = corpus[i].split(" ")
+  c = str(corpus[i]).split(" ")
   cor.append(c)
 print(cor)
 
@@ -76,7 +89,6 @@ for v in vocab:
   i+=1
 terms_to_ids
 
-#terms_to_ids['access']
 
 ## corpus_one_hot
 allones = []
@@ -86,7 +98,7 @@ for i in range(len(corpus)):
   #terms_to_ids 
   one_hot = [0]*len(vocab)
   #print(one_hot)
-  for x in c.split(" "):
+  for x in str(c).split(" "):
     #print(x)
     one_hot[terms_to_ids[x]] = 1
   print(one_hot)
@@ -101,7 +113,7 @@ for i in range(len(sentence1)):
   #terms_to_ids 
   one_hot = [0]*len(vocab)
   #print(one_hot)
-  for x in c.split(" "):
+  for x in str(c).split(" "):
     #print(x)
     one_hot[terms_to_ids[x]] = 1
   print(one_hot)
@@ -116,25 +128,18 @@ for i in range(len(sentence2)):
   #terms_to_ids 
   one_hot = [0]*len(vocab)
   #print(one_hot)
-  for x in c.split(" "):
+  for x in str(c).split(" "):
     #print(x)
     one_hot[terms_to_ids[x]] = 1
   print(one_hot)
   allones_lda.append(one_hot)
 
 np.array(allones)
-  np.array(allones_dmr)
-  np.array(allones_lda)
-
-!pip install transformers
-
-import torch
-from transformers import BertTokenizer, BertModel
+np.array(allones_dmr)
+np.array(allones_lda)
 
 tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
 model = BertModel.from_pretrained('bert-base-multilingual-cased')
-
-import numpy as np
 
 embeddingDict = {}
 for i in range(len(vocab)):
@@ -144,10 +149,8 @@ for i in range(len(vocab)):
   embeddings = embeddings.reshape(embeddings.shape[0], -1)
   avg = np.average(embeddings[1:-1], axis=0)
   embeddingDict[vocab[i]] = avg
-#print(embeddingDict.values())
 
-#print(embeddingDict['authentication'])
-print(embeddingDict)
+#print(embeddingDict)
 #print(embeddingDict.items())
 
 embeddingDict = dict(sorted(embeddingDict.items()))
@@ -231,18 +234,15 @@ embeddings2 = embeddings2 /  np.linalg.norm(embeddings2, axis=1, keepdims=True)
 
 print(finvector)
 
-!pip install sentence_transformers
+#!pip install sentence_transformers
 
 # https://stackoverflow.com/questions/55619176/how-to-cluster-similar-sentences-using-bert #참고 링크
 
 """
 This is a simple application for sentence embeddings: clustering
-
 Sentences are mapped to sentence embeddings and then agglomerative clustering with a threshold is applied.
 """
 #from sentence_transformers import SentenceTransformer
-from sklearn.cluster import AgglomerativeClustering
-import numpy as np
 
 # Normalize the embeddings to unit length
 embeddings = list(finvector.values()) 
@@ -252,7 +252,7 @@ print(embeddings)
 # Perform clustering
 # n_clusters 랑 distance_threshold 둘 중 하나만 쓸 수 있음 
 # n_clusters = 11
-clustering_model = AgglomerativeClustering(n_clusters= None, affinity='cosine', linkage='average', distance_threshold=0.07) # distance_threshold=0.4, distance_threshold=1.5 등 #news: distance_threshold=0.07 #papers:distance_threshold=0.07 #papents:distance_threshold=0.07
+clustering_model = AgglomerativeClustering(n_clusters= None, affinity='cosine', linkage='average', distance_threshold=0.05)  #distance_threshold=0.04, distance_threshold=1.5 등 #n_clusters= None #patent: 0.05
 clustering_model.fit(embeddings)
 cluster_assignment = clustering_model.labels_
 
@@ -270,14 +270,6 @@ for i, cluster in clustered_sentences.items():
     print("")
 
 # Agglomerative clustering
-from numpy import unique
-from numpy import where
-from sklearn.cluster import AgglomerativeClustering
-from matplotlib import pyplot
-from sklearn.metrics import silhouette_score
-from sklearn.metrics import calinski_harabasz_score
-from sklearn.metrics import davies_bouldin_score
-
 # define the model
 #model = AgglomerativeClustering(n_clusters=4)
 # fit model and predict clusters
@@ -289,6 +281,11 @@ clusters = unique(yhat)
 score_AGclustering_s = silhouette_score(embeddings, yhat.labels_, metric='cosine')
 score_AGclustering_c = calinski_harabasz_score(embeddings, yhat.labels_)
 score_AGclustering_d = davies_bouldin_score(embeddings, yhat_2)
+
+with open('./results/' + target_name + '_score.json', 'w') as f:
+    #json.dump({'Silhouette Score': score_AGclustering_s, 'Calinski Harabasz Score': score_AGclustering_c, 'Davies Bouldin Score': score_AGclustering_d}, f)
+    json.dump({'Silhouette Score': format(score_AGclustering_s, ".4f"), 'Calinski Harabasz Score': format(score_AGclustering_c, ".4f"), 'Davies Bouldin Score': format(score_AGclustering_d, ".4f")}, f)
+    
 print('Silhouette Score: %.4f' % score_AGclustering_s)
 print('Calinski Harabasz Score: %.4f' % score_AGclustering_c)
 print('Davies Bouldin Score: %.4f' % score_AGclustering_d)
@@ -315,12 +312,12 @@ clustering = []
 for i, cluster in clustered_sentences.items(): #items()쓰면 key와 value 쌍을 얻을 수 있음 
     #print("Cluster ", i+1)
     #print(cluster)
-    str = " ".join(set(cluster)) # keywords간의 중복제거 하기 싫으면 set 없애면 됨 
-    #print(str)
-    clustering.append(str)
+    _str = " ".join(map(str,set(cluster))) # keywords간의 중복제거 하기 싫으면 set 없애면 됨 
+    #print(str)   
+    clustering.append(_str)
     num = i+1 #f"topic {i+1}" 
     topic_num.append(num)
-    topic_cluster[num] = str
+    topic_cluster[num] = _str
 topic_keywords = topic_cluster
 #print(topic_keywords) #key,value 형태 # ex) {'topic 1': 'cryptocurrencies crypto  services cryptocurrencies price', 'topic 2': 'government trade countries china economy growth sector industry country innovation nfts art game auction artists tokens games sale metaverse nft', 'topic 3': 'university health research students school education work program city science insider trends industry reports media book coverage report intelligence insiders', 'topic 4': 'security sanctions department government money hackers law court states case capital startups startup venture investment fund funding ventures fintech firm', 'topic 5': 'facebook law regulators tax government policy rules libra mr president university students school event research program director education science city', 'topic 6': 'nfts art work game media money something york thats things health supply group products logistics food industry sales customers vehicles', 'topic 7': 'services startups capital startup tech venture investment software platform firm law security court money department hackers enforcement case transactions fraud', 'topic 8': 'application transaction network images tables charts states office abstract device stock stocks shares growth cent investment markets price quarter index', 'topic 9': 'banks payments payment services banking currency money transactions credit customers mr things work money something thats lot media dont york', 'topic 10': 'energy food power industry mining supply oil gas electricity carbon crypto assets securities exchange asset trading regulators cryptocurrencies industry exchanges'}
 #print(topic_keywords.keys())
@@ -333,19 +330,20 @@ keywords = clustering
 # dataframe 형태로 저장 
 df1 = {'topic_num' : topic_num, 'keywords' : keywords}
 df2 = pd.DataFrame(df1)
+#df2 = df2.dropna()
 print(df2)
-df2.to_csv('/content/drive/MyDrive/Colab Notebooks/blockchain/papers_topic_clustering.csv', index=False)
+df2.to_csv('./results/' + target_name + '_topic_clustering.csv', index=False)
 
 
 # picKle 형태로 저장 
 import pickle
-with open('/content/drive/MyDrive/Colab Notebooks/blockchain/papers_topic_clustering.pkl', "wb") as file:
+with open('./results/' + target_name + '_topic_clustering.pkl', "wb") as file:
     pickle.dump(topic_keywords, file)
 
-df = pd.read_pickle('/content/drive/MyDrive/Colab Notebooks/blockchain/papers_topic_clustering.pkl') #어떻게 생겼나 확인
+df = pd.read_pickle('./results/' + target_name + '_topic_clustering.pkl') #어떻게 생겼나 확인
 print(df)
 
-# df = pd.read_pickle('/content/drive/MyDrive/Colab Notebooks/blockchain/results/news_topic_clustering.pkl') #어떻게 생겼나 확인
+# df = pd.read_pickle('./results/papers_topic_clustering.pkl') #어떻게 생겼나 확인
 # print(df)
 
 # dendrogram 그리기 
@@ -379,47 +377,6 @@ def plot_dendrogram(model, **kwargs):
 
 # plot dendrogram to visualize clusters
 plot_dendrogram(trained_model)
+plt.savefig('./results/' + target_name + '.png')
 
-# !pip install sentence_transformers
-
-# from sentence_transformers import SentenceTransformer, util
-# # model = SentenceTransformer('all-MiniLM-L6-v2')
-# # Two lists of sentences
-# # sentences1 = ['The cat sits outside']
-# # sentences2 = ['The dog plays in the garden']
-# #Compute embedding for both lists
-# # embeddings1 = model.encode(sentences1, convert_to_tensor=True)
-# # embeddings2 = model.encode(sentences2, convert_to_tensor=True)
-# #Compute cosine-similarities
-# cosine_scores = util.cos_sim(embeddings1, embeddings2)
-# #Output the pairs with their score
-
-# # for i in range(len(sentence1)):
-# #   for j in range(len(sentence2)):
-# #     # if cosine_scores[i][j] > 0.91:
-# #     print("{} \t\t {} \t\t  {:.4f}".format(sentence1[i], sentence2[j], cosine_scores[i][j]))
-
-
-# for j in range(len(sentence2)):
-#   for i in range(len(sentence1)):
-#     if cosine_scores[i][j] > 0.9:
-#       print("{} \t\t {} \t\t  {:.4f}".format(sentence2[j], sentence1[i], cosine_scores[i][j]))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  

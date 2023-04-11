@@ -136,6 +136,9 @@ def main():
 #                                    default='word_count',
 #                                    help='word_count_annotation_prefix')
     
+    parser_make_graph.add_argument('-m','--multiprocess',
+                                   default=1,type=int,
+                                   required=False,help='Number of maximal multiprocess for centrality/connectivity calculation. Default is 1.')
     
     ####### Arguments for extraction of a topic ########
     parser_extract_topic = subparsers.add_parser('extract_topic', # 3. extract_topic
@@ -180,6 +183,10 @@ def main():
                                       type=int,
                                       default=None,
                                       help='Maximal keyword number. Recommend 50')
+    parser_extract_topic.add_argument('-m','--multiprocess',
+                                      default=1,type=int,
+                                      required=False,help='Number of maximal multiprocess for centrality/connectivity calculation. Default is 1.')
+    
     
     ####### Arguments for random_clusters ########
     parser_random_cluster = subparsers.add_parser('random_cluster', # 4. random_cluster
@@ -188,10 +195,13 @@ def main():
                                        required=True,help='Whole time graph file.')
     parser_random_cluster.add_argument('-s','--seed_node_file',
                                        default=None,type=str,
-                                       help='File for seed nodes - tsv or txt formatted.')
+                                       help='File for seed nodes - tsv or txt formatted. (line delimitted)')
     parser_random_cluster.add_argument('-o','--output',
                                        default='./random_cluster.json',
                                        help='Output file. Recommend to end with \"json\"')
+    parser_random_cluster.add_argument('--exclusive_node_file',
+                                       default=None,type=str,
+                                       help='File with words to exclude for random walk. (keyword file template can be applied)')
     parser_random_cluster.add_argument('-n','--cluster_n',
                                        default=1000,
                                        type=int,
@@ -204,6 +214,9 @@ def main():
                                        default=10,
                                        type=int,
                                        help='Minimal number of nodes for a cluster')
+    parser_random_cluster.add_argument('-m','--multiprocess',
+                                       default=1,type=int,
+                                       required=False,help='Number of maximal multiprocess for centrality/connectivity calculation. Default is 1.')
     
 #     args = get_config()
     args = parser.parse_args()
@@ -249,6 +262,7 @@ def main():
             output_dir=_output,
             centrality_function_names=args.centrality,
             connectivity_function_names=args.connectivity,
+            multiprocess=args.multiprocess,
         )
         graph_file = os.path.join(_output,'combined_graph.pkl')
         node_annotation_file = os.path.join(_output,'node_attributes.txt')
@@ -303,16 +317,19 @@ def main():
                 central_node=args.central_node,
                 align_node_order=bool(args.align_node_order),
                 max_keyword_n=args.max_keyword_n,
+                multiprocess=args.multiprocess,
             )
     elif args.job == 'random_cluster':
         print("Generating clusters for %s"%args.input)
         random_cluster(
             whole_time_graph_file=args.input,
+            exclusive_node_file=args.exclusive_node_file,
             output_f=args.output,
             seed_node_file=args.seed_node_file,
             cluster=args.cluster_n,
             min_node_n=args.min_node_n,
             max_node_n=args.max_node_n,
+            multiprocess=args.multiprocess,
         )
         
     print('Finished')

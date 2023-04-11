@@ -1,9 +1,11 @@
-﻿,topic number,label,keywords
-0,0,edge fog devices wireless sdn,things iot devices networks internet communication applications architecture service edge
-1,1,electricity market energy trading prosumers energy market electricity,energy power trading market transaction electricity grid consumption demand distribution
-2,2,proceedings papers conference papers conference proceedings papers conference proceedings,detection machine conference proceedings topics papers learning prediction image networks
-3,3,designmethodologyapproach research limitationsimplications limitationsimplications implications findings,industry applications review literature economy cryptocurrency application adoption innovation market
-4,4,proofofwork consensus protocol pow miners consensus,consensus transaction transactions bitcoin nodes protocol performance mining algorithm payment
-5,5,patients health patient hospitals health care,health healthcare records patients education care record insurance covid19 access
-6,6,supply traceability supply supply chains products food,contracts supply contract traceability food ethereum platform smart application software
-7,7,encryption signature decryption scheme revocation,access scheme storage control authentication identity secure encryption protection signature
+﻿,topic number,label,lda_keywords
+0,0,supply chain food food supply supply chain traceability food safety,supply traceability food industry logistics chains products quality manufacturing production
+1,1,iomt internet things iomt things iomt internet things iot things iot,iot internet things devices healthcare health privacy applications architecture edge
+2,2,design/methodology/approach originality/value limitations/implications research limitations/implications implications,research industry review literature applications adoption application economy innovation intelligence
+3,3,solidity languages bugs contracts programs code,contracts contract ethereum software applications voting blockchains smart execution framework
+4,4,investors currencies cryptocurrency market cryptocurrencies money,bitcoin cryptocurrency transactions transaction cryptocurrencies payment market currency money price
+5,5,ipfs documents file records authenticity,service trust identity platform privacy storage services solution records integrity
+6,6,certificateless revocation ciphertext authentication scheme decryption,scheme privacy access authentication encryption control storage vehicles secure signature
+7,7,focus conference papers focus conference proceedings papers focus proceedings papers focus conference papers focus,learning detection machine networks conference algorithm proceedings topics papers prediction
+8,8,pow proof-of-work pow consensus protocol proof-of-work liveness,consensus nodes block protocol algorithm transaction performance transactions mining blockchains
+9,9,energy resources demand response energy trading electricity market prosumers,energy power trading market grid transaction electricity resource resources consumption

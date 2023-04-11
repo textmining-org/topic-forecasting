@@ -116,7 +116,7 @@ def _read_node_features_(file,gcn_io_format=True):
         with open(file, 'rb') as f:
             feature = json.loads(f.read().decode())
         return feature
-    
+
     
 # node_features(gcn_io_format==False): {ATTRIBUTE:{NODE:VALUE}}
 # node_features(gcn_io_format==True): 2-dim np.array - dim1 : time(or attribute)-specific, dim2 : node-specific
@@ -132,10 +132,10 @@ def _read_edge_features_(input_prefix,gcn_io_format=True):
     if gcn_io_format:
         if os.path.isdir(input_prefix):
             edge_idx_f = os.path.join(input_prefix,'edge_indices.json')
-            edge_wgt_f = os.path.join(input_prefix,'edge_weigths.json')
+            edge_wgt_f = os.path.join(input_prefix,'edge_weights.json')
         else:
             edge_idx_f = input_prefix+'.edge_indices.json'
-            edge_wgt_f = input_prefix+'.edge_weigths.json'
+            edge_wgt_f = input_prefix+'.edge_weights.json'
         with open(edge_idx_f, 'rb') as f:
             idx_d = json.loads(f.read().decode())
         with open(edge_wgt_f, 'rb') as f:
@@ -161,10 +161,10 @@ def _write_edge_features_(edge_features:dict,output_prefix,gcn_io_format=True):
     if gcn_io_format:
         if os.path.isdir(output_prefix):
             edge_idx_f = os.path.join(output_prefix,'edge_indices.json')
-            edge_wgt_f = os.path.join(output_prefix,'edge_weigths.json')
+            edge_wgt_f = os.path.join(output_prefix,'edge_weights.json')
         else:
             edge_idx_f = output_prefix+'.edge_indices.json'
-            edge_wgt_f = output_prefix+'.edge_weigths.json'
+            edge_wgt_f = output_prefix+'.edge_weights.json'
         
         edge_idx_d = {}
         edge_wgt_d = {}
@@ -196,6 +196,52 @@ def _load_graph_position_(file):
     with open(file,'rb') as f:
         _pos = json.loads(f.read().decode())
     return {_k:np.array(_v) for _k, _v in _pos.items()}
+    
+    
+# parse keyword (or word group) file
+# csv, tsv, txt, pkl and json formatted
+# returns keyword dictionary (KEYWORD_ID:[WORD1,WORD2,...])
+# keyword groups should be delimitted by line
+# words should be delimitted with space
+# for json formatted ones, it is recommended for files with type (list) for each keywords' value
+def parse_keyword_file(keyword_list_file): 
+    if keyword_list_file.endswith('csv'):
+        kwrd_df = pd.read_csv(keyword_list_file,sep=',')
+        keyword_d = {kwrd_df.loc[idx,:].loc['topic_num']:kwrd_df.loc[idx,:].loc['keywords'].split(' ') for idx in kwrd_df.index}
+    elif keyword_list_file.endswith('tsv'):
+        kwrd_df = pd.read_csv(keyword_list_file,sep='\t')
+        keyword_d = {kwrd_df.loc[idx,:].loc['topic_num']:kwrd_df.loc[idx,:].loc['keywords'].split(' ') for idx in kwrd_df.index}
+    elif keyword_list_file.endswith('pkl'):
+        with open(keyword_list_file, 'rb') as f:
+            kwrd_d = pickle.load(f)
+        keyword_d = {_k:_v.split(' ') for _k, _v in kwrd_d.items()}
+    elif keyword_list_file.endswith('txt'): # considering that the file consists of list of words
+        with open(keyword_list_file,'rb') as f:
+            reading = f.read().decode()
+        keyword_list = reading.split()
+        keyword_d = {keyword_list_file:keyword_list}
+    elif keyword_list_file.endswith('json'):
+        with open(keyword_list_file,'rb') as f:
+            reading = json.loads(f.read().decode())
+        if type(list(reading.values())[0]) == str:
+            keyword_d = {_k:_v.split(' ') for _k, _v in reading.items()}
+        else:
+            keyword_d = reading
+    return keyword_d
+    
+    
+# save keyword dictionary to file
+# json is recommended
+# keyword_dict should be formatted as : {KEYWORD_ID:[WORD1,WORD2,...]}
+def save_keyword_dict(keyword_dict:dict,file:str):
+    if file.endswith('json'):
+        with open(file,'wb') as f:
+            f.write(json.dumps(keyword_dict).encode())
+    else:
+        keyword_df_d = {k:' '.join(v) for k,v in keyword_dict.items()}
+        keyword_ser = pd.Series(keyword_df_d)
+        keyword_ser.name = 'keywords'
+        keyword_ser.index.name = 'topic_num'
     
     
 #########################
