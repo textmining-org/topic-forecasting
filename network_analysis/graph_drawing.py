@@ -10,15 +10,19 @@ def _draw_graph_(G,
                  output:str='output.png',
                  weight:str='inv_cooccurrence',
                  pos:'networkx.Layout'=None,
-                 nodesize_key:str='word_count',
-                 edgewidth_key:str='cooccurrence',
-                 cmap=plt.cm.RdYlBu_r,
+                 node_feature:str='word_count',
+                 nodesize_val:float=None,
+                 node_alpha:float=1.0,
+                 node_cmap=plt.cm.autumn_r,
+                 edge_feature:str='cooccurrence',
+                 edgewidth_val:float=None,
+                 edge_cmap=plt.cm.autumn_r,
                  show_label:bool=True,
                  sub_G_node_list:list=None, # this can be topic
                  with_null_nodes:bool=True,
                  label_options:dict={'font_size':20},
-                 edge_options:dict={'alpha':0.7},
-                 edge_width_multiply:float=5.,
+                 edge_options:dict={},
+                 edge_width_multiply:float=0.1,
                 ):
     fig, ax = plt.subplots(figsize=(12, 12))
         
@@ -26,7 +30,7 @@ def _draw_graph_(G,
         sub_G = G.subgraph(sub_G_node_list).copy()
         if with_null_nodes:
             _new_nodes = list(set(sub_G_node_list)-set(sub_G.nodes))
-            sub_G.add_nodes_from([(n,{nodesize_key:0.0}) for n in _new_nodes])
+            sub_G.add_nodes_from([(n,{node_feature:0.0}) for n in _new_nodes])
     else:
         sub_G = G
     
@@ -35,15 +39,21 @@ def _draw_graph_(G,
         _pos = nx.kamada_kawai_layout(sub_G,weight=weight)
     else:
         _pos = {_k:_v for _k,_v in pos.items() if _k in sub_G.nodes}
-
-    nodesize = [sub_G.nodes[node][nodesize_key]*100 for node in sub_G.nodes]
-    
+    if nodesize_val:
+        nodesize = [nodesize_val for node in sub_G.nodes]
+    else:
+        nodesize = [sub_G.nodes[node][node_feature]*100 for node in sub_G.nodes]
+    if node_cmap:
+        nodecolor = [sub_G.nodes[node][node_feature]*100 for node in sub_G.nodes]
+    else:
+        nodecolor = [1.0 for node in sub_G.nodes]
     nx.draw_networkx_nodes(
         sub_G,
         pos=_pos,
         node_size=nodesize,
-        node_color=nodesize,
-        cmap=cmap,
+        node_color=nodecolor,
+        cmap=node_cmap,
+        alpha=node_alpha,
     )
     if show_label:
         nx.draw_networkx_labels(
@@ -51,17 +61,22 @@ def _draw_graph_(G,
             pos=_pos,
             **label_options,
         )
-    edgewidth = [sub_G.get_edge_data(u,v)[edgewidth_key]*edge_width_multiply for u, v in sub_G.edges]
+    if edgewidth_val:
+        edgewidth = [edgewidth_val for u, v in sub_G.edges]
+    else:
+        edgewidth = [sub_G.get_edge_data(u,v)[edge_feature]*edge_width_multiply for u, v in sub_G.edges]
+    if edge_cmap:
+        edgecolor = [sub_G.get_edge_data(u,v)[edge_feature]*edge_width_multiply for u, v in sub_G.edges]
+    else:
+        edgecolor = [1.0 for u, v in sub_G.edges]
     nx.draw_networkx_edges(sub_G,
                            pos=_pos,
                            width=edgewidth,
-                           edge_color=edgewidth,
-                           edge_cmap=cmap,
+                           edge_color=edgecolor,
+                           edge_cmap=edge_cmap,
                            **edge_options,
 #                            # TODO REMOVE HERE
-#                            width=1.0,
 #                            edge_color="r",
-#                            edge_cmap=None,
 #                            alpha=0.7,
 #                            # BY HERE
                           )
@@ -79,12 +94,18 @@ def draw_time_serial_graph(graph_loc_d:dict,
                            standard_position:bool=True,
                            standard_position_file:str=False,
                            standard_position_G_file:str=False,
-                           nodesize_key:str='word_count',
-                           edgewidth_key:str='cooccurrence',
-                           cmap=plt.cm.RdYlBu_r,
-                           edge_width_multiply=5.,
+                           node_feature:str='word_count',
+                           nodesize_val:float=None,
+                           node_alpha:float=1.0,
+                           node_cmap=plt.cm.autumn_r,
+                           edge_feature:str='cooccurrence',
+                           edgewidth_val:float=None,
+                           edge_cmap=plt.cm.autumn_r,
+                           edge_width_multiply=0.1,
+                           edge_options:dict={},
                            save_pos=False,
                            sub_G_node_list:list=[],
+                           show_label=True,
                           ):
     output = os.path.abspath(output)
     os.makedirs(output,exist_ok=True)
@@ -97,9 +118,10 @@ def draw_time_serial_graph(graph_loc_d:dict,
         elif standard_position_G_file:
             print("Parsing graph file...")
             pos_G = net_utils.load_graph(standard_position_G_file)
+            pos_subg = pos_G.subgraph(sub_G_node_list)
             print("Calculating standard position...")
-            pos = nx.kamada_kawai_layout(pos_G,weight=pos_weight)
-            del pos_G
+            pos = nx.kamada_kawai_layout(pos_subg,weight=pos_weight)
+            del pos_subg
         # Standard at the last graph in ordered graph_loc_d's file location
         else:
             print("Parsing graph file %s for standard position..."%(list(graph_loc_d.values())[-1]))
@@ -128,11 +150,17 @@ def draw_time_serial_graph(graph_loc_d:dict,
             output=curr_output,
             weight=pos_weight,
             pos=pos,
-            nodesize_key=nodesize_key,
-            edgewidth_key=edgewidth_key,
-            cmap=cmap,
+            node_feature=node_feature,
+            nodesize_val=nodesize_val,
+            node_alpha=node_alpha,
+            node_cmap=node_cmap,
+            edge_feature=edge_feature,
+            edgewidth_val=edgewidth_val,
+            edge_cmap=edge_cmap,
+            edge_options=edge_options,
             sub_G_node_list=curr_target_nodes,
             edge_width_multiply=edge_width_multiply,
+            show_label=show_label,
         )
     return output
 
@@ -140,64 +168,97 @@ def draw_time_serial_graph(graph_loc_d:dict,
 #### example ####
 
 def main():
-    #     G = net_utils.load_graph('./topic-forecasting/output/papers_co10/3.graph/combined_graph.pkl')
-    #     draw_graph(G=G,output='./papers.combined_graph.whole_time.png',
-    #         weight='word_count:whole_time',
-    #         nodesize_key='word_count:whole_time',
-    #         edgewidth_key='cooccurrence:whole_time',)
+#     G = net_utils.load_graph('./topic-forecasting/output/papers_co10/3.graph/combined_graph.pkl')
+#     draw_graph(G=G,output='./papers.combined_graph.whole_time.png',
+#         weight='word_count:whole_time',
+#         node_feature='word_count:whole_time',
+#         edge_feature='cooccurrence:whole_time',)
 
-        pos = None
-        pos_file = None
-        # Single
-    #     G = net_utils.load_graph('./topic-forecasting/output/patents_co10/3.graph/combined_graph.pkl')
-    #     _draw_graph_(
-    #         G=G,
-    #         output='./test_result.graph.plot.png',
-    # #         output='./patents.combined_graph.whole_time.png',
-    #         pos_weight='inv_cooccurrence:whole_time',
-    #         nodesize_key='word_count:whole_time',
-    #         edgewidth_key='cooccurrence:whole_time',)
+    pos = None
+    pos_file = None
+    # Single
+#     G = net_utils.load_graph('./topic-forecasting/output/patents_co10/3.graph/combined_graph.pkl')
+#     _draw_graph_(
+#         G=G,
+#         output='./test_result.graph.plot.png',
+# #         output='./patents.combined_graph.whole_time.png',
+#         pos_weight='inv_cooccurrence:whole_time',
+#         node_feature='word_count:whole_time',
+#         edge_feature='cooccurrence:whole_time',)
 
-
-        time_file = './topic-forecasting/output/time_line.txt' # annotation
-        times = pd.read_csv('./topic-forecasting/output/time_line.txt',header=None).iloc[:,0].values
-        annod_d = {t:f'./topic-forecasting/output/patents_co10/3.graph/time_speicific_graphs/{t}.cooccurrence.graph.pkl' for t in times}
-        topic_f = './topic-forecasting/topic_modeling/topic_clustering/results/patents_topic_clustering.csv'
-        pos_file = './topic-forecasting/output/patents_co10_test_graphs/standard_graph_position.json'
-        if topic_f:
-            topic_df = pd.read_csv(topic_f)
-            for idx in topic_df.index:
-                [topic_id, kw_str] = topic_df.loc[idx,:].values
-                _kws = list(set(kw_str.split(' ')))
-                curr_output = os.path.join(f'./topic-forecasting/output/patents_co10_test_graphs',f'topic_graph.{topic_id:02d}')
-                draw_time_serial_graph(
-                    graph_loc_d=annod_d,
-                    output=curr_output,
-                    pos_weight='cooccurrence',
-                    standard_position=True,
-                    standard_position_G_file='./topic-forecasting/output/patents_co10/3.graph/combined_graph.pkl',
-                    standard_position_file=pos_file,
-                    nodesize_key='word_count',
-                    edgewidth_key='cooccurrence',
-                    cmap=plt.cm.RdYlBu_r,
-                    edge_width_multiply=0.1,
-                    save_pos=True,
-                    sub_G_node_list=_kws
-                )
-        else:
+    time_file = './topic-forecasting/output/time_line.txt' # annotation
+    times = pd.read_csv('./topic-forecasting/output/time_line.txt',header=None).iloc[:,0].values
+    annod_d = {t:f'./topic-forecasting/output/patents_co10/3.graph/time_speicific_graphs/{t}.cooccurrence.graph.pkl'  \
+               for t in times}
+    label_graph_d = {'label_graph':f'./topic-forecasting/output/patents_co10/3.graph/combined_graph.pkl'}
+    topic_f = './topic-forecasting/topic_modeling/topic_clustering/results/patents_topic_clustering.csv'
+    pos_file = './topic-forecasting/output/patents_co10_test_graphs/standard_graph_position.json'
+    if topic_f:
+        topic_df = pd.read_csv(topic_f)
+        for idx in topic_df.index:
+            [topic_id, kw_str] = topic_df.loc[idx,:].values
+            _kws = list(set(kw_str.split(' ')))
+            curr_output = os.path.join(f'./topic-forecasting/output/patents_co10_graphs',f'topic_graph.{topic_id:02d}')
+            # without label
             draw_time_serial_graph(
                 graph_loc_d=annod_d,
-                output=f'./topic-forecasting/output/patents_co10_test_graphs',
+                output=curr_output,
                 pos_weight='cooccurrence',
                 standard_position=True,
                 standard_position_G_file='./topic-forecasting/output/patents_co10/3.graph/combined_graph.pkl',
                 standard_position_file=pos_file,
-                nodesize_key='word_count',
-                edgewidth_key='cooccurrence',
-                cmap=plt.cm.RdYlBu_r,
+                node_feature='word_count',
+                nodesize_val=100., # constant node size
+                node_alpha=0.7,
+                node_cmap=plt.cm.autumn_r, # color map
+                edge_feature='cooccurrence',
+                edgewidth_val=1.0, # constant edge width
+                edge_cmap=plt.cm.autumn_r, # color map
                 edge_width_multiply=0.1,
                 save_pos=True,
+                show_label=False,
+                sub_G_node_list=_kws,
             )
+            # label-only graph
+            draw_time_serial_graph(
+                graph_loc_d=label_graph_d,
+                output=curr_output,
+                pos_weight='cooccurrence',
+                standard_position=True,
+                standard_position_G_file='./topic-forecasting/output/patents_co10/3.graph/combined_graph.pkl',
+                standard_position_file=pos_file,
+                node_feature='word_count:whole_time',
+                nodesize_val=100.0, # constant node size
+                node_cmap=None, # color map
+                node_alpha=0.2,
+                edge_feature='cooccurrence:whole_time',
+                edgewidth_val=1.0, # constant edge width
+                edge_cmap=None,
+                edge_width_multiply=0.1,
+                save_pos=True,
+                show_label=True,
+                sub_G_node_list=_kws,
+                edge_options={'alpha':0.2}
+            )
+    else:
+        draw_time_serial_graph(
+            graph_loc_d=annod_d,
+            output=f'./topic-forecasting/output/patents_co10_graphs',
+            pos_weight='cooccurrence',
+            standard_position=True,
+            standard_position_G_file='./topic-forecasting/output/patents_co10/3.graph/combined_graph.pkl',
+            standard_position_file=pos_file,
+            node_feature='word_count',
+            nodesize_val=1.0, # constant node size
+            edge_feature='cooccurrence',
+            edgewidth_val=1.0, # constant edge width
+            node_cmap=plt.cm.autumn_r,
+            edge_cmap=plt.cm.autumn_r,
+            edge_width_multiply=0.1,
+            show_label=False,
+            save_pos=True,
+        )
+        
         
 if __name__=='__main__':
     main()
