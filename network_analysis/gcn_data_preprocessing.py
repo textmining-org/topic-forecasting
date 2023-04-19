@@ -12,6 +12,7 @@ import json
 import tqdm
 import _multi
 import argparse
+import re
 
 
 # returns log_base(arr1+pseudocount/arr2+pseudocount)
@@ -95,7 +96,7 @@ def __write_edge_fs__(attrb_l,_idx_dict,_weight_dict,prfx):
 
 
 # log(X_t/X_t-1)
-def convert_fold_change(cluster_data_dir,output_dir,base=np.e,pseudocount=1.0):
+def convert_fold_change(cluster_data_dir,output_dir,base=np.e,pseudocount=1.0,wo_node_fc=False,wo_edge_fc=False):
     _o_dir = os.path.abspath(output_dir)
     os.makedirs(_o_dir,exist_ok=True)
     
@@ -105,15 +106,6 @@ def convert_fold_change(cluster_data_dir,output_dir,base=np.e,pseudocount=1.0):
         
             # fold change
         val_arr,attrb_l = __read_node_fs__(os.path.join(cluster_data_dir,_prfx))
-#         for _f in _fs:
-#             if _f.endswith('node_targets.npy'):
-#                 val_arr = np.load(_f)
-#             # drop the first one
-#             elif _f.endswith('node_attributes.txt'):
-#                 with open(_f,'rb') as f:
-#                     attrb_l = f.read().decode().split() # [TIME_KEY]
-#                 while '' in attrb_l:
-#                     attrb_l.remove('')
         assert val_arr.shape[0] == len(attrb_l) # WARNING check numpy shape
         fc_val_arr = []
         fc_attrb_l = attrb_l[1:]
@@ -122,32 +114,20 @@ def convert_fold_change(cluster_data_dir,output_dir,base=np.e,pseudocount=1.0):
             # WARNING check numpy shape
             val0 = val_arr[idxt0,:]
             val1 = val_arr[idxt1,:]
-            fc_val = _fold_change_(val1,val0,base=base,pseudocount=pseudocount).reshape(1,-1)
+            if not wo_node_fc:
+                fc_val = _fold_change_(val1,val0,base=base,pseudocount=pseudocount).reshape(1,-1)
+            else:
+                fc_val = val1.reshape(1,-1)
             fc_val_arr.append(fc_val)
         del attrb_l
         del val_arr
         
         fc_val_arr = np.concatenate(fc_val_arr,axis=0)
         _out_prfx=os.path.join(_o_dir,_prfx)
-#         np.save(_out_prfx+'.node_targets.npy',fc_val_arr)
-#         with open(_out_prfx+'.node_attributes.txt','wb') as f:
-#             f.write('\n'.join(fc_attrb_l).encode())
         __write_node_fs__(val_arr=fc_val_arr,attrb_l=fc_attrb_l,prfx=_out_prfx)
             
     # Edge val
     for _prfx, _fs in edge_fs.items():
-#         for _f in _fs:
-#             if _f.endswith('edge_attributes.txt'):
-#                 with open(_f,'rb') as f:
-#                     attrb_l = f.read().decode().split() # [TIME_KEY]
-#                 while '' in attrb_l:
-#                     attrb_l.remove('')
-#             elif _f.endswith('edge_indices.json'):
-#                 with open(_f,'rb') as f:
-#                     _idx_dict = json.loads(f.read().decode()) # {TIME_KEY:[[source_idx],[target_idx]]}
-#             elif _f.endswith('edge_weights.json'):
-#                 with open(_f,'rb') as f:
-#                     _weight_dict = json.loads(f.read().decode()) # {TIME_KEY:[weight_val]}
         attrb_l,_idx_dict,_weight_dict = __read_edge_fs__(os.path.join(cluster_data_dir,_prfx))
 
         assert set(attrb_l) == set(_idx_dict.keys())
@@ -159,38 +139,34 @@ def convert_fold_change(cluster_data_dir,output_dir,base=np.e,pseudocount=1.0):
         for _idx in range(1,len(attrb_l)):
             _t_1 = attrb_l[_idx]
             _t_0 = attrb_l[_idx-1]
-            # WARNING, check index
-            _t_0_ser = pd.Series(_weight_dict[_t_0],
-                                 index=list(zip(_idx_dict[_t_0][0],_idx_dict[_t_0][1]))) #((SRC1_no,SRC2_no))
-            _t_1_ser = pd.Series(_weight_dict[_t_1],
-                                 index=list(zip(_idx_dict[_t_1][0],_idx_dict[_t_1][1])))
-            _whole_idx = sorted(list(set(_t_0_ser.index).union(set(_t_1_ser.index))))
-            # WARNING, check index
-            _t_0_ser = pd.Series(_t_0_ser,index=_whole_idx)
-            _t_0_ser = _t_0_ser.fillna(0.0)
-            _t_1_ser = pd.Series(_t_1_ser,index=_whole_idx)
-            _t_1_ser = _t_1_ser.fillna(0.0)
-            
-            fc_arr = _fold_change_(
-                np.array(_t_1_ser.values),
-                np.array(_t_0_ser.values),
-                base=base,
-                pseudocount=pseudocount
-            )
-            fc_wgt_dict[_t_1] = fc_arr.reshape(-1).tolist()
-            
-            fc_idx_dict[_t_1] = [[i[0] for i in _whole_idx],[i[1] for i in _whole_idx]]
+            if not wo_edge_fc:
+                # WARNING, check index
+                _t_0_ser = pd.Series(_weight_dict[_t_0],
+                                     index=list(zip(_idx_dict[_t_0][0],_idx_dict[_t_0][1]))) #((SRC1_no,SRC2_no))
+                _t_1_ser = pd.Series(_weight_dict[_t_1],
+                                     index=list(zip(_idx_dict[_t_1][0],_idx_dict[_t_1][1])))
+                _whole_idx = sorted(list(set(_t_0_ser.index).union(set(_t_1_ser.index))))
+                # WARNING, check index
+                _t_0_ser = pd.Series(_t_0_ser,index=_whole_idx)
+                _t_0_ser = _t_0_ser.fillna(0.0)
+                _t_1_ser = pd.Series(_t_1_ser,index=_whole_idx)
+                _t_1_ser = _t_1_ser.fillna(0.0)
+                fc_arr = _fold_change_(
+                    np.array(_t_1_ser.values),
+                    np.array(_t_0_ser.values),
+                    base=base,
+                    pseudocount=pseudocount
+                )
+                fc_wgt_dict[_t_1] = fc_arr.reshape(-1).tolist()
+                fc_idx_dict[_t_1] = [[i[0] for i in _whole_idx],[i[1] for i in _whole_idx]]
+            else:
+                fc_wgt_dict[_t_1] = _weight_dict[_t_1]
+                fc_idx_dict[_t_1] = _idx_dict[_t_1]
             
         fc_attrb_l=attrb_l[1:]
         # write
         _out_prfx=os.path.join(_o_dir,_prfx)
         __write_edge_fs__(attrb_l=fc_attrb_l,_idx_dict=fc_idx_dict,_weight_dict=fc_wgt_dict,prfx=_out_prfx)
-#         with open(_out_prfx+'.edge_attribute.txt','wb') as f:
-#             f.write('\n'.join(fc_attrb_l).encode())
-#         with open(_out_prfx+'.edge_indices.json','wb') as f:
-#             f.write(json.dumps(fc_idx_dict).encode())
-#         with open(_out_prfx+'.edge_weights.json','wb') as f:
-#             f.write(json.dumps(fc_wgt_dict).encode())
         del attrb_l
         del _idx_dict
         del _weight_dict
@@ -205,6 +181,8 @@ def convert_fold_change_batch(master_cluster_data_dir,
                               master_output_dir,
                               base=np.e,
                               pseudocount=1.0,
+                              wo_node_fc=False,
+                              wo_edge_fc=False,
                               multiprocess:int=8,
                              ):
     m_i_d = os.path.abspath(master_cluster_data_dir)
@@ -222,7 +200,8 @@ def convert_fold_change_batch(master_cluster_data_dir,
         fn_kwarg_list.append(dict(
             cluster_data_dir=os.path.join(m_i_d,sub_dir),
             output_dir=os.path.join(m_o_d,sub_dir),
-            base=base,pseudocount=pseudocount
+            base=base,pseudocount=pseudocount,
+            wo_node_fc=wo_node_fc,wo_edge_fc=wo_edge_fc,
         ))
         
     fn = convert_fold_change
@@ -245,10 +224,6 @@ def split_feature_time(cluster_data_dir,
                        dir_portion_ratio_list:list=[0.7,0.85],
                        ):
     o_ds = [os.path.abspath(i) for i in output_dirs]
-#     o_d_1 = os.path.abspath(output_dir1)
-#     o_d_2 = os.path.abspath(output_dir2)
-#     os.makedirs(output_dir1,exist_ok=True)
-#     os.makedirs(output_dir2,exist_ok=True)
     for _o_d in o_ds:
         os.makedirs(_o_d,exist_ok=True)
     # Time line
@@ -284,16 +259,6 @@ def split_feature_time(cluster_data_dir,
                 val_arr=_curr_val_arr,
                 attrb_l=_curr_attrb_l,
                 prfx=_out_prfx)
-            
-#             val_arr1 = val_arr[:time_idx,:]
-#             val_arr2 = val_arr[time_idx:,:]
-#             attrb_l_1 = attrb_l[:time_idx]
-#             attrb_l_2 = attrb_l[time_idx:]
-
-#             _out_prfx1=os.path.join(o_d_1,_node_prfx)
-#             _out_prfx2=os.path.join(o_d_2,_node_prfx)
-#             __write_node_fs__(val_arr=val_arr1,attrb_l=attrb_l_1,prfx=_out_prfx1)
-#             __write_node_fs__(val_arr=val_arr2,attrb_l=attrb_l_2,prfx=_out_prfx2)
         
     for _edge_prfx in edge_fs:
         attrb_l,_idx_dict,_weight_dict = __read_edge_fs__(os.path.join(cluster_data_dir,_edge_prfx))
@@ -310,18 +275,6 @@ def split_feature_time(cluster_data_dir,
                 _weight_dict=_curr_weight_dict_1,
                 prfx=_out_prfx)
         
-#         attrb_l_1 = attrb_l[:time_idx]
-#         attrb_l_2 = attrb_l[time_idx:]
-#         _idx_dict_1 = {_k:_idx_dict[_k] for _k in attrb_l_1}
-#         _idx_dict_2 = {_k:_idx_dict[_k] for _k in attrb_l_2}
-#         _weight_dict_1 = {_k:_weight_dict[_k] for _k in attrb_l_1}
-#         _weight_dict_2 = {_k:_weight_dict[_k] for _k in attrb_l_1}
-        
-#         _out_prfx1=os.path.join(o_d_1,_edge_prfx)
-#         _out_prfx2=os.path.join(o_d_2,_edge_prfx)
-#         __write_edge_fs__(attrb_l=attrb_l_1,_idx_dict=_idx_dict_1,_weight_dict=_weight_dict_1,prfx=_out_prfx1)
-#         __write_edge_fs__(attrb_l=attrb_l_2,_idx_dict=_idx_dict_2,_weight_dict=_weight_dict_2,prfx=_out_prfx2)
-    
     for _f in other_fs:
         for split_ord_idx, time_suffix_list in enumerate(timelines):
             os.system('cp %s %s'%(
@@ -373,6 +326,8 @@ def main():
     parser.add_argument('-f','--fold_change',default=False,action='store_true',help='With FC conversion process')
     parser.add_argument('-m','--multiprocess',type=int,default=8,help='For multiprocessing N')
     parser.add_argument('-o','--output',type=str,action='append',default=[],help='Output directory suffix - in order of time index to split')
+    parser.add_argument('--wo_node_fc',action='store_true',default=False,help='FC is not applied for node features')
+    parser.add_argument('--wo_edge_fc',action='store_true',default=False,help='FC is not applied for edge features')
     parser.add_argument('-n','--timepoint_n',type=int,action='append',default=[],help='Specific time point  to split : int. If fold_change is imposed, n-1 would be applied')
     
     args = parser.parse_args()
@@ -387,11 +342,19 @@ def main():
         splitting=True
     input_dir = os.path.abspath(args.input)
     if args.fold_change:
+        if not args.wo_node_fc and not args.wo_edge_fc:
+            fc_o_dir = input_dir+'.fc_converted'
+        elif not args.wo_node_fc and args.wo_edge_fc:
+            fc_o_dir = input_dir+'.node_fc_converted'
+        elif args.wo_node_fc and not args.wo_edge_fc:
+            fc_o_dir = input_dir+'.edge_fc_converted'
         convert_fold_change_batch(
             master_cluster_data_dir=input_dir,
-            master_output_dir=input_dir+'.fc_converted',
+            master_output_dir=fc_o_dir,
             base=np.e,
             pseudocount=1.0,
+            wo_node_fc=args.wo_node_fc,
+            wo_edge_fc=args.wo_edge_fc,
             multiprocess=args.multiprocess,)
         if splitting:
             split_feature_time_batch(

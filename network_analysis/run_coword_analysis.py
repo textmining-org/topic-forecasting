@@ -139,6 +139,9 @@ def main():
     parser_make_graph.add_argument('-m','--multiprocess',
                                    default=1,type=int,
                                    required=False,help='Number of maximal multiprocess for centrality/connectivity calculation. Default is 1.')
+    parser_make_graph.add_argument('--continue_subgraph_analysis',
+                                   default=False,action='store_true',
+                                   help='In case to continue from subgraph analysis')
     
     ####### Arguments for extraction of a topic ########
     parser_extract_topic = subparsers.add_parser('extract_topic', # 3. extract_topic
@@ -182,7 +185,7 @@ def main():
     parser_extract_topic.add_argument('--max_keyword_n',
                                       type=int,
                                       default=None,
-                                      help='Maximal keyword number. Recommend 50')
+                                      help='Maximal keyword number. Recommend 20')
     parser_extract_topic.add_argument('-m','--multiprocess',
                                       default=1,type=int,
                                       required=False,help='Number of maximal multiprocess for centrality/connectivity calculation. Default is 1.')
@@ -207,16 +210,22 @@ def main():
                                        type=int,
                                        help='Number of cluster to make')
     parser_random_cluster.add_argument('--max_node_n',
-                                       default=50,
+                                       default=20,
                                        type=int,
                                        help='Maximal number of nodes for a cluster')
     parser_random_cluster.add_argument('--min_node_n',
-                                       default=10,
+                                       default=8,
                                        type=int,
                                        help='Minimal number of nodes for a cluster')
+    parser_random_cluster.add_argument('--edge_drop_thr',
+                                       default=0.0,
+                                       type=float,
+                                       help='Edge dropping threshold. If imposed, edges with lower number of attributes than edge_drop_thr are droppped when random clustering.')
+    
     parser_random_cluster.add_argument('-m','--multiprocess',
                                        default=1,type=int,
                                        required=False,help='Number of maximal multiprocess for centrality/connectivity calculation. Default is 1.')
+    
     
 #     args = get_config()
     args = parser.parse_args()
@@ -251,19 +260,32 @@ def main():
             _input = os.path.join(_input,'coword_results.pkl') # inferrence
         _output = os.path.abspath(args.output)
         os.makedirs(_output,exist_ok=True)
-        
         print(f'Reconstructing master graph... \n{_input}')
-        reconstruct_graph(
-            coword_file=_input,
-            word_count_annotation_prefix='word_count', # annotation prefix for node
-            whole_word_count_annotation='word_count:whole_time', # annotation of node for whole time
-            coword_annotation_prefix='cooccurrence', # annotation prefix for edge
-            whole_coword_annotation='cooccurrence:whole_time', # annotation of edge for whole time
-            output_dir=_output,
-            centrality_function_names=args.centrality,
-            connectivity_function_names=args.connectivity,
-            multiprocess=args.multiprocess,
-        )
+        if not args.continue_subgraph_analysis:
+            reconstruct_graph(
+                coword_file=_input,
+                word_count_annotation_prefix='word_count', # annotation prefix for node
+                whole_word_count_annotation='word_count:whole_time', # annotation of node for whole time
+                coword_annotation_prefix='cooccurrence', # annotation prefix for edge
+                whole_coword_annotation='cooccurrence:whole_time', # annotation of edge for whole time
+                output_dir=_output,
+                centrality_function_names=args.centrality,
+                connectivity_function_names=args.connectivity,
+                multiprocess=args.multiprocess,
+            )
+            
+        else:
+            graph_reconstruction._graph_analysis_for_reconstruct_graph_(
+                coword_file=_input,
+                word_count_annotation_prefix='word_count', # annotation prefix for node
+                whole_word_count_annotation='word_count:whole_time', # annotation of node for whole time
+                coword_annotation_prefix='cooccurrence', # annotation prefix for edge
+                whole_coword_annotation='cooccurrence:whole_time', # annotation of edge for whole time
+                output_dir=_output,
+                centrality_function_names=args.centrality,
+                connectivity_function_names=args.connectivity,
+                multiprocess=args.multiprocess,
+            )
         graph_file = os.path.join(_output,'combined_graph.pkl')
         node_annotation_file = os.path.join(_output,'node_attributes.txt')
         edge_annotation_file = os.path.join(_output,'edge_attributes.txt')
@@ -330,6 +352,7 @@ def main():
             min_node_n=args.min_node_n,
             max_node_n=args.max_node_n,
             multiprocess=args.multiprocess,
+            edge_drop_thr=args.edge_drop_thr,
         )
         
     print('Finished')
