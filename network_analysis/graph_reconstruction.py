@@ -127,6 +127,7 @@ def reconstruct_time_graphs(by_month_word_count:dict=None,
                             by_month_coword_map:dict=None,
                             coword_file:str=None,
                             output_dir:str=None,
+                            without_graph_recon:bool=False,
                            ):
     if (not by_month_word_count or not by_month_coword_map) and coword_file:
         word_list, whole_word_count, by_month_word_count, whole_coword_map, by_month_coword_map = net_utils.parse_coword_chunk(coword_file)
@@ -135,9 +136,16 @@ def reconstruct_time_graphs(by_month_word_count:dict=None,
         output_dir = os.path.abspath(output_dir)
         os.makedirs(output_dir,exist_ok=True)
 #     for inv_bool_flt, cooc_inv_name in enumerate(['cooccurrence','inv_cooccurrence']):
-    for inv_bool_flt, cooc_inv_name in enumerate(['inv_cooccurrence']):
+#     for inv_bool_flt, cooc_inv_name in zip([False],['cooccurrence','inv_cooccurrence']):
+    for inv_bool_flt, cooc_inv_name in zip([True],['inv_cooccurrence']):
         sub_Gs[cooc_inv_name] = {}
         for time_key in by_month_word_count.keys():
+            if without_graph_recon:
+                if output_dir:
+                    sub_Gs[cooc_inv_name][time_key] = os.path.join(output_dir,f"{time_key}.{cooc_inv_name}.graph.pkl")
+                else:
+                    sub_Gs[cooc_inv_name][time_key] = False
+                continue
             G = _recon_time_graph_(
                 by_month_word_count=by_month_word_count,
                 by_month_coword_map=by_month_coword_map,
@@ -177,6 +185,83 @@ def _graph_analysis_multiprc_compo_(time_specific_grpah_file:str, #sub_g_o_d,f'{
     with open(connectivity_output_f,'wb') as f:
         f.write(json.dumps(_t_analyzed['connectivity']).encode())
 
+        
+def _graph_analysis_for_reconstruct_graph_(coword_file:str=None,
+                      word_list:list=None, # [WORD]
+                      whole_word_count:dict=None, # {WORD:COUNT}
+                      by_month_word_count:dict=None, # {TIME:{WORD:COUNT}}
+                      whole_coword_map:dict=None, # {(WORD1,WORD2):COUNT}
+                      by_month_coword_map:dict=None, # {TIME:{(WORD1,WORD2):COUNT}}
+                      word_count_annotation_prefix:str='word_count', # annotation prefix for node
+                      whole_word_count_annotation:str='word_count:whole_time', # annotation of node for whole time
+                      coword_annotation_prefix:str='cooccurrence', # annotation prefix for edge
+                      whole_coword_annotation:str='cooccurrence:whole_time', # annotation of edge for whole time
+                      output_dir:str='./output',
+                      centrality_function_names:list=['betweenness_centrality','closeness_centrality'],
+                      connectivity_function_names:list=['all_pairs_dijkstra'],
+                      multiprocess:int=8,
+                     )->('nx.Graph', list, list):
+    # In case that coword file is given
+    if coword_file:
+        print(f"Parsing file...\t{coword_file}")
+        # print(net_utils.parse_coword_chunk(coword_file))
+        word_list, whole_word_count, by_month_word_count, whole_coword_map, by_month_coword_map = net_utils.parse_coword_chunk(coword_file)
+        
+    o_d = os.path.abspath(output_dir)
+    # Subgraphs - timeline-specific
+    sub_g_o_d = os.path.join(o_d,'time_speicific_graphs')
+    sub_g_tmp_d = os.path.join(o_d,'tmp_graph_dir')
+    print(f"Output directory for sub graphs and analysis results: {sub_g_o_d}")
+    os.makedirs(sub_g_o_d,exist_ok=True)
+    os.makedirs(sub_g_tmp_d,exist_ok=True)
+    sub_Gs = reconstruct_time_graphs(
+        by_month_word_count=by_month_word_count,
+        by_month_coword_map=by_month_coword_map,
+        output_dir=sub_g_tmp_d,
+        without_graph_recon=True,
+    )
+    # memory saving
+    del word_list
+    del whole_word_count
+    del by_month_word_count
+    del whole_coword_map
+    del by_month_coword_map
+    
+    fn = _graph_analysis_multiprc_compo_
+    fn_arg_list = []
+    fn_kwarg_list = []
+
+    for cooc_key, t_sub_G_d in sub_Gs.items():
+        for time_key, sub_G in t_sub_G_d.items():
+            print(f'Current analysis: {time_key}.{cooc_key}')
+            assert os.path.isfile(os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.graph.pkl'))
+            _curr_arg_ = tuple()
+            _curr_kwarg_ = dict(
+                time_specific_grpah_file=os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.graph.pkl'),
+                centrality_function_names=centrality_function_names,
+                connectivity_function_names=connectivity_function_names,
+                edge_weight_keys=[cooc_key],
+                centrality_output_f=os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.centrality.json'),
+                connectivity_output_f=os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.connectivity.json'),
+            )
+            fn_arg_list.append(_curr_arg_)
+            fn_kwarg_list.append(_curr_kwarg_.copy())
+    time_lines = list(list(sub_Gs.values())[0].keys())
+    with open(os.path.join(o_d,'time_lines.txt'),'wb') as f:
+        f.write('\n'.join(time_lines).encode())
+    with open(os.path.join(o_d,'fc_time_lines.txt'),'wb') as f:
+        f.write('\n'.join(time_lines[1:]).encode())
+        
+    fn_args = _multi.argument_generator(fn_arg_list)
+    fn_kwargs = _multi.keyword_argument_generator(fn_kwarg_list)
+    _multi.multi_function_execution(
+        fn=fn,
+        fn_args=fn_args,
+        fn_kwargs=fn_kwargs,
+        max_processes=multiprocess,
+        collect_result=False,
+    )
+    
 
 ######## Master Function ########
 
@@ -256,7 +341,12 @@ def reconstruct_graph(coword_file:str=None,
         by_month_coword_map=by_month_coword_map,
         output_dir=sub_g_tmp_d,
     )
-    
+    # memory saving
+    del word_list
+    del whole_word_count
+    del by_month_word_count
+    del whole_coword_map
+    del by_month_coword_map
     
     fn = _graph_analysis_multiprc_compo_
     fn_arg_list = []
@@ -282,9 +372,9 @@ def reconstruct_graph(coword_file:str=None,
             fn_kwarg_list.append(_curr_kwarg_.copy())
     time_lines = list(list(sub_Gs.values())[0].keys())
     with open(os.path.join(o_d,'time_lines.txt'),'wb') as f:
-        f.write('\n'.join(time_lines))
+        f.write('\n'.join(time_lines).encode())
     with open(os.path.join(o_d,'fc_time_lines.txt'),'wb') as f:
-        f.write('\n'.join(time_lines[1:]))
+        f.write('\n'.join(time_lines[1:]).encode())
         
     del sub_Gs
             
@@ -297,28 +387,6 @@ def reconstruct_graph(coword_file:str=None,
         max_processes=multiprocess,
         collect_result=False,
     )
-    
-    # Backup
-#     for cooc_key, t_sub_G_d in sub_Gs.items():
-#         for time_key, sub_G in t_sub_G_d.items():
-#             print(f'Current analysis: {time_key}.{cooc_key}')
-#             net_utils.save_graph(
-#                 graph_obj=sub_G,
-#                 output_file=os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.graph.pkl'))
-#             assert os.path.isfile(os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.graph.pkl'))
-#             # _t_analyzed = {'centrality':{CENT_FUNC_NAME:{EDGE_WEIGHT_KEY:{NODE:VAL}}},
-#             #     'connectivity':{CONN_FUNC_NAME:{EDGE_WEIGHT_KEY:{NODE:{NODE:VAL}}}}}
-#             # NOTE: EDGE_WEIGHT_KEY is dependent on cooc vs inv_coor
-#             _t_analyzed = graph_analysis.analyze_graph(
-#                 graph_obj=sub_G,
-#                 centrality_function_names=centrality_function_names,
-#                 connectivity_function_names=connectivity_function_names,
-#                 edge_weight_keys=[cooc_key],
-#             )
-#             with open(os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.centrality.json'),'wb') as f:
-#                 f.write(json.dumps(_t_analyzed['centrality']).encode())
-#             with open(os.path.join(sub_g_o_d,f'{time_key}.{cooc_key}.connectivity.json'),'wb') as f:
-#                 f.write(json.dumps(_t_analyzed['connectivity']).encode())
     
     return G, node_annotations, edge_annotations
     
@@ -520,7 +588,7 @@ def extract_topic(input_package_dir:str,
 
                 
 # Batch function for multiple topics
-def extract_topic_batch(max_keyword_n:int=50,
+def extract_topic_batch(max_keyword_n:int=20,
                         multiprocess:int=8,
                         **kwargs,
                        ):
@@ -561,19 +629,6 @@ def extract_topic_batch(max_keyword_n:int=50,
                     max_node_n=max_keyword_n,)
                 fn_kwarg_fit_ftr_list.append(fit_ftr_kwargs.copy())
                 
-#         for topic, keyword_list in keyword_d.items():
-#             curr_kwargs = kwargs.copy()
-#             curr_kwargs['output_dir'] = os.path.join(kwargs['output_dir'],str(topic))
-#             os.makedirs(curr_kwargs['output_dir'],exist_ok=True)
-#             curr_kwargs['keyword_list_file'] = None
-#             curr_kwargs['keyword_list'] = list(set(keyword_list))
-#             extract_topic(**curr_kwargs)
-#             if max_keyword_n:
-#                 fit_features_to_structure(
-#                     topic_dir=os.path.join(kwargs['output_dir'],str(topic)),
-#                     output_dir=os.path.join(structured_od,str(topic)),
-#                     max_node_n=max_keyword_n,
-#                 )
         fn_args = _multi.argument_generator(fn_arg_list)
         fn_kwargs = _multi.keyword_argument_generator(fn_kwarg_list)
         _multi.multi_function_execution(
@@ -615,7 +670,7 @@ def _fit_structure_word_count_val_(node_val_mat:'numpy.array', # shape = (len(ti
 # Fit topic dataset to structured set
 def fit_features_to_structure(topic_dir:str,
                               output_dir:str,
-                              max_node_n:int=50,
+                              max_node_n:int=20,
                              ):
     i_d = os.path.abspath(topic_dir)
     o_d = os.path.abspath(output_dir)
