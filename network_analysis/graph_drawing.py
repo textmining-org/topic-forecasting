@@ -1,9 +1,12 @@
+#!/usr/bin/env python3
+"""Modules to draw networkx graphs"""
 import os
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 import network_utils as net_utils
-
+import argparse
+import numpy as np
 
 # Draw graph - template
 def _draw_graph_(G,
@@ -23,6 +26,8 @@ def _draw_graph_(G,
                  label_options:dict={'font_size':20},
                  edge_options:dict={},
                  edge_width_multiply:float=0.1,
+                 edge_width_max_scale:float=False,
+                 inverse_edge_width=False,
                 ):
     fig, ax = plt.subplots(figsize=(12, 12))
         
@@ -61,24 +66,33 @@ def _draw_graph_(G,
             pos=_pos,
             **label_options,
         )
-    if edgewidth_val:
-        edgewidth = [edgewidth_val for u, v in sub_G.edges]
-    else:
-        edgewidth = [sub_G.get_edge_data(u,v)[edge_feature]*edge_width_multiply for u, v in sub_G.edges]
-    if edge_cmap:
-        edgecolor = [sub_G.get_edge_data(u,v)[edge_feature]*edge_width_multiply for u, v in sub_G.edges]
-    else:
-        edgecolor = [1.0 for u, v in sub_G.edges]
-    nx.draw_networkx_edges(sub_G,
-                           pos=_pos,
-                           width=edgewidth,
-                           edge_color=edgecolor,
-                           edge_cmap=edge_cmap,
-                           **edge_options,
-#                            # TODO REMOVE HERE
-#                            edge_color="r",
-#                            alpha=0.7,
-#                            # BY HERE
+    if sub_G.edges:
+        if edgewidth_val:
+            edgewidth = [edgewidth_val for u, v in sub_G.edges]
+        else:
+            edgewidth = [sub_G.get_edge_data(u,v)[edge_feature] for u, v in sub_G.edges]
+        if inverse_edge_width:
+            edgewidth = [1.0/i*edge_width_multiply for i in edgewidth]
+        else:
+            edgewidth = [i*edge_width_multiply for i in edgewidth]
+        if edge_width_max_scale:
+            edgewidth = list(np.array(edgewidth)/np.max(edgewidth)*edge_width_max_scale)
+        if edge_cmap:
+            edgecolor = [sub_G.get_edge_data(u,v)[edge_feature]*edge_width_multiply for u, v in sub_G.edges]
+        else:
+            edgecolor = [1.0 for u, v in sub_G.edges]
+        if inverse_edge_width:
+            edgecolor = [1./i for i in edgecolor]
+        nx.draw_networkx_edges(sub_G,
+                               pos=_pos,
+                               width=edgewidth,
+                               edge_color=edgecolor,
+                               edge_cmap=edge_cmap,
+                               **edge_options,
+    #                            # TODO REMOVE HERE
+    #                            edge_color="r",
+    #                            alpha=0.7,
+    #                            # BY HERE
                           )
     fig.tight_layout()
     plt.axis("off")
@@ -102,10 +116,12 @@ def draw_time_serial_graph(graph_loc_d:dict,
                            edgewidth_val:float=None,
                            edge_cmap=plt.cm.autumn_r,
                            edge_width_multiply=0.1,
+                           edge_width_max_scale=False,
                            edge_options:dict={},
                            save_pos=False,
                            sub_G_node_list:list=[],
                            show_label=True,
+                           inverse_edge_width=True,
                           ):
     output = os.path.abspath(output)
     os.makedirs(output,exist_ok=True)
@@ -161,6 +177,8 @@ def draw_time_serial_graph(graph_loc_d:dict,
             sub_G_node_list=curr_target_nodes,
             edge_width_multiply=edge_width_multiply,
             show_label=show_label,
+            inverse_edge_width=inverse_edge_width,
+            edge_width_max_scale=edge_width_max_scale,
         )
     return output
 
@@ -168,97 +186,122 @@ def draw_time_serial_graph(graph_loc_d:dict,
 #### example ####
 
 def main():
-#     G = net_utils.load_graph('./topic-forecasting/output/papers_co10/3.graph/combined_graph.pkl')
-#     draw_graph(G=G,output='./papers.combined_graph.whole_time.png',
-#         weight='word_count:whole_time',
-#         node_feature='word_count:whole_time',
-#         edge_feature='cooccurrence:whole_time',)
-
+    parser = argparse.ArgumentParser(description='Graph drawing by time')
+    parser.add_argument('-m','--master_graph',help='Input master graph file')
+    parser.add_argument('-g','--time_graph',default=None,help='Time-specific graph directory')
+    parser.add_argument('-t','--topic_file',help='Topic file with keywords')
+    parser.add_argument('-o','--output',help='Output directory')
+    parser.add_argument('--time_line',default=None,help='Timeline file')
+    parser.add_argument('-p','--pos_file',default='',help='Position file')
+    parser.add_argument('--node_feature',default='word_count',help='Feature for node size and color')
+    parser.add_argument('--edge_feature',default='cooccurrence',help='Feature for edge size and color')
+    parser.add_argument('--inverse_edge_width',default=False,action='store_true',help='Inverse value of edge feature')
+    
+    args = parser.parse_args()
+    
     pos = None
-    pos_file = None
+    os.makedirs(args.output,exist_ok=True)
     # Single
-#     G = net_utils.load_graph('./topic-forecasting/output/patents_co10/3.graph/combined_graph.pkl')
-#     _draw_graph_(
-#         G=G,
-#         output='./test_result.graph.plot.png',
-# #         output='./patents.combined_graph.whole_time.png',
-#         pos_weight='inv_cooccurrence:whole_time',
-#         node_feature='word_count:whole_time',
-#         edge_feature='cooccurrence:whole_time',)
-
-    time_file = './topic-forecasting/output/time_line.txt' # annotation
-    times = pd.read_csv('./topic-forecasting/output/time_line.txt',header=None).iloc[:,0].values
-    annod_d = {t:f'./topic-forecasting/output/patents_co10/3.graph/time_speicific_graphs/{t}.cooccurrence.graph.pkl'  \
-               for t in times}
-    label_graph_d = {'label_graph':f'./topic-forecasting/output/patents_co10/3.graph/combined_graph.pkl'}
-    topic_f = './topic-forecasting/topic_modeling/topic_clustering/results/patents_topic_clustering.csv'
-    pos_file = './topic-forecasting/output/patents_co10_test_graphs/standard_graph_position.json'
-    if topic_f:
-        topic_df = pd.read_csv(topic_f)
+    if args.time_line:
+        time_file=args.time_line
+        times = pd.read_csv(time_file,header=None).iloc[:,0].values
+    else:
+        times = {}
+    if os.path.isfile(args.time_graph):
+        label_graph_d = {'label_graph':args.time_graph}
+    if os.path.isdir(args.time_graph):
+        annod_d = {t:os.path.join(args.time_graph,f'{t}.inv_cooccurrence.graph.pkl') for t in times}
+    pos_file=args.pos_file
+    # Standard at the last graph in ordered graph_loc_d's file location
+    if not os.path.isfile(pos_file):
+        pos_file = os.path.join(args.output,'standard_graph_position.json')
+        print("Parsing graph file %s for standard position..."%(args.master_graph))
+        # getting graph position
+        pos_G = net_utils.load_graph(args.master_graph)
+        print("Calculating standard position...")
+        pos_weight='inv_cooccurrence:whole_time',
+        pos = nx.kamada_kawai_layout(pos_G,weight=pos_weight)
+        del pos_G
+        net_utils._save_graph_position_(
+            pos=pos,file=pos_file)
+        print("Standard position has been saved to %s"%os.path.join(
+            args.output,'standard_graph_position.json'))
+        del pos
+        
+    if args.topic_file:
+        topic_df = pd.read_csv(args.topic_file)
         for idx in topic_df.index:
             [topic_id, kw_str] = topic_df.loc[idx,:].values
             _kws = list(set(kw_str.split(' ')))
-            curr_output = os.path.join(f'./topic-forecasting/output/patents_co10_graphs',f'topic_graph.{topic_id:02d}')
+            curr_output = os.path.join(args.output,f'topic_graph.{topic_id}')
             # without label
-            draw_time_serial_graph(
-                graph_loc_d=annod_d,
-                output=curr_output,
-                pos_weight='cooccurrence',
-                standard_position=True,
-                standard_position_G_file='./topic-forecasting/output/patents_co10/3.graph/combined_graph.pkl',
-                standard_position_file=pos_file,
-                node_feature='word_count',
-                nodesize_val=100., # constant node size
-                node_alpha=0.7,
-                node_cmap=plt.cm.autumn_r, # color map
-                edge_feature='cooccurrence',
-                edgewidth_val=1.0, # constant edge width
-                edge_cmap=plt.cm.autumn_r, # color map
-                edge_width_multiply=0.1,
-                save_pos=True,
-                show_label=False,
-                sub_G_node_list=_kws,
-            )
+            if os.path.isdir(args.time_graph):
+                draw_time_serial_graph(
+                    graph_loc_d=annod_d,
+                    output=curr_output,
+                    pos_weight='inv_cooccurrence',
+                    standard_position=True,
+                    standard_position_G_file=args.master_graph,
+                    standard_position_file=pos_file,
+                    node_feature=args.node_feature, # 'word_count'
+                    nodesize_val=200., # constant node size
+                    node_alpha=0.7,
+                    node_cmap=plt.cm.magma_r, # color map
+                    edge_feature=args.edge_feature, #'inv_cooccurrence',
+#                     edgewidth_val=1, # constant edge width
+                    edge_cmap=plt.cm.magma_r, # color map
+                    edge_width_multiply=1,
+                    edge_width_max_scale=5,
+                    save_pos=False,#=True
+                    show_label=False,
+                    sub_G_node_list=_kws,
+                    inverse_edge_width=args.inverse_edge_width,
+                )
             # label-only graph
-            draw_time_serial_graph(
-                graph_loc_d=label_graph_d,
-                output=curr_output,
-                pos_weight='cooccurrence',
-                standard_position=True,
-                standard_position_G_file='./topic-forecasting/output/patents_co10/3.graph/combined_graph.pkl',
-                standard_position_file=pos_file,
-                node_feature='word_count:whole_time',
-                nodesize_val=100.0, # constant node size
-                node_cmap=None, # color map
-                node_alpha=0.2,
-                edge_feature='cooccurrence:whole_time',
-                edgewidth_val=1.0, # constant edge width
-                edge_cmap=None,
-                edge_width_multiply=0.1,
-                save_pos=True,
-                show_label=True,
-                sub_G_node_list=_kws,
-                edge_options={'alpha':0.2}
-            )
+            if os.path.isfile(args.time_graph):
+                draw_time_serial_graph(
+                    graph_loc_d=label_graph_d,
+                    output=curr_output,
+                    pos_weight='inv_cooccurrence',
+                    standard_position=True,
+                    standard_position_G_file=args.master_graph,
+                    standard_position_file=pos_file,
+                    node_feature=args.node_feature, # 'word_count:whole_time'
+                    nodesize_val=200.0, # constant node size
+                    node_cmap=None, # color map
+                    node_alpha=0.2,
+                    edge_feature=args.edge_feature, # 'cooccurrence:whole_time'
+                    edgewidth_val=1, # constant edge width
+                    edge_cmap=None,
+                    edge_width_multiply=1,
+                    edge_width_max_scale=5,
+                    save_pos=False,#=True
+                    show_label=True,
+                    sub_G_node_list=_kws,
+                    edge_options={'alpha':0.2},
+                    inverse_edge_width=args.inverse_edge_width,
+                )
     else:
         draw_time_serial_graph(
             graph_loc_d=annod_d,
-            output=f'./topic-forecasting/output/patents_co10_graphs',
+            output=args.output,
             pos_weight='cooccurrence',
             standard_position=True,
-            standard_position_G_file='./topic-forecasting/output/patents_co10/3.graph/combined_graph.pkl',
+            standard_position_G_file=args.master_graph,#'./topic-forecasting/output/patents_co10/3.graph/combined_graph.pkl',
             standard_position_file=pos_file,
-            node_feature='word_count',
+            node_feature=args.node_feature,
             nodesize_val=1.0, # constant node size
-            edge_feature='cooccurrence',
+            edge_feature=args.edge_feature,
             edgewidth_val=1.0, # constant edge width
-            node_cmap=plt.cm.autumn_r,
-            edge_cmap=plt.cm.autumn_r,
+            node_cmap=plt.cm.magma_r,
+            edge_cmap=plt.cm.magma_r,
             edge_width_multiply=0.1,
             show_label=False,
-            save_pos=True,
+            save_pos=False,#=True
+            inverse_edge_width=args.inverse_edge_width,
         )
         
         
 if __name__=='__main__':
     main()
+              
