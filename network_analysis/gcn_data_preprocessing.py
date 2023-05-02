@@ -250,8 +250,10 @@ def split_feature_time(cluster_data_dir,
         for split_ord_idx, time_suffix_list in enumerate(timelines):
             
             _curr_attrb_l = [i for i in attrb_l if i.split(':')[-1] in time_suffix_list]
-            _curr_attrb_l_arr = np.array(_curr_attrb_l)
-            _idx_vals = [np.where(_curr_attrb_l_arr==i)[0][0] for i in _curr_attrb_l]
+#             _curr_attrb_l_arr = np.array(_curr_attrb_l)
+#             _idx_vals = [np.where(_curr_attrb_l_arr==i)[0][0] for i in _curr_attrb_l]
+            _whole_attrb_l_arr = np.array(attrb_l)
+            _idx_vals = [np.where(_whole_attrb_l_arr==i)[0][0] for i in _curr_attrb_l]
             _curr_val_arr = val_arr[_idx_vals,:] # TODO - Check if it is write
             
             _out_prfx=os.path.join(o_ds[split_ord_idx],_node_prfx)
