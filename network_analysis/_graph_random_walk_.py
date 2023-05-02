@@ -9,9 +9,8 @@ import copy
 import _multi
 
 
-SEED = 123
-np.random.seed(SEED)
-
+# SEED = 123
+# np.random.seed(SEED)
 
 def _pick_random_node_(graph_obj=None,node_list=None):
     if graph_obj:
@@ -119,6 +118,13 @@ def remove_low_rated_edge(graph_obj,
     return g_copy
 
 
+# cluster_dict = {CLUSTER_ID:[KWRD]}
+def get_unique_kwrd_sets(cluster_dict:dict):
+    cluster_kwrd_sets = set([tuple(sorted(list(set(i)))) for i in cluster_dict.values()])
+    dropped_kwrd_sets = [list(i) for i in cluster_kwrd_sets]
+    return dropped_kwrd_sets
+
+
 def make_random_clusters(graph_obj,
                          seed_node_list:list=[], # Seed nodes to start clustering
                          cluster_min:int=0,
@@ -126,7 +132,9 @@ def make_random_clusters(graph_obj,
                          min_node_n:int=8,
                          max_node_n:int=20,
                          tmp_output_file:str='tmp.random_batch.0.json',
+                         random_seed_int:int=123,
                         ):
+    np.random.seed(random_seed_int)
     cluster_dict = {} # {CLUSTER_NAME:[KEYWORDS]}
     if type(graph_obj) == str:
         graph_obj = net_utils.load_graph(graph_obj)
@@ -209,6 +217,7 @@ def random_cluster(whole_time_graph_file:str,
             min_node_n=min_node_n,
             max_node_n=max_node_n,
             tmp_output_file=tmp_output_file,
+            random_seed_int=_batch_n,
         )
         if _batch_n==multiprocess:
             _curr_kwargs['max_node_n'] = cluster
@@ -232,12 +241,18 @@ def random_cluster(whole_time_graph_file:str,
         clstr_dict.update(_curr_cltr_dict.copy())
         os.system('rm %s'%_f)
         
+    unq_kwrds = get_unique_kwrd_sets(clstr_dict)
+    unq_clstr_dict = {}
+    for clstr_no, kwrd_l in enumerate(unq_kwrds):
+        cluster_name = f'random_cluster_{clstr_no:04d}'
+        unq_clstr_dict[cluster_name] = kwrd_l
+        
     if output_f.endswith('json'):
         with open(output_f,'wb') as f:
-            f.write(json.dumps(clstr_dict).encode())
+            f.write(json.dumps(unq_clstr_dict).encode())
     else:
         clstr_df = pd.DataFrame(
-            {_k:{'keywords':' '.join(_kwd_l)} for _k, _kwd_l in clstr_dict.items()}
+            {_k:{'keywords':' '.join(_kwd_l)} for _k, _kwd_l in unq_clstr_dict.items()}
         ).T
         clstr_df.index.name = 'cluster_name'
         if output_f.endswith('csv'):
