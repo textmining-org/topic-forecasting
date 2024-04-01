@@ -156,7 +156,8 @@ def draw_time_serial_graph(graph_loc_d:dict,
     for g_id, g_file in graph_loc_d.items():
         print("Generating graph for %s : %s"%(g_id,g_file))
         curr_G = net_utils.load_graph(g_file)
-        curr_output = os.path.join(output,g_id+'.graph.png')
+#         curr_output = os.path.join(output,g_id+'.graph.png')
+        curr_output = os.path.join(output,g_id+'.graph.svg')
         if sub_G_node_list:
             curr_target_nodes = sub_G_node_list
         else:
@@ -244,7 +245,7 @@ def main():
                     standard_position_G_file=args.master_graph,
                     standard_position_file=pos_file,
                     node_feature=args.node_feature, # 'word_count'
-                    nodesize_val=200., # constant node size
+                    nodesize_val=1000., # constant node size
                     node_alpha=0.7,
                     node_cmap=plt.cm.magma_r, # color map
                     edge_feature=args.edge_feature, #'inv_cooccurrence',
@@ -267,7 +268,7 @@ def main():
                     standard_position_G_file=args.master_graph,
                     standard_position_file=pos_file,
                     node_feature=args.node_feature, # 'word_count:whole_time'
-                    nodesize_val=200.0, # constant node size
+                    nodesize_val=1000.0, # constant node size
                     node_cmap=None, # color map
                     node_alpha=0.2,
                     edge_feature=args.edge_feature, # 'cooccurrence:whole_time'
@@ -281,6 +282,28 @@ def main():
                     edge_options={'alpha':0.2},
                     inverse_edge_width=args.inverse_edge_width,
                 )
+#                 draw_time_serial_graph(
+#                     graph_loc_d=label_graph_d,
+#                     output=curr_output,
+#                     pos_weight='inv_cooccurrence',
+#                     standard_position=True,
+#                     standard_position_G_file=args.master_graph,
+#                     standard_position_file=pos_file,
+#                     node_feature=args.node_feature, # 'word_count:whole_time'
+#                     nodesize_val=1000.0, # constant node size
+#                     node_cmap=None, # color map
+#                     node_alpha=0.2,
+#                     edge_feature=args.edge_feature, # 'cooccurrence:whole_time'
+#                     edgewidth_val=1, # constant edge width
+#                     edge_cmap=None,
+#                     edge_width_multiply=1,
+#                     edge_width_max_scale=5,
+#                     save_pos=False,#=True
+#                     show_label=False,
+#                     sub_G_node_list=_kws,
+#                     edge_options={'alpha':0.2},
+#                     inverse_edge_width=args.inverse_edge_width,
+#                 )
     else:
         draw_time_serial_graph(
             graph_loc_d=annod_d,

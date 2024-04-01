@@ -101,9 +101,11 @@ def make_random_node_cluster(graph_obj,
     return curr_node_pool
 
 
+# Temporal graph backbone for random walk
 def remove_low_rated_edge(graph_obj,
                           edge_drop_thr:float=None,
                           _lower_limit_:float=1.0,
+                          target_timeline:list=[], # list of edge keys
                           ):
     g_copy = graph_obj.copy()
     if not edge_drop_thr:
@@ -112,9 +114,15 @@ def remove_low_rated_edge(graph_obj,
         drop_limit = _lower_limit_
     else:
         drop_limit = edge_drop_thr
-    for _e in graph_obj.edges:
-        if len(graph_obj.edges[_e])<=drop_limit: # At least more than one edges should be exist - cooccurrence:whole_time
-            g_copy.remove_edges_from([_e])
+    if not target_timeline:
+        for _e in graph_obj.edges:
+            if len(graph_obj.edges[_e])<=drop_limit: # At least more than one edges should be exist - cooccurrence:whole_time
+                g_copy.remove_edges_from([_e])
+    else:
+        for _e in graph_obj.edges:
+            if len(set(graph_obj.edges[_e].keys())&set(target_timeline))<=drop_limit: # Drop if specific edge key doesn't exist
+                g_copy.remove_edges_from([_e])
+        
     return g_copy
 
 
@@ -157,7 +165,7 @@ def make_random_clusters(graph_obj,
                 max_node_n=max_node_n,
             )
         cluster_dict[cluster_name] = kwrds
-        if c%20==0:
+        if c%50==0:
             print(tmp_output_file+' processed: '+str(c/(cluster_max-cluster_min)))
     print("Random clustering finished for batch %s"%tmp_output_file)
     with open(tmp_output_file,'wb') as f:
@@ -175,6 +183,11 @@ def random_cluster(whole_time_graph_file:str,
                    min_node_n:int=8,
                    max_node_n:int=20,
                    multiprocess:int=8,
+                   time_key_list:list=[],
+                   edge_ens_span:list=[], # time points to divide span. This option is imposed to ensure existence of edge for a cluster for the every divided time span. Impose list of timepoints (int : ordrered number of the time point; float : ordered ratio for the timepoint)
+                   # edge_ens_span=[48]
+                   # edge_ens_span=[48,60]
+                   # edge_ens_span=[0.5715]
                   ):
     graph_obj = net_utils.load_graph(whole_time_graph_file)
     # exclusive node
@@ -187,12 +200,49 @@ def random_cluster(whole_time_graph_file:str,
         print(f'{len(excl_n_l)} words are found for exclusive words')
         print(f"Input graph: {len(graph_obj.nodes)} words with {len(graph_obj.edges)}")
         graph_obj.remove_nodes_from(excl_n_l)
-        print(f"Exclusive node_excluded graph: {len(graph_obj.nodes)} words with {len(graph_obj.edges)}")
+        print(f"Exclusive node_excluded graph: {len(graph_obj.nodes)} words with {len(graph_obj.edges)} edges")
         
     # remove edges lower occurrent edges
+        # Drop edges which occurred less than 8(edge_drop_thr) time points
     graph_obj = remove_low_rated_edge(
         graph_obj=graph_obj,edge_drop_thr=edge_drop_thr)
-        
+        # Drop edges not occurred at the specific timeline (specified by edge_ens_span)
+    if edge_ens_span: # imposed time span index
+        # calling timelines
+        time_span_l = []
+        # split and distribute time span
+        curr_idx = 0
+        if type (edge_ens_span[0]) == float and edge_ens_span[0]<1.0:
+            print(f"Making edge-existence-ensured spans with float input:{str(edge_ens_span)}")
+            # spanning by float
+            for _sub_t_ind_, idx_e in enumerate(edge_ens_span):
+                idx_e_int = int(len(time_key_list)*idx_e)
+                time_span_l.append(time_key_list[curr_idx:idx_e_int])
+                curr_idx = idx_e_int
+                if _sub_t_ind_ == len(time_key_list)-1:
+                    time_span_l.append(time_key_list[idx_e_int:])
+        elif type (edge_ens_span[0]) == int:
+            if edge_ens_span[-1] > len(time_key_list):
+                edge_ens_span.pop(-1)
+            print(f"Making edge-existence-ensured spans with integer input:{str(edge_ens_span)}")
+            # spanning by int - index
+            for _sub_t_ind_, idx_e in enumerate(edge_ens_span):
+                time_span_l.append(time_key_list[curr_idx:idx_e])
+                curr_idx = idx_e
+                if _sub_t_ind_ == len(time_key_list)-1:
+                    time_span_l.append(time_key_list[idx_e:])
+        # appending prefix for timeline
+        prfx = "cooccurrence:"
+        sfx = ""
+        for _sub_tl_idx, _sub_tl in enumerate(time_span_l):
+            time_span_l[_sub_tl_idx] = [prfx+i+sfx for i in _sub_tl]
+                
+        for curr_timeline in time_span_l:
+            graph_obj = remove_low_rated_edge(
+                graph_obj=graph_obj,edge_drop_thr=edge_drop_thr,
+                target_timeline=curr_timeline,
+            )
+    print(f"Graph without poorly connected edges: {len(graph_obj.nodes)} words with {len(graph_obj.edges)} edges")
     net_utils.save_graph(graph_obj=graph_obj,output_file=output_f+'.tmp_graph_obj.pkl')
     del graph_obj
     if seed_node_file:

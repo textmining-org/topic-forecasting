@@ -32,13 +32,21 @@ def load_pickled(file):
     return data, time_map
 
 
+# def load_preprocessed(file:str,sep=','):
+#     _p_df = pd.read_csv(file,sep=sep)
+#     time_map = _p_df.iloc[:,0].to_dict()
+# #     time_map = {idx:_t.split('-') for idx,_t in time_map.items()}
+#     _data = _p_df.iloc[:,1].to_dict()
+#     data = {idx:re.sub('[]\' []','',_str).split(',') for idx,_str in _data.items()}
+#     return data, time_map
+
 def load_preprocessed(file:str,sep=','):
-    _p_df = pd.read_csv(file,sep=sep)
-    time_map = _p_df.iloc[:,0].to_dict()
-#     time_map = {idx:_t.split('-') for idx,_t in time_map.items()}
-    _data = _p_df.iloc[:,1].to_dict()
-    data = {idx:re.sub('[]\' []','',_str).split(',') for idx,_str in _data.items()}
+    parsed = pd.read_csv(file,sep=sep)
+    print(parsed)
+    time_map = parsed.loc[:,'date'].to_dict() # 
+    data = parsed.loc[:,'text'].to_dict()
     return data, time_map
+
 
 def save_coword_dict(target:dict,file:str):
     with open(file,'wb') as f:
