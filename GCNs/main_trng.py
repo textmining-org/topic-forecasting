@@ -25,17 +25,9 @@ if __name__ == "__main__":
     results_path = os.path.abspath(args.results_path)
     # TODO rollback directory : models
     model_save_path = os.path.join(results_path, 'models')
+    metric_save_path = os.path.join(results_path, 'metrics_trng.csv')
     node_feature_type = '_'.join(args.node_feature_type)
-    model_filename = f'{args.model}_{node_feature_type}_{args.num_training_clusters}.pt'
-
-    # tensorboard
-    # tensorboard dev upload --logdir _tensorboard
-    tb_train_loss = SummaryWriter(
-        log_dir=f'../_tensorboard/{args.media}/{args.model}/{node_feature_type}/{args.num_training_clusters}/train')
-    tb_valid_loss = SummaryWriter(
-        log_dir=f'../_tensorboard/{args.media}/{args.model}/{node_feature_type}/{args.num_training_clusters}/valid')
-    tb_test_loss = SummaryWriter(
-        log_dir=f'../_tensorboard/{args.media}/{args.model}/{node_feature_type}/{args.num_training_clusters}/test')
+    model_filename = f'{args.media}_{args.model}_{node_feature_type}_{args.num_train_clusters}_{args.desc}.pt'
 
     # fix randomness
     fix_randomness(args.seed)
@@ -44,31 +36,34 @@ if __name__ == "__main__":
     # refine_data = True if args.model == 'dcrnn' else False
     refine_data = False
 
+    # cluster_dirs = [os.path.join(args.cluster_dir, i) for i in os.listdir(args.cluster_dir)][
+    #                :args.num_train_clusters]
+
     # TODO WARNING - check the location of cluster dirs
-    cluster_dirs = [os.path.join(args.cluster_dir, i) for i in os.listdir(args.cluster_dir)][
-                   :args.num_training_clusters]
+    train_cluster_dirs = [os.path.join(args.cluster_dir + '/train', i)
+                          for i in os.listdir(args.cluster_dir + '/train')][:args.num_train_clusters]
+    valid_cluster_dirs = [os.path.join(args.cluster_dir + '/valid', i)
+                          for i in os.listdir(args.cluster_dir + '/valid')][:args.num_train_clusters]
+    test_cluster_dirs = [os.path.join(args.cluster_dir + '/test', i)
+                         for i in os.listdir(args.cluster_dir + '/test')][:args.num_train_clusters]
 
     # TODO split clusters by ratio(train/valid/test)
-    train_border = int(len(cluster_dirs) * 0.7)
-    valid_border = int(len(cluster_dirs) * 0.85)
-    train_cluster_dirs = cluster_dirs[:train_border]
-    valid_cluster_dirs = cluster_dirs[train_border:valid_border]
-    test_cluster_dirs = cluster_dirs[valid_border:]
 
     train_dataset_packages = []
     for _c_dir in train_cluster_dirs:
-        dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps \
-            = get_dataset(_c_dir, args.node_feature_type, args.discard_index, refine_data)
+        dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps = get_dataset(_c_dir, args.node_feature_type)
         train_dataset_packages.append([dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps])
+
+        print(dataset)
+
     valid_dataset_packages = []
     for _c_dir in valid_cluster_dirs:
-        dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps \
-            = get_dataset(_c_dir, args.node_feature_type, args.discard_index, refine_data)
+        dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps = get_dataset(_c_dir, args.node_feature_type)
         valid_dataset_packages.append([dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps])
+
     test_dataset_packages = []
     for _c_dir in test_cluster_dirs:
-        dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps \
-            = get_dataset(_c_dir, args.node_feature_type, args.discard_index, refine_data)
+        dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps = get_dataset(_c_dir, args.node_feature_type)
         test_dataset_packages.append([dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps])
 
     print(f'train len: {len(train_dataset_packages)}')
@@ -87,7 +82,7 @@ if __name__ == "__main__":
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     criterion = torch.nn.MSELoss(reduction='mean')
-    early_stopping = EarlyStopping(patience=7)
+    early_stopping = EarlyStopping(patience=args.patience)
 
     # mse_log = {}
     best_epoch, best_train_mse, best_valid_mse, best_test_mse = 0, math.inf, math.inf, math.inf
@@ -104,6 +99,7 @@ if __name__ == "__main__":
                                             args.embedd_dim)
             train_y_hats = torch.concat([train_y_hats, train_y_hat[None, :, :]])
             train_ys = torch.concat([train_ys, train_y[None, :, :]])
+            print(train_ys)
 
         for _ds_idx, _curr_dataset_pack in enumerate(valid_dataset_packages):
             # evaluating
@@ -142,11 +138,6 @@ if __name__ == "__main__":
             # save best model
             torch.save(model.state_dict(), os.path.join(model_save_path, model_filename))
 
-        # tensorboard
-        tb_train_loss.add_scalar(f"{args.media} / {args.model} / {node_feature_type} / Loss: mse", train_mse, epoch)
-        tb_valid_loss.add_scalar(f"{args.media} / {args.model} / {node_feature_type} / Loss: mse", valid_mse, epoch)
-        tb_test_loss.add_scalar(f"{args.media} / {args.model} / {node_feature_type} / Loss: mse", test_mse, epoch)
-
         # early stopping
         early_stopping(valid_mse)
         if early_stopping.early_stop:
@@ -158,7 +149,7 @@ if __name__ == "__main__":
     print("[Final (BEST MAE)] Train: {:.8f} | Valid : {:.8f} | Test : {:.8f} at Epoch {:3}".format(
         best_train_mae, best_valid_mae, best_test_mae, best_epoch, best_epoch))
 
-    arg_names = ['model', 'node_feature_type', 'epochs', 'lr', 'num_training_clusters', 'cluster_dir']
+    arg_names = ['media', 'model', 'node_feature_type', 'epochs', 'batch_size', 'lr', 'num_train_clusters', 'desc']
     metric_names = ['mse', 'mae']
     metrics = [best_test_mse, best_test_mae]
-    save_metrics(results_path, 'metrics_trng.csv', args, arg_names, metrics, metric_names)
+    save_metrics(metric_save_path, args, arg_names, metrics, metric_names)

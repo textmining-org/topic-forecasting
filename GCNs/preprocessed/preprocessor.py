@@ -4,6 +4,9 @@ import pathlib
 
 import numpy as np
 from torch_geometric_temporal.signal import DynamicGraphTemporalSignal, DynamicGraphTemporalSignalBatch
+import torch
+from typing import List, Union
+from torch_geometric.data import Data
 
 
 def get_node_targets(data_path, discard_index=None):
@@ -46,9 +49,9 @@ def get_edge_indices(data_path, bidirectional=False, discard_index=None):
 
 
 def get_edge_weights(data_path, bidirectional=False, discard_index=None):
-    loc_edge_weights = os.path.join(data_path, 'cooccurrence.edge_weigths.json')
+    loc_edge_weights = os.path.join(data_path, 'cooccurrence.edge_weights.json')
     if os.path.exists(loc_edge_weights):
-        with open(os.path.join(data_path, 'cooccurrence.edge_weigths.json'), 'r') as f:
+        with open(os.path.join(data_path, 'cooccurrence.edge_weights.json'), 'r') as f:
             dict_edge_weights = json.load(f)
             with open(os.path.join(data_path, 'cooccurrence.edge_attributes.txt'), 'r') as f_eattr:
                 edge_attrs = f_eattr.read().splitlines()
@@ -155,6 +158,39 @@ def denormalizer(data, min_val, max_val, eps):
     return denorm_data
 
 
+class CDGTS(DynamicGraphTemporalSignal):
+    def __getitem__(self, time_index: Union[int, slice]):
+        if isinstance(time_index, slice):
+            snapshot = DynamicGraphTemporalSignal(
+                self.edge_indices[time_index],
+                self.edge_weights[time_index],
+                self.features[time_index],
+                self.targets[time_index],
+                **{key: getattr(self, key)[time_index] for key in self.additional_feature_keys}
+            )
+        else:
+            x = self._get_features(time_index)
+            edge_index = self._get_edge_index(time_index)
+            edge_weight = self._get_edge_weight(time_index)
+            # FIXME to forecast next timestep
+            y = self._get_target(time_index + 1)
+            additional_features = self._get_additional_features(time_index)
+
+            snapshot = Data(x=x, edge_index=edge_index, edge_attr=edge_weight,
+                            y=y, **additional_features)
+        return snapshot
+
+    def __next__(self):
+        # FIXME to forecast next timestep
+        if self.t < len(self.features) - 1:
+            snapshot = self[self.t]
+            self.t = self.t + 1
+            return snapshot
+        else:
+            self.t = 0
+            raise StopIteration
+
+
 def get_dataset(data_path, node_feature_type=['betweenness'], discard_index=None, refine_data=False):
     # node targets(label)
     node_targets = get_node_targets(data_path, discard_index=discard_index)
@@ -173,7 +209,13 @@ def get_dataset(data_path, node_feature_type=['betweenness'], discard_index=None
     if refine_data == True:
         node_targets, node_features, edge_indices, edge_weights = refine_graph_data(node_targets, node_features,
                                                                                     edge_indices, edge_weights)
+
+
+
+    print(node_features.shape)
+    print(node_targets.shape)
+    # print(edge_indices)
+    # print(edge_indices)
     dataset = DynamicGraphTemporalSignal(edge_indices, edge_weights, node_features, node_targets)
 
     return dataset, num_nodes, num_features, min_val_tar, max_val_tar, eps
-
