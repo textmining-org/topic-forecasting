@@ -79,4 +79,3 @@ def get_topic_labeler(model):
     cands = extractor.extract(model)
     labeler = tp.label.FoRelevance(model, cands, min_df=5, smoothing=1e-2, mu=0.25)
     return labeler
-
