@@ -1,0 +1,13 @@
+## optimal number for topics
+
+Paper
+Lda: 8
+dmr: 10
+
+patent
+Lda: 20
+dmr: 12
+
+news
+Lda: 26
+dmr: 28
