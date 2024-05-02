@@ -4,12 +4,45 @@ import pickle
 import os
 import re
 
-#이걸로 정했다!
-
-def preprocess_text(text):
+#이걸로 돌린다
+def preprocess_text(text, terms_to_replace):
     """
     Preprocess text to treat specific blockchain-related multi-word terms as single tokens.
     """
+    # Iterate over the terms and replace them in the text
+    for term, replacement in terms_to_replace.items():
+        pattern = re.compile(re.escape(term), re.IGNORECASE)
+        text = pattern.sub(replacement, text)
+    return text
+
+def custom_filter(text_list, stopwords_path):
+    """
+    Load stopwords and filter out stopwords and special characters from the text list.
+    """
+    # Load stopwords
+    with open(stopwords_path, 'r', encoding='utf-8') as file:
+        stopwords = file.read().splitlines()
+
+    # Filter out stopwords and special characters
+    filtered_text_list = [word for word in text_list if
+                          word.lower() not in stopwords and len(word) > 1 and (word.isalnum() or '-' in word)]
+    return filtered_text_list
+
+def preprocess_data(data_type, input_path, output_path_base, stopwords_path, remove_duplicates=False):
+    """
+    Preprocess data and optionally remove duplicates.
+    """
+    _, file_extension = os.path.splitext(input_path)
+    if file_extension.lower() == '.csv':
+        df = pd.read_csv(input_path, encoding="utf8").fillna("")
+    elif file_extension.lower() == '.xlsx':
+        df = pd.read_excel(input_path).fillna("")
+    else:
+        raise ValueError("Invalid file extension. Use '.csv' or '.xlsx'.")
+
+    #df = df.head(500)  # Example limitation for processing
+
+    # Define your dictionary of terms to replace here
     terms_to_replace = {
         'Atomic Swap': 'Atomic-Swap',
         'Blockchain Explorer': 'Blockchain-Explorer',
@@ -152,37 +185,6 @@ def preprocess_text(text):
         'WEB ASSEMBLY': 'WEB-ASSEMBLY'
     }
 
-    # Iterate over the terms and replace them in the text
-    for term, replacement in terms_to_replace.items():
-        pattern = re.compile(re.escape(term), re.IGNORECASE)
-        text = pattern.sub(replacement, text)
-
-    return text
-
-
-def custom_filter(text_list, stopwords_path):
-    # Load stopwords
-    with open(stopwords_path, 'r', encoding='utf-8') as file:
-        stopwords = file.read().splitlines()
-
-    # Filter out stopwords and special characters
-    filtered_text_list = [word for word in text_list if
-                          word.lower() not in stopwords and len(word) > 1 and (word.isalnum() or '-' in word)]
-
-    return filtered_text_list
-
-
-def preprocess_data(data_type, input_path, output_path_base, stopwords_path):
-    _, file_extension = os.path.splitext(input_path)
-    if file_extension.lower() == '.csv':
-        df = pd.read_csv(input_path, encoding="utf8").fillna("")
-    elif file_extension.lower() == '.xlsx':
-        df = pd.read_excel(input_path).fillna("")
-    else:
-        raise ValueError("Invalid file extension. Use '.csv' or '.xlsx'.")
-
-    #df = df.head(500)
-
     if data_type == 'paper':
         df.rename(columns={'cover_date': 'date'}, inplace=True)
         df['keywords'] = df['keywords'].str.replace("|", "")
@@ -192,11 +194,9 @@ def preprocess_data(data_type, input_path, output_path_base, stopwords_path):
         df['text'] = df['Title'] + " " + df['full text']
     elif data_type == 'patent':
         df['text'] = df['title'] + " " + df['abstract']
-    else:
-        raise ValueError("Invalid data type. Choose from 'paper', 'news', 'patent'.")
 
     # Preprocess text
-    df['text'] = df['text'].apply(preprocess_text).str.lower()
+    df['text'] = df['text'].apply(lambda x: preprocess_text(x, terms_to_replace)).str.lower()
 
     pipeline = ptm.Pipeline(ptm.splitter.NLTK(),
                             ptm.tokenizer.Word(),
@@ -209,16 +209,16 @@ def preprocess_data(data_type, input_path, output_path_base, stopwords_path):
     # df['text'] = result
     
     for i, text_list in enumerate(result):
-        # Flatten list and apply custom filter
         flat_list = sum(text_list, [])
-        # Remove duplicates without preserving order
-        flat_list = list(set(flat_list))
+        if remove_duplicates:
+            flat_list = list(set(flat_list))  # Remove duplicates
         df.at[i, 'text'] = custom_filter(flat_list, stopwords_path)
 
-
-    pickle_path = f"{output_path_base}.pkl"
-    csv_path = f"{output_path_base}.csv"
-    tsv_path = f"{output_path_base}.tsv"
+    # Define separate file names for with and without duplicates
+    file_suffix = "without_duplicates" if remove_duplicates else "with_duplicates"
+    pickle_path = f"{output_path_base}_{file_suffix}.pkl"
+    csv_path = f"{output_path_base}_{file_suffix}.csv"
+    tsv_path = f"{output_path_base}_{file_suffix}.tsv"
 
     with open(pickle_path, "wb") as file:
         pickle.dump(df, file)
@@ -228,13 +228,12 @@ def preprocess_data(data_type, input_path, output_path_base, stopwords_path):
 
     return df.head()
 
-
 # Example usage
-data_type = 'patent'
-input_path = './data/patents_201701_202312_sample.xlsx'
-output_path_base = './results/patents_201701_202312_sample'
+data_type = 'news'
+input_path = './data/news_201701_202312.xlsx'
+output_path_base = './results/news_201701_202312'
 stopwords_path = './stopwords/Stopword_Eng_Blockchain.txt'
 
-# Call the function
-preprocessed_head = preprocess_data(data_type, input_path, output_path_base, stopwords_path)
-print(preprocessed_head)
+# Call the function twice, once with remove_duplicates=True and once with False
+print(preprocess_data(data_type, input_path, output_path_base, stopwords_path, True))  # For removing duplicates
+print(preprocess_data(data_type, input_path, output_path_base, stopwords_path, False))  # For keeping duplicates
