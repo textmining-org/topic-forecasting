@@ -32,11 +32,6 @@ def get_node_targets(data_path, seq_len=1, pred_len=1):
     raise Exception(f'There is no node targets! (data_path: {data_path})')
 
 
-# # data_path = '/Data2/yejin/blockchain_data/papers_co10/clusters.max_structured.time_split/valid/random_cluster_5731'
-# data_path = '/Data2/yejin/blockchain_data/papers_co10/clusters.max_structured.time_split/valid/random_cluster_0000'
-# node_targets = get_node_targets(data_path, 12, 3)
-# print(node_targets.shape)
-
 # (32, 50, 4, 12) : (time, node, features, seq_len)
 def get_node_features(data_path, feature_type=['betweenness', 'closeness', 'degree'], seq_len=1, pred_len=1):
     loc_node_targets = os.path.join(data_path, 'word_count.node_targets.npy')
@@ -56,10 +51,8 @@ def get_node_features(data_path, feature_type=['betweenness', 'closeness', 'degr
             else:
                 node_features = np.concatenate([node_features, node_feature], axis=2)
 
-    # print('node features: {}'.format(node_features.shape))
     # (48, 50, 4) : (time, node, features)
     node_features = np.concatenate((node_features, node_targets), axis=2)
-    # print(f'node_features: {node_features.shape}')
 
     node_features_seq = []
     # for i in range(node_features.shape[0] - int(seq_len + pred_len - 1)):
@@ -69,15 +62,7 @@ def get_node_features(data_path, feature_type=['betweenness', 'closeness', 'degr
 
     node_features_seq = np.moveaxis(np.array(node_features_seq), 1, 2)
     node_features_seq = np.moveaxis(node_features_seq, 2, 3)
-    # node_features_seq = np.array(node_features_seq)
-    # print(f'node_features_seq: {node_features_seq.shape}' )
     return node_features_seq
-
-
-# data_path = '/Data2/yejin/blockchain_data/papers_co10/clusters.max_structured.time_split/train/random_cluster_0000'
-# node_features = get_node_features(data_path, seq_len=12, pred_len=3)
-# print(node_features.shape)
-
 
 def get_edge_indices(data_path, bidirectional=False, seq_len=1, pred_len=1):
     loc_edge_indices = os.path.join(data_path, 'cooccurrence.edge_indices.json')
@@ -89,8 +74,10 @@ def get_edge_indices(data_path, bidirectional=False, seq_len=1, pred_len=1):
                 edge_indices = []
                 for edge_attr in edge_attrs:
                     if edge_attr in dict_edge_indices:
+
                         edge_index = np.array(dict_edge_indices[edge_attr])
-                        # print(edge_index)
+                        # print(f'##### edge_attr: {edge_attr}, edge_index: {edge_index}')
+                        # 2024.04.22 : 현재 데이터는 무방향으로, 아래의 IF 구문이 실행되지 않음
                         if bidirectional == True and edge_index.size != 0:
                             src_index = np.split(edge_index[0], 2)[0]
                             dst_index = np.split(edge_index[1], 2)[0]
@@ -103,17 +90,9 @@ def get_edge_indices(data_path, bidirectional=False, seq_len=1, pred_len=1):
                 seq = edge_indices[i:i + seq_len + pred_len]
                 edge_indices_seq.append(seq[:seq_len])
 
-            # print(f'edge indices: {len(edge_indices)} * {edge_indices[0].shape}')
             return edge_indices_seq
 
     raise Exception(f'There is no edge indices! (data_path: {data_path})')
-
-
-# data_path = '/Data2/yejin/blockchain_data/papers_co10/clusters.max_structured.time_split/train/random_cluster_4000'
-# edge_indices = get_edge_indices(data_path, seq_len=12, pred_len=3)
-# print(len(edge_indices))
-# for edge_index in edge_indices:
-#     print(len(edge_index))
 
 
 def get_edge_weights(data_path, bidirectional=False, seq_len=1, pred_len=1):
@@ -143,14 +122,6 @@ def get_edge_weights(data_path, bidirectional=False, seq_len=1, pred_len=1):
 
     raise Exception(f'There is no edge weights! (data_path: {data_path})')
 
-
-# data_path = '/Data2/yejin/blockchain_data/papers_co10/clusters.max_structured.time_split/train/random_cluster_4000'
-# edge_weights = get_edge_weights(data_path, seq_len=12, pred_len=3)
-#
-# print(len(edge_weights))
-# for edge_weight in edge_weights:
-#     print(len(edge_weight))
-
 def normalizer(data):
     """
     Execute min-max normalization to data
@@ -177,9 +148,6 @@ def normalizer(data):
 def denormalizer(data, min_val, max_val, eps):
     denorm_data = data * (max_val - min_val + eps) + min_val
     return denorm_data
-
-
-# def get_integrate_edge_batch(edge_indices_batch, edge_weights_batch, seq_len, batch_size)
 
 def get_loader(data_path, node_feature_type=['betweenness', 'closeness', 'degree'], seq_len=1, pred_len=1, batch_size=4,
                device='cpu'):
@@ -208,7 +176,6 @@ def get_loader(data_path, node_feature_type=['betweenness', 'closeness', 'degree
 
     # dataset = DynamicGraphTemporalSignal(edge_indices, edge_weights, node_features, node_targets)
 
-    print(f'##### dataloader length: {len(dataloader)}')
     edge_indices_batch = []
     edge_weights_batch = []
     for idx, value in enumerate(dataloader):
@@ -217,14 +184,6 @@ def get_loader(data_path, node_feature_type=['betweenness', 'closeness', 'degree
             if ((idx + 1) * batch_size) > len(edge_indices) else (idx + 1) * batch_size
         edge_indices_batch.append(edge_indices[edge_batch_start_idx:edge_batch_end_idx])
         edge_weights_batch.append(edge_weights[edge_batch_start_idx:edge_batch_end_idx])
-
-
-    print(f'##### node_feature_tensor shape: {node_feature_tensor.shape}')
-    print(f'##### node_target_tensor shape: {node_target_tensor.shape}')
-
-    print(f'##### edge_indices: {len(edge_indices), len(edge_indices[0]), len(edge_indices[0][0])}')
-    print(f'##### edge_indices_batch: {len(edge_indices_batch), len(edge_indices_batch[0]), len(edge_indices_batch[0][0])}')
-
 
     return dataloader, edge_indices_batch, edge_weights_batch, num_nodes, num_features, min_val_fea, max_val_fea, min_val_tar, max_val_tar, eps
 
@@ -271,3 +230,4 @@ def get_loader(data_path, node_feature_type=['betweenness', 'closeness', 'degree
 #     edges = np.nonzero(adj_matrix)
 #     print(edges)
 #     print(np.array(edges))
+
