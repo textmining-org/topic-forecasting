@@ -2,7 +2,9 @@ import torch
 import torch.nn.functional as F
 from torch_geometric_temporal.nn.recurrent import DCRNN, TGCN, AGCRN, A3TGCN, A3TGCN2, TGCN2
 from torch.nn import DataParallel
+import numpy as np
 
+from torch_geometric.utils import to_dense_batch
 
 class DCRNNet(torch.nn.Module):
     def __init__(self, in_channels, out_channels, K, out_size):
@@ -11,12 +13,6 @@ class DCRNNet(torch.nn.Module):
         self.linear = torch.nn.Linear(out_channels, out_size)
 
     def forward(self, x, edge_index, edge_weight):
-
-        print(f'x shape: {x.shape}')
-        print(f'edge_index type: {type(edge_index)}')
-        print(f'edge_weight type: {type(edge_weight)}')
-        # print(f'edge_index shape: {edge_index.shape}')
-
         h = self.recurrent(x, edge_index, edge_weight)
         h = F.relu(h)
         h = self.linear(h)
@@ -24,12 +20,22 @@ class DCRNNet(torch.nn.Module):
 
 
 class TGCNet(torch.nn.Module):
-    def __init__(self, in_channels, out_channels, out_size):
+    def __init__(self, in_channels, out_channels, out_size, batch_size):
         super(TGCNet, self).__init__()
-        self.recurrent = TGCN(in_channels, out_channels)
+        self.recurrent = TGCN2(in_channels, out_channels, batch_size)
         self.linear = torch.nn.Linear(out_channels, out_size)
 
     def forward(self, x, edge_index, edge_weight):
+        edge_index_list = []
+        for sublist in edge_index:
+            sublist_array = np.concatenate(sublist)
+            sublist_tensor = torch.from_numpy(sublist_array).long()
+            edge_index_list.append(sublist_tensor)
+
+        edge_index_tensor = torch.cat(edge_index_list, dim=1)
+        edge_index = edge_index_tensor
+        print(edge_index)
+
         h = self.recurrent(x, edge_index, edge_weight)
         h = F.relu(h)
         h = self.linear(h)
@@ -47,6 +53,10 @@ class AGCRNet(torch.nn.Module):
         self.linear = torch.nn.Linear(out_channels, out_size)
 
     def forward(self, x, e, h):
+        # 배치 크기에 맞춰 h의 크기 조정
+        if h is None or h.size(0) != x.size(0):
+            h = torch.zeros(x.size(0), self.recurrent.number_of_nodes, self.recurrent.out_channels).to(x.device)
+
         h_0 = self.recurrent(x, e, h)
         y = F.relu(h_0)
         y = self.linear(y)
@@ -121,6 +131,62 @@ class A3TGCNet2(torch.nn.Module):
         h = self.linear(h)
         return h
 
+### LSTM ###
+class LSTMNet(torch.nn.Module):
+    def __init__(self, input_size, hidden_size, output_size, num_layers):
+        super(LSTMNet, self).__init__()
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.output_size = output_size
+
+        self.lstm = torch.nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=num_layers, batch_first=True)
+        self.fc = torch.nn.Linear(in_features=hidden_size, out_features=output_size)
+
+    def forward(self, x):
+        output, (h, b) = self.lstm(x)
+        output = F.relu(output)
+        y = self.fc(output)
+
+        return y
+
+
+### GRU ###
+class GRUNet(torch.nn.Module):
+    def __init__(self, input_size, hidden_size, output_size, num_layers):
+        super(GRUNet, self).__init__()
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.output_size = output_size
+
+        self.gru = torch.nn.GRU(input_size=input_size, hidden_size=hidden_size, num_layers=num_layers, batch_first=True)
+        self.fc = torch.nn.Linear(in_features=hidden_size, out_features=output_size)
+
+    def forward(self, x):
+        h_init = self.init_hidden(batch_size=x.size(0), device=x.get_device())
+        output, h = self.gru(x, h_init)
+        output = F.relu(output)
+        y = self.fc(output)
+
+        return y
+
+    def init_hidden(self, batch_size, device):
+        """
+        Initialize hidden state.
+
+        Args:
+            batch_size: batch size
+            device: the device of the parameters
+
+        Returns:
+            hidden: initial value of hidden state
+        """
+
+        weight = next(self.parameters()).data
+        h_init = weight.new(self.num_layers, batch_size, self.hidden_size).zero_().to(device)
+        return h_init
+
 
 def get_model(args, num_nodes, num_features):
     if args.model == 'dcrnn':
@@ -129,16 +195,21 @@ def get_model(args, num_nodes, num_features):
                        K=args.K,
                        out_size=args.out_size)
     elif args.model == 'tgcn':
-        return TGCNet(in_channels=num_features,
+        # return TGCNet(in_channels=num_features,
+        #               out_channels=args.out_channels,
+        #               out_size=args.out_size,
+        #               batch_size=args.batch_size)
+        return TGCNet(in_channels=args.seq_len,
                       out_channels=args.out_channels,
-                      out_size=args.out_size)
+                      out_size=args.pred_len,
+                      batch_size=args.batch_size)
     elif args.model == 'agcrn':
         return AGCRNet(number_of_nodes=num_nodes,
-                       in_channels=num_features,
+                       in_channels=num_features * args.seq_len,
                        out_channels=args.out_channels,
                        K=args.K,
                        embedding_dimensions=args.embedd_dim,
-                       out_size=args.out_size)
+                       out_size=args.pred_len)
     elif args.model == 'a3tgcn':
         return A3TGCNet(node_features=num_features,
                         out_channels=args.out_channels,
@@ -149,7 +220,16 @@ def get_model(args, num_nodes, num_features):
                          out_channels=args.out_channels,
                          periods=args.pred_len,
                          batch_size=args.batch_size)
-
+    elif args.model == 'lstm':
+        return LSTMNet(input_size=num_features * args.seq_len,
+                       hidden_size=args.hidden_size,
+                       output_size=args.pred_len,
+                       num_layers=args.num_layers)
+    elif args.model == 'gru':
+        return GRUNet(input_size=num_features * args.seq_len,
+                       hidden_size=args.hidden_size,
+                       output_size=args.pred_len,
+                       num_layers=args.num_layers)
 
 def training(model, dataset, optimizer, criterion, num_features, num_nodes=None, embedd_dim=None):
     device = next(model.parameters()).device
@@ -224,17 +304,6 @@ def training_loader(model, dataloader, edge_indices, edge_weights, optimizer, cr
                     embedd_dim):
     device = next(model.parameters()).device
 
-    # print(f'in training loader... edge_indices len: {len(edge_indices)}')
-    # print(f'in training loader... edge_indices 0 len: {len(edge_indices[0])}')
-    # print(f'in training loader... edge_indices 0 0 shape: {len(edge_indices[0][0])}')
-    # print(f'in training loader... edge_weights: {edge_weights}')
-
-    print(f'edge_indices[0] length: {len(edge_indices[0])}')
-    print(f'edge_indices[0] type: {type(edge_indices[0])}')
-
-    print(f'edge_weights[0] length: {len(edge_weights[0])}')
-    print(f'edge_weights[0] type: {type(edge_weights[0])}')
-
     # TODO multi-processing
     if isinstance(model, DataParallel):
         model_class = model.module.__class__
@@ -273,23 +342,28 @@ def training_loader(model, dataloader, edge_indices, edge_weights, optimizer, cr
         optimizer.zero_grad()
         node_features, node_targets = value
 
-        y_hat = model(node_features, edge_index, edge_weight)
-
         if model_class in [A3TGCNet2]:
             y_hat = model(node_features, edge_index, edge_weight)
         elif model_class in [AGCRNet]:
             e = torch.empty(num_nodes, embedd_dim).to(device)
             torch.nn.init.xavier_uniform_(e)
-            # FIXME dim, ex. (32, 50, 4, 12) : (time, node, features, seq_len)
-            x = node_features.view(1, num_nodes, num_features)  # (?, num of nodes, num of node features)
-            y_hat, h = model(x, e, h)
-            h = h.detach()  # FIXME RuntimeError: Trying to backward through the graph a second time
+            """
+            # node_feature reshape : 기존 AGCRN 모델은 seq_len 반영을 위한 별도 로직이 없어 다음과 같이 reshape 수행
+            # - Before: (batch, num node, num features, seq_len), (32, 20, 4, 12)
+            # - After: (batch, num node, num features * seq_len), (32, 20, 48)
+            """
+            # num_features.shape[3] = seq_len
+            x = node_features.view(-1, num_nodes, num_features * num_features.shape[3])
 
-        # print(f'training - node features: {node_features.shape}\t'
-        #       f'node targets: {node_targets.shape}\t'
-        #       f'edge index: {edge_index.shape}\t'
-        #       f'edge weight: {edge_weight.shape}\t'
-        #       f'y_hat: {y_hat.shape}')
+            y_hat, h = model(x, e, h)
+            h = h.detach()
+        elif model_class in [TGCNet]:
+            y_hat = model(node_features, edge_indices[idx], edge_weights[idx])
+        elif model_class in [LSTMNet, GRUNet]:
+            x = node_features.view(node_features.shape[0], num_nodes, -1)
+            y_hat = model(x)
+        else:
+            y_hat = model(node_features, edge_indices, edge_weights)
 
         loss = criterion(y_hat, node_targets)
         loss.backward()
@@ -346,8 +420,18 @@ def evaluating_loader(model, dataloader, edge_indices, edge_weights, num_feature
             if model.__class__ in [A3TGCNet2]:
                 y_hat = model(node_features, edge_index, edge_weight)
             elif model.__class__ in [AGCRNet]:
-                x = node_features.view(1, num_nodes, num_features)
+                """
+                # node_feature reshape : 기존 AGCRN 모델은 seq_len 반영을 위한 별로 로직이 없어 다음과 같이 reshape 수행
+                # - Before: (batch, num node, num features, seq_len), (32, 20, 4, 12)
+                # - After: (batch, num node, num features * seq_len), (32, 20, 48)
+                """
+                # x = node_features.view(1, num_nodes, num_features)
+                # FIXME 12 -> args.seq_len
+                x = node_features.view(-1, num_nodes, num_features * 12)  # (?, num of nodes, num of node features)
                 y_hat, h = model(x, e, h)
+            elif model.__class__ in [LSTMNet, GRUNet]:
+                x = node_features.view(node_features.shape[0], num_nodes, -1)
+                y_hat = model(x)
 
             ys = torch.concat([ys, node_targets], axis=0)
             y_hats = torch.concat([y_hats, y_hat], axis=0)

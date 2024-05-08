@@ -1,29 +1,124 @@
-timestamp,mse,mae,model,node_feature_type,epochs,lr,num_training_clusters,cluster_dir
-2023-02-09 23:50:12,0.0098492661491036,0.0327330529689788,dcrnn,"['betweenness', 'closeness', 'degree']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 21:17:59,0.0102918213233351,0.0339086465537548,dcrnn,"['closeness', 'degree']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 19:04:57,0.0103306854143738,0.0400651842355728,dcrnn,"['betweenness', 'degree']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 17:30:59,0.0106316348537802,0.0338861756026744,dcrnn,"['betweenness', 'closeness']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 17:28:45,0.0107615198940038,0.034459326416254,tgcn,"['betweenness', 'closeness', 'degree']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 16:49:04,0.0108006233349442,0.0347755961120128,a3tgcn,"['betweenness', 'closeness', 'degree']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 16:46:42,0.0109386192634701,0.0347713530063629,tgcn,"['closeness', 'degree']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 16:13:27,0.0110326511785388,0.037855252623558,a3tgcn,"['closeness', 'degree']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-10 04:25:03,0.0111253326758742,0.0339372642338275,dcrnn,['degree'],200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-10 05:19:41,0.011209930293262,0.0353124737739563,dcrnn,['closeness'],200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 16:02:12,0.0112418755888938,0.0350759364664554,tgcn,"['betweenness', 'closeness']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 15:27:02,0.011334822513163,0.0351662598550319,a3tgcn,"['betweenness', 'closeness']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 16:26:28,0.0114049986004829,0.0348979048430919,tgcn,"['betweenness', 'degree']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 15:54:15,0.0114173060283064,0.0350798889994621,a3tgcn,"['betweenness', 'degree']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 18:30:17,0.0114506380632519,0.0348443612456321,tgcn,['degree'],200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 17:28:43,0.011453510262072,0.0360432304441928,a3tgcn,['degree'],200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 18:48:13,0.011453959159553,0.0349045358598232,a3tgcn,['closeness'],200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 19:00:40,0.0114605333656072,0.0346199721097946,tgcn,['closeness'],200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 15:32:13,0.0178643614053726,0.0577328987419605,agcrn,['closeness'],200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-10 03:06:58,0.0184840131551027,0.0558256916701793,dcrnn,['betweenness'],200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 17:58:19,0.0185498092323541,0.0542779080569744,tgcn,['betweenness'],200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 17:00:52,0.0188664961606264,0.0561511218547821,a3tgcn,['betweenness'],200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 15:03:59,0.0220494382083416,0.063000850379467,agcrn,"['betweenness', 'closeness']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 15:12:19,0.0234462022781372,0.0660481825470924,agcrn,"['closeness', 'degree']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 15:28:00,0.0236331727355718,0.0734883546829223,agcrn,['degree'],200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 15:16:19,0.0238937530666589,0.0664691030979156,agcrn,"['betweenness', 'closeness', 'degree']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 15:24:02,0.0244056284427642,0.0787412226200103,agcrn,['betweenness'],200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
-2023-02-09 15:08:00,0.0246103107929229,0.0726317167282104,agcrn,"['betweenness', 'degree']",200,0.001,100,/Data2/yejin/blockchain_data/patents_co10/clusters.max_structured
+timestamp,mse,mae,media,model,node_feature_type,epochs,batch_size,lr,num_train_clusters,num_valid_clusters,num_test_clusters,seq_len,pred_len,desc
+2023-05-04 3:50,0.015798705,0.086691514,papers,a3tgcn2,"['betweenness', 'closeness']",500,32,0.001,2000,2000,2000,12,3,desc
+2023-05-05 17:11,0.016216656,0.084213577,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.001,4000,1000,1000,12,3,desc
+2023-05-05 15:51,0.016271319,0.08518061,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.01,4000,1000,1000,12,3,desc
+2023-05-07 0:34,0.016851112,0.087529257,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.01,4000,1000,1000,12,3,desc
+2023-05-06 13:21,0.016876787,0.087590843,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.01,4000,1000,1000,12,3,desc
+2023-05-06 1:21,0.016909717,0.086573735,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.01,4000,1000,1000,12,3,desc
+2023-05-03 23:51,0.01764388,0.096158825,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.001,2000,2000,2000,12,3,desc
+2023-05-08 11:59,0.017683828,0.087929495,papers,a3tgcn2,['closeness'],30,32,0.01,4000,1000,1000,12,3,desc
+2023-05-03 23:53,0.018260175,0.097192705,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.001,2000,2000,2000,12,3,desc
+2023-05-08 0:10,0.018353801,0.089427412,papers,a3tgcn2,['degree'],30,32,0.01,4000,1000,1000,12,3,desc
+2023-05-05 15:42,0.018641118,0.089130215,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.001,4000,1000,1000,12,1,desc
+2023-05-03 23:53,0.018732514,0.097035088,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.001,2000,2000,2000,12,3,desc
+2023-05-05 15:46,0.019048374,0.092802241,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.0001,4000,1000,1000,12,1,desc
+2023-05-03 23:54,0.019414935,0.096388549,papers,a3tgcn2,['betweenness'],30,32,0.001,2000,2000,2000,12,3,desc
+2023-05-10 11:00:13,0.0194262247532606,0.0955821797251701,papers,a3tgcn2,"['betweenness', 'closeness']",500,64,0.001,4000,1000,1000,12,1,desc
+2023-05-07 3:56,0.019508103,0.093162596,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.001,4000,1000,1000,12,3,desc
+2023-05-05 17:13,0.019918259,0.094301544,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.0001,4000,1000,1000,12,3,desc
+2023-05-08 14:29,0.020176584,0.09425211,papers,a3tgcn2,['closeness'],30,32,0.0001,4000,1000,1000,12,1,desc
+2023-05-07 12:29,0.020446358,0.092930287,papers,a3tgcn2,['betweenness'],30,32,0.01,4000,1000,1000,12,3,desc
+2023-05-08 13:50,0.020517191,0.098302178,papers,a3tgcn2,['closeness'],30,32,0.001,4000,1000,1000,12,1,desc
+2023-05-08 10:30,0.020633867,0.099101864,papers,a3tgcn2,['closeness'],30,32,0.01,4000,1000,1000,12,1,desc
+2023-05-04 0:47,0.02066914,0.101735726,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.001,2000,2000,2000,12,3,desc
+2023-05-05 15:23,0.020755267,0.099746443,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.01,4000,1000,1000,12,1,desc
+2023-05-07 2:31,0.02078346,0.096446082,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.001,4000,1000,1000,12,1,desc
+2023-05-07 14:28,0.020800261,0.094885387,papers,a3tgcn2,['betweenness'],30,32,0.001,4000,1000,1000,12,1,desc
+2023-05-06 15:42,0.020818595,0.094789527,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.0001,4000,1000,1000,12,1,desc
+2023-05-04 1:32,0.020913457,0.100928865,papers,a3tgcn2,"['betweenness', 'closeness']",500,32,0.001,2000,2000,2000,12,1,desc
+2023-05-04 0:53,0.020924745,0.10229449,papers,a3tgcn2,['degree'],30,32,0.001,2000,2000,2000,12,3,desc
+2023-05-07 10:57,0.02093371,0.095058449,papers,a3tgcn2,['betweenness'],30,32,0.01,4000,1000,1000,12,1,desc
+2023-05-06 23:08,0.021321511,0.09858866,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.01,4000,1000,1000,12,1,desc
+2023-05-06 3:56,0.021446662,0.097564854,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.0001,4000,1000,1000,12,1,desc
+2023-05-07 3:27,0.02162342,0.096670859,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.0001,4000,1000,1000,12,1,desc
+2023-05-06 14:54,0.021956304,0.099368431,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.001,4000,1000,1000,12,1,desc
+2023-05-07 15:40,0.022125419,0.096507922,papers,a3tgcn2,['betweenness'],30,32,0.0001,4000,1000,1000,12,1,desc
+2023-05-08 2:31,0.022249101,0.098929293,papers,a3tgcn2,['degree'],30,32,0.0001,4000,1000,1000,12,1,desc
+2023-05-11 00:37:43,0.0224180798977613,0.0976829901337623,papers,a3tgcn2,"['betweenness', 'closeness']",500,64,0.001,4000,1000,1000,12,3,desc
+2023-05-06 16:19,0.0224528,0.100028597,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.001,4000,1000,1000,12,3,desc
+2023-05-06 3:33,0.02332674,0.10151118,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.001,4000,1000,1000,12,1,desc
+2023-05-07 15:52,0.02369773,0.099479087,papers,a3tgcn2,['betweenness'],30,32,0.001,4000,1000,1000,12,3,desc
+2023-05-04 12:41,0.023699706,0.101466313,papers,a3tgcn2,"['betweenness', 'closeness']",500,32,0.001,2000,2000,2000,12,6,desc
+2023-05-05 23:57,0.023794413,0.103502624,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.01,4000,1000,1000,12,1,desc
+2023-05-06 11:53,0.024107467,0.105346985,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.01,4000,1000,1000,12,1,desc
+2023-05-08 3:15,0.024361262,0.100214034,papers,a3tgcn2,['degree'],30,32,0.001,4000,1000,1000,12,3,desc
+2023-05-06 4:58,0.025071625,0.100083038,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.001,4000,1000,1000,12,3,desc
+2023-05-07 22:43,0.025143363,0.105619937,papers,a3tgcn2,['degree'],30,32,0.01,4000,1000,1000,12,1,desc
+2023-05-08 14:34,0.025564468,0.102768645,papers,a3tgcn2,['closeness'],30,32,0.01,4000,1000,1000,12,6,desc
+2023-05-04 0:51,0.025905887,0.113215454,papers,a3tgcn2,['closeness'],30,32,0.001,2000,2000,2000,12,3,desc
+2023-05-08 14:55,0.025935384,0.105252646,papers,a3tgcn2,['closeness'],30,32,0.001,4000,1000,1000,12,3,desc
+2023-05-08 2:02,0.025939692,0.106279433,papers,a3tgcn2,['degree'],30,32,0.001,4000,1000,1000,12,1,desc
+2023-05-07 14:42,0.026599772,0.100106224,papers,a3tgcn2,['betweenness'],30,32,0.01,4000,1000,1000,12,6,desc
+2023-05-06 3:53,0.026611056,0.103944868,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.01,4000,1000,1000,12,6,desc
+2023-05-06 15:50,0.026831461,0.101193704,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.01,4000,1000,1000,12,6,desc
+2023-05-07 2:58,0.027603406,0.108673953,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.01,4000,1000,1000,12,6,desc
+2023-05-08 2:43,0.02799922,0.10439527,papers,a3tgcn2,['degree'],30,32,0.01,4000,1000,1000,12,6,desc
+2023-05-05 19:38,0.028493043,0.105343677,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.001,4000,1000,1000,12,6,desc
+2023-05-05 17:45,0.029051295,0.110046983,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.01,4000,1000,1000,12,6,desc
+2023-05-07 4:55,0.029891213,0.113006078,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.0001,4000,1000,1000,12,3,desc
+2023-05-06 5:22,0.029914416,0.111509688,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.0001,4000,1000,1000,12,3,desc
+2023-05-06 17:10,0.030029505,0.112426221,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.0001,4000,1000,1000,12,3,desc
+2023-05-07 17:09,0.030796446,0.110093489,papers,a3tgcn2,['betweenness'],30,32,0.0001,4000,1000,1000,12,3,desc
+2023-05-08 3:59,0.030882027,0.113401808,papers,a3tgcn2,['degree'],30,32,0.0001,4000,1000,1000,12,3,desc
+2023-05-08 16:06,0.031397872,0.114566058,papers,a3tgcn2,['closeness'],30,32,0.0001,4000,1000,1000,12,3,desc
+2023-05-07 18:01,0.031916525,0.108150646,papers,a3tgcn2,['betweenness'],30,32,0.001,4000,1000,1000,12,6,desc
+2023-05-05 19:39,0.032352265,0.112342887,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.0001,4000,1000,1000,12,6,desc
+2023-05-08 16:45,0.032352977,0.114499345,papers,a3tgcn2,['closeness'],30,32,0.001,4000,1000,1000,12,6,desc
+2023-05-11 15:54:49,0.03262272849678993,0.11462337523698807,papers,a3tgcn2,"['betweenness', 'closeness']",500,64,0.001,4000,1000,1000,12,6,desc
+2023-05-06 18:22,0.033003733,0.114864528,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.001,4000,1000,1000,12,6,desc
+2023-05-06 6:46,0.033011116,0.114366747,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.001,4000,1000,1000,12,6,desc
+2023-05-08 5:46,0.033662073,0.112840012,papers,a3tgcn2,['degree'],30,32,0.001,4000,1000,1000,12,6,desc
+2023-05-07 6:24,0.033878241,0.11614351,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.001,4000,1000,1000,12,6,desc
+2023-05-04 18:34,0.036283791,0.125953987,papers,a3tgcn2,"['betweenness', 'closeness']",500,32,0.001,2000,2000,2000,12,9,desc
+2023-05-07 19:35,0.038983706,0.123102002,papers,a3tgcn2,['betweenness'],30,32,0.0001,4000,1000,1000,12,6,desc
+2023-05-06 19:37,0.039040886,0.126182571,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.0001,4000,1000,1000,12,6,desc
+2023-05-03 21:02,0.039066508,0.120147742,papers,a3tgcn2,['betweenness'],30,32,0.01,2000,2000,2000,12,9,desc
+2023-05-06 7:49,0.039300516,0.126107782,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.0001,4000,1000,1000,12,6,desc
+2023-05-08 6:27,0.039308365,0.125563368,papers,a3tgcn2,['degree'],30,32,0.0001,4000,1000,1000,12,6,desc
+2023-05-08 18:34,0.039521165,0.127149686,papers,a3tgcn2,['closeness'],30,32,0.0001,4000,1000,1000,12,6,desc
+2023-05-05 20:08,0.039806709,0.128040999,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.01,4000,1000,1000,12,9,desc
+2023-05-07 7:30,0.040462095,0.130206525,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.0001,4000,1000,1000,12,6,desc
+2023-05-07 18:10,0.040571503,0.117764458,papers,a3tgcn2,['betweenness'],30,32,0.01,4000,1000,1000,12,9,desc
+2023-05-08 18:03,0.040810354,0.125541255,papers,a3tgcn2,['closeness'],30,32,0.01,4000,1000,1000,12,9,desc
+2023-05-05 23:10,0.041492369,0.131282195,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.001,4000,1000,1000,12,9,desc
+2023-05-03 21:06,0.041906044,0.131482169,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.01,2000,2000,2000,12,9,desc
+2023-05-05 23:10,0.041939825,0.120755926,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.0001,4000,1000,1000,12,9,desc
+2023-05-06 19:10,0.0427262,0.127504975,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.01,4000,1000,1000,12,9,desc
+2023-05-06 10:12,0.042740483,0.131328315,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.001,4000,1000,1000,12,9,desc
+2023-05-08 6:12,0.042934388,0.125925139,papers,a3tgcn2,['degree'],30,32,0.01,4000,1000,1000,12,9,desc
+2023-05-07 21:28,0.043467894,0.122676708,papers,a3tgcn2,['betweenness'],30,32,0.001,4000,1000,1000,12,9,desc
+2023-05-08 20:18,0.043912712,0.128966168,papers,a3tgcn2,['closeness'],30,32,0.001,4000,1000,1000,12,9,desc
+2023-05-07 9:52,0.044540741,0.128830954,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.001,4000,1000,1000,12,9,desc
+2023-05-08 9:18,0.044782698,0.127719298,papers,a3tgcn2,['degree'],30,32,0.001,4000,1000,1000,12,9,desc
+2023-05-06 8:55,0.045219865,0.134196639,papers,a3tgcn2,"['betweenness', 'closeness']",500,32,0.001,2000,2000,2000,12,12,desc
+2023-05-06 21:48,0.045223609,0.126549572,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.001,4000,1000,1000,12,9,desc
+2023-05-07 6:30,0.045496859,0.12426386,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.01,4000,1000,1000,12,9,desc
+2023-05-03 20:41,0.045980342,0.130497083,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.01,2000,2000,2000,12,9,desc
+2023-05-05 23:16,0.046190605,0.132636622,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.01,4000,1000,1000,12,12,desc
+2023-05-08 9:54,0.047368065,0.132370383,papers,a3tgcn2,['degree'],30,32,0.0001,4000,1000,1000,12,9,desc
+2023-05-06 7:21,0.047622018,0.131865069,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.01,4000,1000,1000,12,9,desc
+2023-05-08 22:02,0.047869485,0.132099405,papers,a3tgcn2,['closeness'],30,32,0.0001,4000,1000,1000,12,9,desc
+2023-05-06 23:02,0.047933325,0.13249658,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.0001,4000,1000,1000,12,9,desc
+2023-05-07 21:53,0.048247412,0.13061893,papers,a3tgcn2,['betweenness'],30,32,0.0001,4000,1000,1000,12,9,desc
+2023-05-07 10:56,0.048283517,0.136711791,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.0001,4000,1000,1000,12,9,desc
+2023-05-08 20:57,0.049084842,0.138679177,papers,a3tgcn2,['closeness'],30,32,0.01,4000,1000,1000,12,12,desc
+2023-05-06 11:12,0.049202669,0.139236137,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.0001,4000,1000,1000,12,9,desc
+2023-05-07 22:05,0.049662992,0.139193654,papers,a3tgcn2,['betweenness'],30,32,0.01,4000,1000,1000,12,12,desc
+2023-05-07 10:20,0.050698195,0.141384169,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.01,4000,1000,1000,12,12,desc
+2023-05-06 22:38,0.050880708,0.136347145,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.01,4000,1000,1000,12,12,desc
+2023-05-08 9:52,0.051541805,0.138995603,papers,a3tgcn2,['degree'],30,32,0.01,4000,1000,1000,12,12,desc
+2023-05-06 11:16,0.052269686,0.141134873,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.01,4000,1000,1000,12,12,desc
+2023-05-06 2:53,0.053378459,0.151501685,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.001,4000,1000,1000,12,12,desc
+2023-05-06 14:15,0.053959701,0.152255237,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.001,4000,1000,1000,12,12,desc
+2023-05-07 2:01,0.054643113,0.150572166,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.001,4000,1000,1000,12,12,desc
+2023-05-08 1:26,0.055766195,0.151798695,papers,a3tgcn2,['betweenness'],30,32,0.001,4000,1000,1000,12,12,desc
+2023-05-09 0:09,0.055997197,0.151196927,papers,a3tgcn2,['closeness'],30,32,0.001,4000,1000,1000,12,12,desc
+2023-05-07 13:49,0.056053374,0.156695783,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.001,4000,1000,1000,12,12,desc
+2023-05-08 13:22,0.056596782,0.15167354,papers,a3tgcn2,['degree'],30,32,0.001,4000,1000,1000,12,12,desc
+2023-05-07 15:03,0.060218088,0.163283244,papers,a3tgcn2,"['betweenness', 'closeness', 'degree']",30,32,0.0001,4000,1000,1000,12,12,desc
+2023-05-09 1:58,0.060351938,0.161486268,papers,a3tgcn2,['closeness'],30,32,0.0001,4000,1000,1000,12,12,desc
+2023-05-08 1:52,0.060445514,0.161390632,papers,a3tgcn2,['betweenness'],30,32,0.0001,4000,1000,1000,12,12,desc
+2023-05-08 13:50,0.060520638,0.164122567,papers,a3tgcn2,['degree'],30,32,0.0001,4000,1000,1000,12,12,desc
+2023-05-06 15:06,0.060650598,0.165146947,papers,a3tgcn2,"['betweenness', 'degree']",30,32,0.0001,4000,1000,1000,12,12,desc
+2023-05-07 2:58,0.060652807,0.163790435,papers,a3tgcn2,"['closeness', 'degree']",30,32,0.0001,4000,1000,1000,12,12,desc
+2023-05-06 3:20,0.060991254,0.164497972,papers,a3tgcn2,"['betweenness', 'closeness']",30,32,0.0001,4000,1000,1000,12,12,desc
