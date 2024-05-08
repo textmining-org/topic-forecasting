@@ -34,28 +34,17 @@ if __name__ == "__main__":
     # fix randomness
     fix_randomness(args.seed)
 
-    # device_ids = args.device_ids
-    # gpu = 'cuda:' + str(args.device_ids[0])
-    # model = DataParallel(model, device_ids=device_ids)
     gpu = 'cuda:' + args.device
     device = torch.device(gpu)
 
     # load data
     train_cluster_dirs = [os.path.join(args.cluster_dir + '/train_valid', i)
                           for i in os.listdir(args.cluster_dir + '/train_valid')][:args.num_train_clusters]
+    # validation set 고정: 8000~9999
     valid_cluster_dirs = [os.path.join(args.cluster_dir + '/train_valid', i)
-                          for i in os.listdir(args.cluster_dir + '/train_valid')][args.num_train_clusters:args.num_valid_clusters]
+                          for i in os.listdir(args.cluster_dir + '/train_valid')][8000:8000 + args.num_valid_clusters]
     test_cluster_dirs = [os.path.join(args.cluster_dir + '/test', i)
                          for i in os.listdir(args.cluster_dir + '/test')][:args.num_test_clusters]
-
-    # train_cluster_dirs = [os.path.join(args.cluster_dir + '/train', i)
-    #                       for i in os.listdir(args.cluster_dir + '/train')][:args.num_train_clusters]
-    # valid_cluster_dirs = [os.path.join(args.cluster_dir + '/valid', i)
-    #                       for i in os.listdir(args.cluster_dir + '/valid')][:args.num_valid_clusters]
-    # # valid_cluster_dirs = [os.path.join(args.cluster_dir + '/valid', i)
-    # #                       for i in os.listdir(args.cluster_dir + '/valid')][2000:2000 + args.num_train_clusters]
-    # test_cluster_dirs = [os.path.join(args.cluster_dir + '/test_2000', i)
-    #                      for i in os.listdir(args.cluster_dir + '/test_2000')][:args.num_test_clusters]
 
     train_dataloader_packages = []
     print('##### read train clusters')
@@ -76,7 +65,6 @@ if __name__ == "__main__":
     valid_dataloader_packages = []
     print('##### read valid clusters')
     for _c_dir in valid_cluster_dirs:
-        # print(f'valid _c_dir - {_c_dir}')
         dataloader, edge_indices, edge_weights, num_nodes, num_features, min_val_fea, max_val_fea, min_val_tar, max_val_tar, eps = get_loader(
             _c_dir,
             node_feature_type=args.node_feature_type,
@@ -102,14 +90,13 @@ if __name__ == "__main__":
             [dataloader, edge_indices, edge_weights, num_nodes, num_features, min_val_fea, max_val_fea, min_val_tar,
              max_val_tar, eps])
 
-    print(f'train len: {len(train_dataloader_packages)}')
-    print(f'valid len: {len(valid_dataloader_packages)}')
-    print(f'test len: {len(test_dataloader_packages)}')
+    print(f'##### train len: {len(train_dataloader_packages)}, valid len: {len(valid_dataloader_packages)}, test len: {len(test_dataloader_packages)}')
 
     # FIXME data parallel : multi-gpu
     # create GCN model
     model = get_model(args, num_nodes, num_features)
     model.to(device)
+    print(model)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     criterion = torch.nn.MSELoss(reduction='mean')
