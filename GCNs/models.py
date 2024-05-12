@@ -353,7 +353,7 @@ def training_loader(model, dataloader, edge_indices, edge_weights, optimizer, cr
             # - After: (batch, num node, num features * seq_len), (32, 20, 48)
             """
             # num_features.shape[3] = seq_len
-            x = node_features.view(-1, num_nodes, num_features * num_features.shape[3])
+            x = node_features.view(-1, num_nodes, num_features * node_features.shape[3])
 
             y_hat, h = model(x, e, h)
             h = h.detach()

@@ -1,0 +1,2 @@
+timestamp,mse,mae,media,model,node_feature_type,epochs,batch_size,lr,num_train_clusters,num_valid_clusters,num_test_clusters,seq_len,pred_len,desc,hidden_size,num_layers
+2024-05-10 00:06:38,0.005095163360238075,0.04172629863023758,papers,gru,"['betweenness', 'closeness', 'degree']",30,4,0.01,7,2,1,12,3,desc,32,1

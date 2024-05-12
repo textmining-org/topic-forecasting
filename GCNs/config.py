@@ -5,7 +5,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--device', type=str, default='0')
 parser.add_argument('--device_ids', type=int, default=[0, 1, 2, 3], action="append")
 # parser.add_argument('--model', type=str, default='a3tgcn2')  # dcrnn tgcn agcrn a3tgcn a3tgcn2
-parser.add_argument('--model', type=str, default='gru')  # dcrnn tgcn agcrn a3tgcn a3tgcn2 lstm gru
+parser.add_argument('--model', type=str, default='a3tgcn2')  # dcrnn tgcn agcrn a3tgcn a3tgcn2 lstm gru
 parser.add_argument('--epochs', type=int, default=30)
 parser.add_argument('--batch_size', type=int, default=4)
 parser.add_argument('--seed', type=int, default=0)
@@ -49,6 +49,7 @@ parser.add_argument('--patience', type=int, default=10)
 
 # etc
 parser.add_argument('--results_path', type=str, default='./results/joi_2024')
+parser.add_argument('--metrics_file', type=str, default='metrics_trng_a3tgcn2.csv')
 parser.add_argument('--desc', type=str, default='desc')
 
 
