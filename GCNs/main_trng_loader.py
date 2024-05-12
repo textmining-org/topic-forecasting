@@ -23,10 +23,17 @@ if __name__ == "__main__":
     model_save_path = os.path.join(results_path, 'models')
     node_feature_type = '_'.join(args.node_feature_type)
     model_filename = f'{args.media}_{args.model}_{node_feature_type}_{args.epochs}_{args.batch_size}_{args.lr}_{args.num_train_clusters}_{args.num_valid_clusters}_{args.num_test_clusters}_{args.seq_len}_{args.pred_len}_{args.desc}.pt'
-    metric_save_path = os.path.join(results_path, 'metrics_trng.csv')
+    metric_save_path = os.path.join(results_path, args.metrics_file)
 
     arg_names = ['media', 'model', 'node_feature_type', 'epochs', 'batch_size', 'lr', 'num_train_clusters',
                  'num_valid_clusters', 'num_test_clusters', 'seq_len', 'pred_len', 'desc']
+    if args.model == 'a3tgcn2':
+        arg_names.extend(['out_channels'])
+    elif args.model == 'agcrn':
+        arg_names.extend(['K', 'embedd_dim', 'out_channels'])
+    elif args.model in ['lstm', 'gru']:
+        arg_names.extend(['hidden_size', 'num_layers'])
+
     if exists_metrics(metric_save_path, args, arg_names):
         print(f'There exist experiments results! - {args}')
         sys.exit()
@@ -90,7 +97,8 @@ if __name__ == "__main__":
             [dataloader, edge_indices, edge_weights, num_nodes, num_features, min_val_fea, max_val_fea, min_val_tar,
              max_val_tar, eps])
 
-    print(f'##### train len: {len(train_dataloader_packages)}, valid len: {len(valid_dataloader_packages)}, test len: {len(test_dataloader_packages)}')
+    print(
+        f'##### train len: {len(train_dataloader_packages)}, valid len: {len(valid_dataloader_packages)}, test len: {len(test_dataloader_packages)}')
 
     # FIXME data parallel : multi-gpu
     # create GCN model
@@ -178,8 +186,6 @@ if __name__ == "__main__":
     print("[Final (BEST MAE)] Train: {:.8f} | Valid : {:.8f} | Test : {:.8f} at Epoch {:3}".format(
         best_train_mae, best_valid_mae, best_test_mae, best_epoch, best_epoch))
 
-    arg_names = ['media', 'model', 'node_feature_type', 'epochs', 'batch_size', 'lr', 'num_train_clusters',
-                 'num_valid_clusters', 'num_test_clusters', 'seq_len', 'pred_len', 'desc']
     metric_names = ['mse', 'mae']
     metrics = [best_test_mse, best_test_mae]
     save_metrics(metric_save_path, args, arg_names, metrics, metric_names)
