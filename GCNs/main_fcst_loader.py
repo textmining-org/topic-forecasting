@@ -31,14 +31,25 @@ if __name__ == "__main__":
     fcst_val_save_path = os.path.join(results_path, 'fcst_val')
     model_save_path = os.path.join(results_path, 'models')
     node_feature_type = '_'.join(args.node_feature_type)
-    metric_save_path = os.path.join(results_path, 'metrics_fcst.csv')
-    model_filename = f'{args.media}_{args.model}_{node_feature_type}_{args.epochs}_{args.batch_size}_{args.lr}_{args.num_train_clusters}_{args.num_valid_clusters}_{args.num_test_clusters}_{args.seq_len}_{args.pred_len}_{args.desc}.pt'
+    metric_save_path = os.path.join(results_path, args.metrics_file)
+    # model_filename = f'{args.media}_{args.model}_{node_feature_type}_{args.epochs}_{args.batch_size}_{args.lr}_{args.num_train_clusters}_{args.num_valid_clusters}_{args.num_test_clusters}_{args.seq_len}_{args.pred_len}_{args.desc}.pt'
 
     arg_names = ['media', 'model', 'node_feature_type', 'epochs', 'batch_size', 'lr', 'num_train_clusters',
                  'num_valid_clusters', 'num_test_clusters', 'seq_len', 'pred_len', 'desc']
+
     # if exists_metrics(metric_save_path, args, arg_names):
     #     print(f'There exist experiments results! - {args}')
     #     sys.exit()
+
+    if args.model == 'a3tgcn2':
+        arg_names.extend(['out_channels'])
+        model_filename = f'{args.media}_{args.model}_{node_feature_type}_{args.epochs}_{args.batch_size}_{args.lr}_{args.num_train_clusters}_{args.num_valid_clusters}_{args.num_test_clusters}_{args.seq_len}_{args.pred_len}_{args.desc}_{args.out_channels}.pt'
+    elif args.model == 'agcrn':
+        arg_names.extend(['K', 'embedd_dim', 'out_channels'])
+        model_filename = f'{args.media}_{args.model}_{node_feature_type}_{args.epochs}_{args.batch_size}_{args.lr}_{args.num_train_clusters}_{args.num_valid_clusters}_{args.num_test_clusters}_{args.seq_len}_{args.pred_len}_{args.desc}_{args.K}_{args.embedd_dim}_{args.out_channels}.pt'
+    elif args.model in ['lstm', 'gru']:
+        arg_names.extend(['hidden_size', 'num_layers'])
+        model_filename = f'{args.media}_{args.model}_{node_feature_type}_{args.epochs}_{args.batch_size}_{args.lr}_{args.num_train_clusters}_{args.num_valid_clusters}_{args.num_test_clusters}_{args.seq_len}_{args.pred_len}_{args.desc}_{args.hidden_size}_{args.num_layers}.pt'
 
     # load data
     topic_dirs = [os.path.join(args.topic_dir, i) for i in natsort.natsorted(os.listdir(args.topic_dir))]
@@ -84,8 +95,6 @@ if __name__ == "__main__":
     mse, mae = MSE(y_hats, ys).item(), MAE(y_hats, ys).item()
 
     # save forecasting metrics
-    arg_names = ['media', 'model', 'node_feature_type', 'epochs', 'batch_size', 'lr', 'num_train_clusters',
-                 'num_valid_clusters', 'num_test_clusters', 'seq_len', 'pred_len', 'desc']
     metric_names = ['mse', 'mae']
     metrics = [mse, mae]
     save_metrics(metric_save_path, args, arg_names, metrics, metric_names)

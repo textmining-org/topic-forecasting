@@ -6,7 +6,7 @@ parser.add_argument('--device', type=str, default='0')
 parser.add_argument('--device_ids', type=int, default=[0, 1, 2, 3], action="append")
 # parser.add_argument('--model', type=str, default='a3tgcn2')  # dcrnn tgcn agcrn a3tgcn a3tgcn2
 parser.add_argument('--model', type=str, default='a3tgcn2')  # dcrnn tgcn agcrn a3tgcn a3tgcn2 lstm gru
-parser.add_argument('--epochs', type=int, default=30)
+parser.add_argument('--epochs', type=int, default=10)
 parser.add_argument('--batch_size', type=int, default=4)
 parser.add_argument('--seed', type=int, default=0)
 parser.add_argument('--lr', type=float, default=1e-2)
@@ -24,8 +24,8 @@ parser.add_argument('--media', type=str, default='papers')  # patents papers new
 # parser.add_argument('--topic_dir', type=str, default='/Data2/yejin/blockchain_data_20230420/patents_co10/4.topic.max_structured.time_split/test')
 # parser.add_argument('--cluster_dir', type=str, default='/Data2/yejin/blockchain_data_20230420/papers_co10/5.random_cluster/clusters.max_structured.time_split')
 # parser.add_argument('--topic_dir', type=str, default='/Data2/yejin/blockchain_data_20230420/papers_co10/4.topic.max_structured.time_split/test')
-parser.add_argument('--cluster_dir', type=str, default='/Data2/yejin/blockchain_data_2024/papers_co10/5.random_cluster/clusters.max_structured.time_split')
-parser.add_argument('--topic_dir', type=str, default='/Data2/yejin/blockchain_data_2024/papers_co10/4.topic.max_structured.time_split/test')
+parser.add_argument('--cluster_dir', type=str, default='/data0/yejin/blockchain_data_2024/papers_co10/5.random_cluster/clusters.max_structured.time_split')
+parser.add_argument('--topic_dir', type=str, default='/data0/yejin/blockchain_data_2024/papers_co10/4.topic.max_structured.time_split/test')
 
 # model
 parser.add_argument('--out_channels', type=int, default=32)

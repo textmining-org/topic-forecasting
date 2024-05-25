@@ -1,0 +1,6 @@
+timestamp,mse,mae,media,model,node_feature_type,epochs,batch_size,lr,num_train_clusters,num_valid_clusters,num_test_clusters,seq_len,pred_len,desc,out_channels
+2024-05-25 16:38:18,0.1214106082916259,0.2529891431331634,patents,a3tgcn2,"['closeness', 'degree']",100,64,0.01,2000,500,500,12,1,desc,16
+2024-05-25 16:38:43,0.1569226682186126,0.2877866923809051,patents,a3tgcn2,"['closeness', 'degree']",100,64,0.01,2000,500,500,12,6,desc,16
+2024-05-25 16:38:31,0.1743602454662323,0.3108652532100677,patents,a3tgcn2,"['closeness', 'degree']",100,64,0.01,2000,500,500,12,3,desc,16
+2024-05-25 16:38:56,0.1906638294458389,0.3286052346229553,patents,a3tgcn2,"['closeness', 'degree']",100,64,0.01,2000,500,500,12,9,desc,16
+2024-05-25 16:39:08,0.19747094810009003,0.3184936046600342,patents,a3tgcn2,"['closeness', 'degree']",100,64,0.01,2000,500,500,12,12,desc,16
