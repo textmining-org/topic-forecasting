@@ -17,25 +17,27 @@ import math
 if __name__ == "__main__":
     # set configuration
     args = get_config()
-    print(args)
+    print(f'##### args - {args}')
 
     results_path = os.path.abspath(args.results_path)
     model_save_path = os.path.join(results_path, 'models')
     node_feature_type = '_'.join(args.node_feature_type)
-    model_filename = f'{args.media}_{args.model}_{node_feature_type}_{args.epochs}_{args.batch_size}_{args.lr}_{args.num_train_clusters}_{args.num_valid_clusters}_{args.num_test_clusters}_{args.seq_len}_{args.pred_len}_{args.desc}.pt'
     metric_save_path = os.path.join(results_path, args.metrics_file)
 
     arg_names = ['media', 'model', 'node_feature_type', 'epochs', 'batch_size', 'lr', 'num_train_clusters',
                  'num_valid_clusters', 'num_test_clusters', 'seq_len', 'pred_len', 'desc']
     if args.model == 'a3tgcn2':
         arg_names.extend(['out_channels'])
+        model_filename = f'{args.media}_{args.model}_{node_feature_type}_{args.epochs}_{args.batch_size}_{args.lr}_{args.num_train_clusters}_{args.num_valid_clusters}_{args.num_test_clusters}_{args.seq_len}_{args.pred_len}_{args.desc}_{args.out_channels}.pt'
     elif args.model == 'agcrn':
         arg_names.extend(['K', 'embedd_dim', 'out_channels'])
+        model_filename = f'{args.media}_{args.model}_{node_feature_type}_{args.epochs}_{args.batch_size}_{args.lr}_{args.num_train_clusters}_{args.num_valid_clusters}_{args.num_test_clusters}_{args.seq_len}_{args.pred_len}_{args.desc}_{args.K}_{args.embedd_dim}_{args.out_channels}.pt'
     elif args.model in ['lstm', 'gru']:
         arg_names.extend(['hidden_size', 'num_layers'])
+        model_filename = f'{args.media}_{args.model}_{node_feature_type}_{args.epochs}_{args.batch_size}_{args.lr}_{args.num_train_clusters}_{args.num_valid_clusters}_{args.num_test_clusters}_{args.seq_len}_{args.pred_len}_{args.desc}_{args.hidden_size}_{args.num_layers}.pt'
 
     if exists_metrics(metric_save_path, args, arg_names):
-        print(f'There exist experiments results! - {args}')
+        print(f'##### There exist experiments results!')
         sys.exit()
 
     # fix randomness
@@ -179,7 +181,7 @@ if __name__ == "__main__":
             print("##### Early stopping ...")
             break
 
-        adjust_learning_rate(optimizer, epoch + 1, args.lr, '1')
+        adjust_learning_rate(optimizer, epoch + 1, args.lr, 'constant')
 
     print("[Final (BEST MSE)] Train: {:.8f} | Valid : {:.8f} | Test : {:.8f} at Epoch {:3}".format(
         best_train_mse, best_valid_mse, best_test_mse, best_epoch))

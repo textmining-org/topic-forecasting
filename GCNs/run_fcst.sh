@@ -5,11 +5,14 @@ topic_dir='/Data2/yejin/blockchain_data_2024/'$media'_co10/4.topic.max_structure
 desc='desc'
 
 seed=0
-num_train_clusters=4000
-num_valid_clusters=1000
-num_tset_clusters=1000
-epochs=30
+num_train_clusters=1000
+num_valid_clusters=2000
+num_tset_clusters=2000
+
+epochs=100
+
 lr=1e-3
+
 device=3
 batch_size=32
 seq_len=12
