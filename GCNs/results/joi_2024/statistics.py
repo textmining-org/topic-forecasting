@@ -6,7 +6,7 @@ pd.options.display.float_format = '{:.10f}'.format
 # Load the provided CSV file
 model = 'a3tgcn2'
 rnn_sub = 'lstm'
-media = 'news'  # patents, papers, news
+media = 'papers'  # patents, papers, news
 file_path = f'./metrics_trng_{model}.csv'
 data = pd.read_csv(file_path)
 
