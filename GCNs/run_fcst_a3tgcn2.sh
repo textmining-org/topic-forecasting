@@ -1,12 +1,12 @@
 # MSE 기준 최적 조합 node feature
 # * patents
-# node_feature_type= "closeness degree"
+# node_feature_type="betweenness closeness degree"
 # out_channels=16
 # * papers
-# node_feature_type=""
+# node_feature_type="betweenness closeness degree"
 # out_channels=8
 # * news
-# node_feature_type=""
+# node_feature_type="degree"
 # out_channels=32
 
 seed=0
@@ -22,10 +22,10 @@ metrics_file='metrics_fcst_a3tgcn2.csv'
 
 device=1
 model=a3tgcn2
-media=patents # patents papers news
+media=news # patents papers news
 topic_dir='/data0/yejin/blockchain_data_2024/'$media'_co10/4.topic.max_structured.time_split/test'
-node_feature_type="closeness degree"
-out_channels=16
+node_feature_type="degree"
+out_channels=32
 
 for pred_len in 1 3 6 9 12; do # 1 3 6 9 12
   python3.7 -u main_fcst_loader.py --seed $seed \

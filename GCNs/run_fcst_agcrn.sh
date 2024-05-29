@@ -1,16 +1,16 @@
 # MSE 기준 최적 조합 node feature
 # * patents
-# node_feature_type="betweenness degree"
+# node_feature_type="betweenness closeness degree"
 # K=2
 # embedd_dim=16
 # out_channels=8
 # * papers
-# node_feature_type="degree"
+# node_feature_type="betweenness closeness degree"
 # K=3
 # embedd_dim=4
 # out_channels=8
 # * news
-# node_feature_type="betweenness"
+# node_feature_type="degree"
 # K=2
 # embedd_dim=4
 # out_channels=32
@@ -26,11 +26,11 @@ seq_len=12
 results_path='./results/joi_2024'
 metrics_file='metrics_fcst_agcrn.csv'
 
-device=1
+device=0
 model=agcrn
 media=news # patents papers news
 topic_dir='/data0/yejin/blockchain_data_2024/'$media'_co10/4.topic.max_structured.time_split/test'
-node_feature_type="betweenness"
+node_feature_type="degree"
 K=2
 embedd_dim=4
 out_channels=32
