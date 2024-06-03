@@ -127,10 +127,11 @@ def draw_time_serial_graph(graph_loc_d:dict,
     os.makedirs(output,exist_ok=True)
     # Position standardization for all the time-specific graphs
     if standard_position:
-        # Imposed standard position G
+        # Imposed standard position
         if standard_position_file:
             print("Parsing standard position file...")
             pos = net_utils._load_graph_position_(standard_position_file)
+        # Calculation of standard position if master graph is suggested
         elif standard_position_G_file:
             print("Parsing graph file...")
             pos_G = net_utils.load_graph(standard_position_G_file)
@@ -152,7 +153,8 @@ def draw_time_serial_graph(graph_loc_d:dict,
             pos=pos,file=os.path.join(output,'standard_graph_position.json'))
         print("Standard position has been saved to %s"%os.path.join(
             output,'standard_graph_position.json'))
-    # position inferrecen
+        
+    # position inferrence
     for g_id, g_file in graph_loc_d.items():
         print("Generating graph for %s : %s"%(g_id,g_file))
         curr_G = net_utils.load_graph(g_file)
@@ -188,12 +190,15 @@ def draw_time_serial_graph(graph_loc_d:dict,
 
 def main():
     parser = argparse.ArgumentParser(description='Graph drawing by time')
-    parser.add_argument('-m','--master_graph',help='Input master graph file')
-    parser.add_argument('-g','--time_graph',default=None,help='Time-specific graph directory')
-    parser.add_argument('-t','--topic_file',help='Topic file with keywords')
+    parser.add_argument('-m','--master_graph',help='Input master graph file: master graph for positioning.')
+    parser.add_argument('-g','--time_graph',default=None,help='Time-specific graph directory: target graph to draw.')
+    parser.add_argument('-t','--topic_file',help='Topic file with keywords: node information.')
     parser.add_argument('-o','--output',help='Output directory')
     parser.add_argument('--time_line',default=None,help='Timeline file')
     parser.add_argument('-p','--pos_file',default='',help='Position file')
+    parser.add_argument('--ind_clstr_pos',default=False,action='store_true',help='Position calculation for each individual cluster. If applied, global position will be ignored.')
+    parser.add_argument('--local_std_pos',default=False,action='store_true',help='Getting standard position with given lists of nodes.')
+    parser.add_argument('--save_pos',default=False,action='store_true',help='Save the position file.')
     parser.add_argument('--node_feature',default='word_count',help='Feature for node size and color')
     parser.add_argument('--edge_feature',default='cooccurrence',help='Feature for edge size and color')
     parser.add_argument('--inverse_edge_width',default=False,action='store_true',help='Inverse value of edge feature')
@@ -214,14 +219,28 @@ def main():
         annod_d = {t:os.path.join(args.time_graph,f'{t}.inv_cooccurrence.graph.pkl') for t in times}
     pos_file=args.pos_file
     # Standard at the last graph in ordered graph_loc_d's file location
-    if not os.path.isfile(pos_file):
+    if args.ind_clstr_pos:
+        pos_file = False
+    elif not os.path.isfile(pos_file):
         pos_file = os.path.join(args.output,'standard_graph_position.json')
         print("Parsing graph file %s for standard position..."%(args.master_graph))
         # getting graph position
         pos_G = net_utils.load_graph(args.master_graph)
         print("Calculating standard position...")
-        pos_weight='inv_cooccurrence:whole_time',
-        pos = nx.kamada_kawai_layout(pos_G,weight=pos_weight)
+        pos_weight='inv_cooccurrence:whole_time'#,
+        if args.topic_file and args.local_std_pos:
+            _local_std_nodes_ = []
+            topic_df = pd.read_csv(args.topic_file)
+            for idx in topic_df.index:
+                [topic_id, kw_str] = topic_df.loc[idx,:].values
+                _kws = list(set(kw_str.split(' ')))
+                _local_std_nodes_.extend(_kws)
+            print(f"Local standard position of {len(set(_local_std_nodes_))} nodes from {topic_df.shape[0]} clusters")
+            sub_pos_G = pos_G.subgraph(list(set(_local_std_nodes_)))
+            pos = nx.kamada_kawai_layout(sub_pos_G,weight=pos_weight) # Getting local standard pos file
+            del sub_pos_G
+        else:
+            pos = nx.kamada_kawai_layout(pos_G,weight=pos_weight) # Getting standard pos file
         del pos_G
         net_utils._save_graph_position_(
             pos=pos,file=pos_file)
@@ -253,7 +272,7 @@ def main():
                     edge_cmap=plt.cm.magma_r, # color map
                     edge_width_multiply=1,
                     edge_width_max_scale=5,
-                    save_pos=False,#=True
+                    save_pos=args.save_pos,
                     show_label=False,
                     sub_G_node_list=_kws,
                     inverse_edge_width=args.inverse_edge_width,
@@ -276,7 +295,7 @@ def main():
                     edge_cmap=None,
                     edge_width_multiply=1,
                     edge_width_max_scale=5,
-                    save_pos=False,#=True
+                    save_pos=args.save_pos,
                     show_label=True,
                     sub_G_node_list=_kws,
                     edge_options={'alpha':0.2},
@@ -298,7 +317,7 @@ def main():
 #                     edge_cmap=None,
 #                     edge_width_multiply=1,
 #                     edge_width_max_scale=5,
-#                     save_pos=False,#=True
+#                     save_pos=args.save_pos,
 #                     show_label=False,
 #                     sub_G_node_list=_kws,
 #                     edge_options={'alpha':0.2},
@@ -320,7 +339,7 @@ def main():
             edge_cmap=plt.cm.magma_r,
             edge_width_multiply=0.1,
             show_label=False,
-            save_pos=False,#=True
+            save_pos=args.save_pos,
             inverse_edge_width=args.inverse_edge_width,
         )
         
