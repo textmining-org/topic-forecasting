@@ -32,13 +32,10 @@ def _get_centrality_(graph_obj,fn,weight:str)->dict:
 
 def _connectivity_func_glossary_():
     nx_conn_fns = [
-#         nx.all_node_cuts, # w.o. weight
         nx.all_pairs_node_connectivity, # w.o. weight; takes too long
         nx.all_pairs_dijkstra, # wegith 
         nx.all_pairs_bellman_ford_path_length, # weight
         nx.edge_betweenness_centrality,
-        #nx.node_connectivity,
-        #nx.resistance_distance,
     ]
     return {fn.__name__.split('.')[-1]:fn for fn in nx_conn_fns}
 
@@ -63,7 +60,6 @@ def _get_connectivity_(graph_obj,fn,weight:str)->dict:
         if fn_name in ['all_pairs_dijkstra']:
             for node2, pathlen in path_val[0].items():
                 conn[node1][node2] = pathlen
-#         elif fn_name in ['all_pairs_bellman_ford_path_length']:
         elif fn_name == 'edge_betweenness_centrality':
             node2 = path_val
             pathlen = gen[(node1,node2)]
@@ -77,7 +73,6 @@ def _get_connectivity_(graph_obj,fn,weight:str)->dict:
 def analyze_graph(graph_obj,
                   centrality_function_names:list=['betweenness_centrality'],
                   connectivity_function_names:list=['all_pairs_dijkstra'],
-#                   node_weight_keys:list=[],
                   edge_weight_keys:list=[],
                  )->dict:
     cent_gls = _centrality_func_glossary_()

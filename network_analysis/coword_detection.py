@@ -24,21 +24,9 @@ def load_pickled(file):
     with open(file,'rb') as f:
         parsed = pickle.load(f)
     print(parsed)
-#     time_map = parsed.iloc[:,0].to_dict() # 
-#     data = parsed.iloc[:,1].to_dict()
     time_map = parsed.loc[:,'date'].to_dict() # 
-#     time_map = {k:v.split('-') for k,v in time_map.items()}
     data = parsed.loc[:,'text'].to_dict()
     return data, time_map
-
-
-# def load_preprocessed(file:str,sep=','):
-#     _p_df = pd.read_csv(file,sep=sep)
-#     time_map = _p_df.iloc[:,0].to_dict()
-# #     time_map = {idx:_t.split('-') for idx,_t in time_map.items()}
-#     _data = _p_df.iloc[:,1].to_dict()
-#     data = {idx:re.sub('[]\' []','',_str).split(',') for idx,_str in _data.items()}
-#     return data, time_map
 
 def load_preprocessed(file:str,sep=','):
     parsed = pd.read_csv(file,sep=sep)
@@ -88,8 +76,6 @@ def _append_word_count_(word_list:list,
         weighted_count = weighted_count/len(_w_l)
     for _w in _w_l:
         for _d in target_word_count_dict_list:
-#             if _w not in _d:
-#                 _d[_w] = 0.0
             _d[_w] += weighted_count
     return target_word_count_dict_list
 
@@ -278,8 +264,6 @@ def drop_lowcount_words(word_list:list,
     # by_month_word_count
     whole_times = list(by_month_word_count.keys())
     for _time in whole_times:
-#         by_month_word_count[_time] = {
-#             _k:_v for _k, _v in by_month_word_count[_time].items() if _k in ref_word_list}
         by_month_word_count[_time] = pd.Series(
             by_month_word_count[_time],
             index=list(set(by_month_word_count[_time].keys())&set(ref_word_list))
@@ -458,11 +442,7 @@ def make_coword_dict(preprocessed_data_dict:dict, #{IDX:[WORD]}
         if low_mem_mode:
             _cocr_c_d = net_utils.parse_lowmem_coword_dict(file=by_month_coword_dict[_t])
         for _cocr_pair, _cnt in _cocr_c_d.items():
-#             if _cocr_pair in whole_coword_dict:
             whole_coword_dict[_cocr_pair] += _cnt
-#             # word_list doesn't have a word in _cocr_pair: in case of word count limit
-#             else:
-#                 pass
         if low_mem_mode:
             del _cocr_c_d
     

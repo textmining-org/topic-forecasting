@@ -189,10 +189,6 @@ def convert_fold_change_batch(master_cluster_data_dir,
     m_o_d = os.path.abspath(master_output_dir)
     os.makedirs(m_o_d,exist_ok=True)
     
-#     for sub_dir in tqdm.tqdm(os.listdir(m_i_d)):
-#         convert_fold_change(cluster_data_dir=os.path.join(m_i_d,sub_dir),
-#                             output_dir=os.path.join(m_o_d,sub_dir),
-#                             base=base,pseudocount=pseudocount)
     fn_arg_list = []
     fn_kwarg_list = []
     for sub_dir in os.listdir(m_i_d):
@@ -250,8 +246,6 @@ def split_feature_time(cluster_data_dir,
         for split_ord_idx, time_suffix_list in enumerate(timelines):
             
             _curr_attrb_l = [i for i in attrb_l if i.split(':')[-1] in time_suffix_list]
-#             _curr_attrb_l_arr = np.array(_curr_attrb_l)
-#             _idx_vals = [np.where(_curr_attrb_l_arr==i)[0][0] for i in _curr_attrb_l]
             _whole_attrb_l_arr = np.array(attrb_l)
             _idx_vals = [np.where(_whole_attrb_l_arr==i)[0][0] for i in _curr_attrb_l]
             _curr_val_arr = val_arr[_idx_vals,:] # TODO - Check if it is write
@@ -334,9 +328,6 @@ def main():
     
     args = parser.parse_args()
     
-#     input_dir = '/BiO/home/cdgu/Winery/tasting/ysu_textmining/paper/codes/topic-forecasting/_test_dump_tmp_/gcn_fc_split_test/clusters.max_structured'
-#     fc_conv = '/BiO/home/cdgu/Winery/tasting/ysu_textmining/paper/codes/topic-forecasting/_test_dump_tmp_/gcn_fc_split_test/clusters.max_structured.fc_converted'
-#     timeline_file='/BiO/home/cdgu/Winery/tasting/ysu_textmining/paper/codes/topic-forecasting/_test_dump_tmp_/gcn_fc_split_test/fc_time_line.txt'
     if len(args.output) == 0:
         splitting=False
     else:

@@ -135,8 +135,6 @@ def reconstruct_time_graphs(by_month_word_count:dict=None,
     if output_dir:
         output_dir = os.path.abspath(output_dir)
         os.makedirs(output_dir,exist_ok=True)
-#     for inv_bool_flt, cooc_inv_name in enumerate(['cooccurrence','inv_cooccurrence']):
-#     for inv_bool_flt, cooc_inv_name in zip([False],['cooccurrence','inv_cooccurrence']):
     for inv_bool_flt, cooc_inv_name in zip([True],['inv_cooccurrence']):
         sub_Gs[cooc_inv_name] = {}
         for time_key in by_month_word_count.keys():
@@ -204,7 +202,6 @@ def _graph_analysis_for_reconstruct_graph_(coword_file:str=None,
     # In case that coword file is given
     if coword_file:
         print(f"Parsing file...\t{coword_file}")
-        # print(net_utils.parse_coword_chunk(coword_file))
         word_list, whole_word_count, by_month_word_count, whole_coword_map, by_month_coword_map = net_utils.parse_coword_chunk(coword_file)
         
     o_d = os.path.abspath(output_dir)
@@ -414,7 +411,6 @@ def _realign_keyword_by_node_val_(node_annotation:dict,keyword_list:list):
     return aligned_keyword_list
 
 
-#    
 def extract_topic(input_package_dir:str,
                   output_dir:str,
                   time_key_list:list, # [TIME1,TIME2] <- must be ordered
@@ -485,15 +481,12 @@ def extract_topic(input_package_dir:str,
     target_edges = [edge for edge in itertools.permutations(keyword_list,2) if edge in wt_G.edges]
     for _t_k in time_key_list:
         _attrb = 'cooccurrence:'+_t_k
-#         _curr_edge_features = {}
         _curr_edge_features = {i:{} for i in keyword_list}
         for edge in target_edges:
             if _attrb in wt_G.edges[edge]:
                 n1=edge[0]
                 n2=edge[1]
                 val = wt_G.edges[edge][_attrb]
-#                 if n1 not in _curr_edge_features:
-#                     _curr_edge_features[n1] = {}
                 _curr_edge_features[n1][n2]=val
     
         cooccurrence_data[_attrb] = net_utils._extr_kw_at_edge_(
@@ -651,7 +644,6 @@ def extract_topic_batch(max_keyword_n:int=20,
     
 def _fit_structure_node_list_(node_list,
                               guide_node_n:int,
-#                               node_name_tmpl:str='place_holder_%s',
                              ):
     _n_l = node_list.copy()
     for diff_idx in range(guide_node_n-len(node_list)):

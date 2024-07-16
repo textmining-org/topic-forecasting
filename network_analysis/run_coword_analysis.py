@@ -42,12 +42,6 @@ def main():
     print('Initiated')
     parser = argparse.ArgumentParser(description='Process for coword map and graph generation for preprocessed data.')
     
-#     #### Common arguments ####
-#     parser.add_argument('-i','--input',
-#                        required=True,help='Input file or directory')
-#     parser.add_argument('-o','--output',
-#                        required=True,help='Output directory')
-    
     subparsers = parser.add_subparsers(
         title='Jobs to do',
         description='get_coword/make_graph/extract_topic/random_cluster',
@@ -131,10 +125,6 @@ def main():
                                        graph_analysis._connectivity_func_glossary_().keys()),
                                    help='Method for connectivity')
         
-#     parser_make_graph.add_argument('--word_count_annotation_prefix',
-#                                    type=str,
-#                                    default='word_count',
-#                                    help='word_count_annotation_prefix')
     
     parser_make_graph.add_argument('-m','--multiprocess',
                                    default=1,type=int,
@@ -230,8 +220,6 @@ def main():
     parser_random_cluster.add_argument('--edge_ens_span',default=[],action='append',
                                        help='time points to divide span. This option is imposed to ensure existence of edge for a cluster for the every divided time span. Impose list of timepoints (int : ordrered number of the time point; float : ordered ratio for the timepoint)')
     
-    
-#     args = get_config()
     args = parser.parse_args()
 
     print(args)
@@ -366,17 +354,6 @@ def main():
             time_key_list=time_key_list,
             edge_ens_span=edge_ens_span,
         )
-#     print(dict(whole_time_graph_file=args.input,
-#             exclusive_node_file=args.exclusive_node_file,
-#             output_f=args.output,
-#             seed_node_file=args.seed_node_file,
-#             cluster=args.cluster_n,
-#             min_node_n=args.min_node_n,
-#             max_node_n=args.max_node_n,
-#             multiprocess=args.multiprocess,
-#             edge_drop_thr=args.edge_drop_thr,
-#             time_key_list=time_key_list,
-#             edge_ens_span=edge_ens_span,))
     print('Finished')
 
 if __name__=='__main__':

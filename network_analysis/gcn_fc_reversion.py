@@ -37,7 +37,6 @@ def parse_match_topic(fc_true_file,fc_pred_file,topic_data_dir,topic_data_fc_dir
             if np.allclose(_arr[-1,:],fc_true[idx,-1,:],rtol=1e-04, atol=1e-04):
                 topic_ord_ser[idx]=topic_id
                 break
-#     return fc_true, fc_pred, base_arr_dict, base_fc_arr_dict, topic_ord_ser
     base_arr = np.stack([base_arr_dict[topic_id] for topic_id in list(topic_ord_ser.values)])
     return fc_pred, base_arr, topic_ord_ser
     

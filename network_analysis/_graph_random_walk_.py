@@ -81,8 +81,6 @@ def make_random_node_cluster(graph_obj,
         iter_node_n = node_n
     else:
         iter_node_n = np.random.randint(min_node_n,max_node_n+1)
-#     if weight_fn == None:
-#         weight_fn = lambda x: x
     while len(curr_node_pool)<iter_node_n:
         new_node = _pick_weight_random_node_(
             graph_obj=graph_obj,
@@ -94,10 +92,6 @@ def make_random_node_cluster(graph_obj,
             continue
         else:
             curr_node_pool.append(new_node)
-#         _s = _pick_random_node_(node_list=curr_node_pool) # pick random source node from seed list
-#         _t_list = list(set(_e_d[_s])-set(curr_node_pool)) # get targets from edge dictionary
-#         if _t_list:
-#             curr_node_pool.append(_pick_random_node_(node_list=_t_list))
     return curr_node_pool
 
 
@@ -146,7 +140,6 @@ def make_random_clusters(graph_obj,
     cluster_dict = {} # {CLUSTER_NAME:[KEYWORDS]}
     if type(graph_obj) == str:
         graph_obj = net_utils.load_graph(graph_obj)
-#     _n_l = _get_node_l_(graph_obj)
     _e_d = _get_edge_d_(graph_obj)
     _n_l = [s for s,t in _e_d.items() if len(t)>=1]
     print(tmp_output_file+':'+str(cluster_max-cluster_min))
