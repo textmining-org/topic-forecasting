@@ -1,14 +1,18 @@
  
 # run Topic modeling
- 
 1.	opt_num_topics.py 에서 경로 및 변수 설정 지정 
-2.	opt_num_topics.sh 돌리기 (sh opt_num_topics.sh) => 결과 .opt_num_topics 에 저장됨 
+2.	opt_num_topics.sh 돌리기 (sh opt_num_topics.sh) 
+  => .csv, .html 파일 결과: opt_num_topics 폴더에  저장됨
+  => .bin 모델 파일 결과: models 폴더에 저장됨 
+
 3.	2의 결과로 나온 opt_num_topics 폴더 내의 결과 보고, 토픽개수 선정 후 
   => perplexity는 낮을 수록 coherence는 높을수록 좋음 (그 어디 교차점 선택하면 됨)
-  => 선정된 토픽개수에 해당하는 .bin 파일을 ‘models’ 폴더에 옮김 
+  => 선정된 토픽개수에 해당하는 .bin 파일을 4. run_topic_modeling.py 돌릴 때, ‘models’ 폴더에서 불러옴 
 4.	run_topic_modeling.py 돌림
   => .results 에 결과 저장됨 
 
 # run Topic clustering 
- 
 5.	topic_clustering/topic_clustering.py 코드 실행
+
+# 매체별 유사한 토픽 찾기
+- find_sim_topic.py
