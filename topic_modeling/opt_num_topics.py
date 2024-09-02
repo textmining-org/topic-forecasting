@@ -21,14 +21,14 @@ def make_model(datasets_path, target_name, method_name, num_topics_range):
             model = exec_dmr_modeling(documents, timestamps, num_topics)
 
         print(f'##### number of topics: {num_topics}')
-        model.save(f'./opt_num_topics/{target_name}_{method_name}_{num_topics}.bin', full=True)
+        model.save(f'./models/{target_name}_{method_name}_{num_topics}.bin', full=True)
 
 def calc_coherence_perplexity(target_name, method_name, num_topics_range):
     num_topics_list = list(num_topics_range)
     coherence_metric = 'c_v'
     data_list = []
     for num_topics in num_topics_list:
-        model_save_path = os.path.join('./opt_num_topics', f'{target_name}_{method_name}_{num_topics}.bin')
+        model_save_path = os.path.join('./models', f'{target_name}_{method_name}_{num_topics}.bin')
         if method_name == 'lda':
             model = tp.LDAModel.load(model_save_path)
         elif method_name == 'dmr':
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     datasets_path = os.path.abspath('../_datasets')
     print(datasets_path)
 
-    num_topics_range = range(2, 51, 2)
+    num_topics_range = range(2, 51, 2) 
 
     make_model(datasets_path, args.target_name, args.method_name, num_topics_range)
     calc_coherence_perplexity(args.target_name, args.method_name, num_topics_range)
